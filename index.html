@@ -6,14 +6,15 @@
 <title>Descalce financiero diario</title>
 <style>
   :root {
-    --bg:#e9eef5;
-    --card:#ffffff;
-    --text:#172033;
-    --muted:#64748b;
-    --line:#cfd8e3;
-    --neg:#2563eb;
-    --pos:#f97316;
-    --zero:#94a3b8;
+    --bg:#0a1220;
+    --card:#0d1c30;
+    --card-border:rgba(255,255,255,.08);
+    --text:#eaf1fb;
+    --muted:#8aa0bd;
+    --line:rgba(255,255,255,.08);
+    --zero:#8a9a4a;
+    --neg:#dc2626;
+    --pos:#16a34a;
   }
   * { box-sizing:border-box; }
   body {
@@ -29,82 +30,29 @@
   }
   h1 {
     margin:0 0 6px;
-    font-size:27px;
-    letter-spacing:-.01em;
-    font-weight:700;
+    font-size:22px;
+    letter-spacing:.02em;
+    font-weight:800;
+    text-transform:uppercase;
+    color:var(--text);
   }
   .sub {
     color:var(--muted);
     margin-bottom:22px;
     font-size:13px;
   }
-  .controls {
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-    align-items:end;
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:8px;
-    padding:14px;
-    margin-bottom:14px;
-  }
-  label {
-    display:flex;
-    flex-direction:column;
-    gap:5px;
-    font-size:12px;
-    color:var(--muted);
-  }
-  select, button {
-    height:38px;
-    border:1px solid var(--line);
-    border-radius:7px;
-    background:#ffffff;
-    padding:0 11px;
-    font:inherit;
-    color:var(--text);
-  }
-  button { cursor:pointer; }
-  button.active {
-    background:#172033;
-    color:#fff;
-    border-color:#172033;
-  }
-  .toggle {
-    display:flex;
-    gap:8px;
-    margin-left:auto;
-  }
-  .toggle button.neg.active { background:var(--neg); border-color:var(--neg); }
-  .toggle button.pos.active { background:var(--pos); border-color:var(--pos); }
-  .cards {
-    display:grid;
-    grid-template-columns:repeat(4, minmax(180px,1fr));
-    gap:12px;
-    margin-bottom:14px;
-  }
-  .card {
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:8px;
-    padding:15px 16px;
-  }
-  .card .k {
-    color:var(--muted);
-    font-size:12px;
-    margin-bottom:7px;
-  }
-  .card .v {
-    font-size:24px;
-    font-weight:750;
-    letter-spacing:-.02em;
-  }
   .chart-card {
     background:var(--card);
-    border:1px solid var(--line);
-    border-radius:8px;
+    border:1px solid var(--card-border);
+    border-radius:12px;
     overflow:hidden;
+    position:relative;
+  }
+  .chart-card::before {
+    content:"";
+    display:block;
+    height:4px;
+    background:linear-gradient(90deg,#caa63a 0%, #4c9a4a 100%);
   }
   .month-band-even { fill: rgba(148,163,184,.055); }
   .month-band-odd { fill: rgba(148,163,184,.12); }
@@ -113,7 +61,7 @@
     font-size:10px;
     font-weight:700;
     paint-order:stroke;
-    stroke:white;
+    stroke:#ffffff;
     stroke-width:3px;
     stroke-linejoin:round;
   }
@@ -122,7 +70,7 @@
     justify-content:space-between;
     gap:20px;
     align-items:center;
-    padding:14px 16px 8px;
+    padding:16px 18px 8px;
   }
   .legend {
     display:flex;
@@ -141,7 +89,7 @@
   .chart-scroll {
     overflow-x:auto;
     overflow-y:hidden;
-    border-top:1px solid var(--line);
+    border-top:1px solid var(--card-border);
   }
   #chart {
     display:block;
@@ -152,303 +100,150 @@
     pointer-events:none;
     opacity:0;
     z-index:100;
-    background:#111827;
-    color:white;
+    background:#0d1c30;
+    border:1px solid rgba(255,255,255,.15);
+    color:var(--text);
     padding:9px 10px;
     border-radius:8px;
     font-size:12px;
     line-height:1.4;
-    box-shadow:0 10px 30px rgba(0,0,0,.18);
+    box-shadow:0 10px 30px rgba(0,0,0,.5);
     transform:translate(10px,10px);
-  }
-  .month-strip {
-    display:grid;
-    grid-template-columns:repeat(19, minmax(88px,1fr));
-    gap:6px;
-    padding:12px 16px 16px;
-    overflow-x:auto;
-  }
-  .month-pill {
-    border:1px solid var(--line);
-    border-radius:8px;
-    padding:9px;
-    background:white;
-    cursor:pointer;
-    min-width:88px;
-  }
-  .month-pill strong {
-    display:block;
-    font-size:12px;
-    margin-bottom:4px;
-  }
-  .month-pill span {
-    color:var(--muted);
-    font-size:11px;
   }
   @media (max-width:900px) {
     .page { padding:14px; }
-    .cards { grid-template-columns:repeat(2,1fr); }
-    .toggle { margin-left:0; width:100%; }
-    .toggle button { flex:1; }
   }
 
-  .patterns {
-    margin-top:24px;
+  .exec-summary {
+    margin-top:22px;
     background:var(--card);
-    border:1px solid var(--line);
-    border-radius:8px;
-    padding:20px;
+    border:1px solid var(--card-border);
+    border-radius:12px;
+    padding:22px 24px 26px;
   }
-  .patterns h2 {
-    margin:0 0 5px;
-    font-size:22px;
-    letter-spacing:-.02em;
+  .exec-summary h2 {
+    margin:0 0 4px;
+    font-size:18px;
+    letter-spacing:.02em;
+    text-transform:uppercase;
+    font-weight:800;
   }
-  .patterns .lead {
-    margin:0 0 18px;
+  .exec-summary .exec-sub {
     color:var(--muted);
-    font-size:13px;
-    line-height:1.5;
-  }
-  .pattern-grid {
-    display:grid;
-    grid-template-columns:repeat(3,minmax(0,1fr));
-    gap:10px;
+    font-size:12.5px;
     margin-bottom:18px;
   }
-  .pattern-card {
-    border:1px solid var(--line);
-    border-radius:8px;
-    padding:14px;
-    background:#fff;
-  }
-  .pattern-card .eyebrow {
-    color:var(--muted);
-    font-size:11px;
-    text-transform:uppercase;
-    letter-spacing:.05em;
-    margin-bottom:6px;
-  }
-  .pattern-card .big {
-    font-size:22px;
-    font-weight:800;
-    letter-spacing:-.02em;
-    margin-bottom:5px;
-  }
-  .pattern-card .detail {
-    color:var(--muted);
-    font-size:12px;
-    line-height:1.45;
-  }
-  .pattern-section-title {
-    margin:18px 0 9px;
-    font-size:14px;
-    font-weight:800;
-  }
-  .risk-row {
-    display:grid;
-    grid-template-columns:78px 1fr 72px;
-    gap:10px;
-    align-items:center;
-    margin:8px 0;
-  }
-  .risk-label {
-    font-size:12px;
-    font-weight:700;
-  }
-  .risk-track {
-    height:12px;
-    background:#eef2f7;
-    border-radius:999px;
-    overflow:hidden;
-  }
-  .risk-fill {
-    height:100%;
-    border-radius:999px;
-    background:var(--neg);
-  }
-  .risk-value {
-    font-size:12px;
-    text-align:right;
-    color:var(--muted);
-  }
-  .pattern-callout {
-    border-left:4px solid var(--neg);
-    background:#f8fafc;
-    padding:12px 14px;
-    border-radius:8px;
+  .conclusion-box {
+    background:rgba(255,255,255,.03);
+    border:1px solid var(--card-border);
+    border-radius:10px;
+    padding:18px 20px;
     font-size:13px;
-    line-height:1.5;
-    margin:12px 0 18px;
+    line-height:1.6;
+    color:var(--text);
   }
-  .pattern-callout strong { display:block; margin-bottom:4px; }
-  .pattern-table-wrap {
+  .conclusion-box p { margin:0 0 10px; }
+  .conclusion-box p:last-child { margin-bottom:0; }
+  .conclusion-box b { color:#fca5a5; }
+  .conclusion-risk {
+    padding-top:8px;
+    border-top:1px solid var(--card-border);
+    color:var(--muted);
+  }
+  .exec-table-wrap {
     overflow-x:auto;
-    border:1px solid var(--line);
-    border-radius:8px;
+    border:1px solid var(--card-border);
+    border-radius:10px;
+    margin-bottom:16px;
   }
-  .pattern-table {
+  .exec-table {
     width:100%;
     border-collapse:collapse;
-    min-width:900px;
-    font-size:12px;
+    font-size:12.5px;
   }
-  .pattern-table th,
-  .pattern-table td {
-    padding:9px 10px;
-    border-bottom:1px solid var(--line);
+  .exec-table th, .exec-table td {
+    padding:9px 12px;
+    border-bottom:1px solid var(--card-border);
     text-align:left;
     white-space:nowrap;
   }
-  .pattern-table th {
-    background:#f8fafc;
+  .exec-table th {
+    background:rgba(255,255,255,.03);
     color:var(--muted);
     font-weight:700;
-    position:sticky;
-    top:0;
-  }
-  .pattern-table tr:last-child td { border-bottom:0; }
-  .neg-text { color:#1d4ed8; font-weight:700; }
-  .pos-text { color:#c2410c; font-weight:700; }
-  .year-compare {
-    display:grid;
-    grid-template-columns:repeat(3,minmax(0,1fr));
-    gap:10px;
-    margin:10px 0 18px;
-  }
-  .year-box {
-    border:1px solid var(--line);
-    border-radius:8px;
-    padding:12px;
-  }
-  .year-box strong { display:block; margin-bottom:6px; }
-  .year-box span {
-    display:block;
-    color:var(--muted);
-    font-size:12px;
-    line-height:1.45;
-  }
-  .pattern-note {
-    margin-top:12px;
-    color:var(--muted);
     font-size:11px;
-    line-height:1.5;
+    text-transform:uppercase;
+    letter-spacing:.03em;
   }
-  @media (max-width:900px) {
-    .pattern-grid { grid-template-columns:1fr; }
-    .year-compare { grid-template-columns:1fr; }
-    .risk-row { grid-template-columns:64px 1fr 62px; }
-  }
-
+  .exec-table tr:last-child td { border-bottom:0; }
+  .exec-table tr.crit td { background:rgba(220,38,38,.10); }
+  .neg-c { color:#f87171; font-weight:700; }
+  .pos-c { color:#4ade80; font-weight:700; }
 </style>
 </head>
 <body>
 <div class="page">
-  <h1>Descalce financiero diario</h1>
-  <div class="sub">Datos reales · Junio 2024 a Diciembre 2026 · meses separados visualmente · máximos y mínimos destacados</div>
-
-  <div class="controls">
-    <label>Desde
-      <select id="fromMonth"></select>
-    </label>
-    <label>Hasta
-      <select id="toMonth"></select>
-    </label>
-    <label>Mes puntual
-      <select id="singleMonth">
-        <option value="">Elegir mes...</option>
-      </select>
-    </label>
-    <button id="allBtn" class="active">Todo</button>
-    <button id="y2024Btn">2024</button>
-    <button id="y2025Btn">2025</button>
-    <button id="y2026Btn">2026</button>
-    <div class="toggle">
-      <button id="negBtn" class="neg active">Déficit</button>
-      <button id="posBtn" class="pos active">Positivo</button>
-      <button id="peakBtn" class="active">Marcar picos</button>
-    </div>
-  </div>
-
-  <div class="cards">
-    <div class="card"><div class="k">Días en déficit</div><div class="v" id="defDays">—</div></div>
-    <div class="card"><div class="k">Pico de déficit</div><div class="v" id="worst">—</div></div>
-    <div class="card"><div class="k">Cierre del período</div><div class="v" id="closing">—</div></div>
-    <div class="card"><div class="k">Días positivos</div><div class="v" id="posDays">—</div></div>
-  </div>
+  <h1>Evolución de fondos</h1>
+  <div class="sub">Datos reales · Julio 2026 a Diciembre 2026 · meses separados visualmente · máximos y mínimos destacados</div>
 
   <div class="chart-card">
     <div class="chart-head">
-      <div>
-        <strong>Saldo diario</strong>
-        <div style="font-size:12px;color:var(--muted);margin-top:3px;">Los picos muestran fecha y monto. Pasá el mouse sobre cualquier barra para ver el valor exacto.</div>
-      </div>
+      <div></div>
       <div class="legend">
         <span><i class="dot" style="background:var(--neg)"></i>Déficit</span>
         <span><i class="dot" style="background:var(--pos)"></i>Positivo</span>
+        <span><i class="dot" style="background:#7c3aed"></i>Egresos clave</span>
+        <span><i class="dot" style="background:#ea580c"></i>Ingresos extraordinarios</span>
       </div>
     </div>
     <div class="chart-scroll" id="chartScroll">
       <svg id="chart" height="560"></svg>
     </div>
-    <div class="month-strip" id="monthStrip"></div>
   </div>
 
-  <section class="patterns" id="patternsSection">
-    <h2>PATRONES</h2>
-    <p class="lead">
-      Análisis automático de recurrencia del descalce. Se considera descalce cada saldo diario menor a $0.
-      No se suman los saldos negativos entre días: se analiza cuándo comienza, cuánto dura, dónde toca el mínimo
-      y cuándo vuelve a terreno positivo.
-    </p>
-
-    <div class="pattern-grid" id="patternCards"></div>
-
-    <div class="pattern-section-title">Mapa de riesgo dentro del mes</div>
-    <div id="riskWindows"></div>
-
-    <div class="pattern-callout" id="patternConclusion"></div>
-
-    <div class="pattern-section-title">Evolución estructural por año</div>
-    <div class="year-compare" id="yearCompare"></div>
-
-    <div class="pattern-section-title">Detalle mensual del patrón</div>
-    <div class="pattern-table-wrap">
-      <table class="pattern-table">
-        <thead>
-          <tr>
-            <th>Mes</th>
-            <th>1.er día negativo</th>
-            <th>Pico de déficit</th>
-            <th>Días negativos</th>
-            <th>Racha principal</th>
-            <th>Recupera positivo</th>
-            <th>Días calendario hasta recuperar</th>
-            <th>Cierre</th>
-          </tr>
-        </thead>
-        <tbody id="patternTableBody"></tbody>
-      </table>
-    </div>
-
-    <div class="pattern-note" id="patternNote"></div>
-  </section>
+  <section class="exec-summary" id="execSummary"></section>
 
 </div>
 <div class="tooltip" id="tooltip"></div>
 
 <script>
-const DATA = [{"key": "2024-06", "label": "JUN 24", "rows": [{"date": "2024-06-03", "label": "3/6", "value": -386153705}, {"date": "2024-06-04", "label": "4/6", "value": 74749847}, {"date": "2024-06-05", "label": "5/6", "value": 83390896}, {"date": "2024-06-06", "label": "6/6", "value": -982091715}, {"date": "2024-06-07", "label": "7/6", "value": -966956207}, {"date": "2024-06-10", "label": "10/6", "value": -771034246}, {"date": "2024-06-11", "label": "11/6", "value": -768436390}, {"date": "2024-06-12", "label": "12/6", "value": -859631022}, {"date": "2024-06-13", "label": "13/6", "value": -696150481}, {"date": "2024-06-14", "label": "14/6", "value": -729249780}, {"date": "2024-06-17", "label": "17/6", "value": -729249780}, {"date": "2024-06-18", "label": "18/6", "value": -640065514}, {"date": "2024-06-19", "label": "19/6", "value": -512331686}, {"date": "2024-06-20", "label": "20/6", "value": -512331686}, {"date": "2024-06-21", "label": "21/6", "value": -512331686}, {"date": "2024-06-24", "label": "24/6", "value": -452051238}, {"date": "2024-06-25", "label": "25/6", "value": -255639247}, {"date": "2024-06-26", "label": "26/6", "value": -313213054}, {"date": "2024-06-27", "label": "27/6", "value": -309533514}, {"date": "2024-06-28", "label": "28/6", "value": -341506349}]}, {"key": "2024-07", "label": "JUL 24", "rows": [{"date": "2024-07-01", "label": "1/7", "value": -732799170}, {"date": "2024-07-02", "label": "2/7", "value": -415153634}, {"date": "2024-07-03", "label": "3/7", "value": -328776321}, {"date": "2024-07-04", "label": "4/7", "value": -1283979263}, {"date": "2024-07-05", "label": "5/7", "value": -1218731268}, {"date": "2024-07-08", "label": "8/7", "value": -1175499866}, {"date": "2024-07-09", "label": "9/7", "value": -1175499866}, {"date": "2024-07-10", "label": "10/7", "value": -1106940159}, {"date": "2024-07-11", "label": "11/7", "value": -1002306227}, {"date": "2024-07-12", "label": "12/7", "value": -918600212}, {"date": "2024-07-15", "label": "15/7", "value": -932695407}, {"date": "2024-07-16", "label": "16/7", "value": -918886460}, {"date": "2024-07-17", "label": "17/7", "value": -803049333}, {"date": "2024-07-18", "label": "18/7", "value": -810204389}, {"date": "2024-07-19", "label": "19/7", "value": -848604945}, {"date": "2024-07-22", "label": "22/7", "value": -624991684}, {"date": "2024-07-23", "label": "23/7", "value": -585890495}, {"date": "2024-07-24", "label": "24/7", "value": -583099712}, {"date": "2024-07-25", "label": "25/7", "value": -558643081}, {"date": "2024-07-26", "label": "26/7", "value": -550015210}, {"date": "2024-07-29", "label": "29/7", "value": -517283460}, {"date": "2024-07-30", "label": "30/7", "value": -385936596}, {"date": "2024-07-31", "label": "31/7", "value": -380484528}]}, {"key": "2024-08", "label": "AGO 24", "rows": [{"date": "2024-08-01", "label": "1/8", "value": -286847833}, {"date": "2024-08-02", "label": "2/8", "value": 113218337}, {"date": "2024-08-05", "label": "5/8", "value": 185572460}, {"date": "2024-08-06", "label": "6/8", "value": -1215371585}, {"date": "2024-08-07", "label": "7/8", "value": -1164615689}, {"date": "2024-08-08", "label": "8/8", "value": -1156662992}, {"date": "2024-08-09", "label": "9/8", "value": -1085625757}, {"date": "2024-08-12", "label": "12/8", "value": -887234221}, {"date": "2024-08-13", "label": "13/8", "value": -994268967}, {"date": "2024-08-14", "label": "14/8", "value": -958972946}, {"date": "2024-08-15", "label": "15/8", "value": -954195843}, {"date": "2024-08-16", "label": "16/8", "value": -1097545865}, {"date": "2024-08-19", "label": "19/8", "value": -970051092}, {"date": "2024-08-20", "label": "20/8", "value": -944578798}, {"date": "2024-08-21", "label": "21/8", "value": -911534873}, {"date": "2024-08-22", "label": "22/8", "value": -600027682}, {"date": "2024-08-23", "label": "23/8", "value": -721285627}, {"date": "2024-08-26", "label": "26/8", "value": -574685899}, {"date": "2024-08-27", "label": "27/8", "value": -543613257}, {"date": "2024-08-28", "label": "28/8", "value": -464215742}, {"date": "2024-08-29", "label": "29/8", "value": -381829800}, {"date": "2024-08-30", "label": "30/8", "value": -404487056}]}, {"key": "2024-09", "label": "SEP 24", "rows": [{"date": "2024-09-02", "label": "2/9", "value": -187614406}, {"date": "2024-09-03", "label": "3/9", "value": 221215857}, {"date": "2024-09-04", "label": "4/9", "value": 336082370}, {"date": "2024-09-05", "label": "5/9", "value": -1179490258}, {"date": "2024-09-06", "label": "6/9", "value": -1147840898}, {"date": "2024-09-09", "label": "9/9", "value": -925024527}, {"date": "2024-09-10", "label": "10/9", "value": -834610891}, {"date": "2024-09-11", "label": "11/9", "value": -1198387444}, {"date": "2024-09-12", "label": "12/9", "value": -1057794156}, {"date": "2024-09-13", "label": "13/9", "value": -1023985510}, {"date": "2024-09-16", "label": "16/9", "value": -706973011}, {"date": "2024-09-17", "label": "17/9", "value": -578338695}, {"date": "2024-09-18", "label": "18/9", "value": -423641610}, {"date": "2024-09-19", "label": "19/9", "value": -380828645}, {"date": "2024-09-20", "label": "20/9", "value": -261859395}, {"date": "2024-09-23", "label": "23/9", "value": -211264761}, {"date": "2024-09-24", "label": "24/9", "value": -317290773}, {"date": "2024-09-25", "label": "25/9", "value": -301478513}, {"date": "2024-09-26", "label": "26/9", "value": -247232686}, {"date": "2024-09-27", "label": "27/9", "value": -135629384}, {"date": "2024-09-30", "label": "30/9", "value": -128593435}]}, {"key": "2024-10", "label": "OCT 24", "rows": [{"date": "2024-10-01", "label": "1/10", "value": -130691544}, {"date": "2024-10-02", "label": "2/10", "value": 387347268}, {"date": "2024-10-03", "label": "3/10", "value": 633165525}, {"date": "2024-10-04", "label": "4/10", "value": -720548062}, {"date": "2024-10-07", "label": "7/10", "value": -590460039}, {"date": "2024-10-08", "label": "8/10", "value": -526379059}, {"date": "2024-10-09", "label": "9/10", "value": -304831976}, {"date": "2024-10-10", "label": "10/10", "value": -292436965}, {"date": "2024-10-11", "label": "11/10", "value": -292436965}, {"date": "2024-10-14", "label": "14/10", "value": -711454155}, {"date": "2024-10-15", "label": "15/10", "value": -360660239}, {"date": "2024-10-16", "label": "16/10", "value": -425968586}, {"date": "2024-10-17", "label": "17/10", "value": -401756932}, {"date": "2024-10-18", "label": "18/10", "value": -239298828}, {"date": "2024-10-21", "label": "21/10", "value": -264315394}, {"date": "2024-10-22", "label": "22/10", "value": -28668838}, {"date": "2024-10-23", "label": "23/10", "value": 26152890}, {"date": "2024-10-24", "label": "24/10", "value": 40393375}, {"date": "2024-10-25", "label": "25/10", "value": 70828380}, {"date": "2024-10-28", "label": "28/10", "value": 77717771}, {"date": "2024-10-29", "label": "29/10", "value": -1902366}, {"date": "2024-10-30", "label": "30/10", "value": -105768604}, {"date": "2024-10-31", "label": "31/10", "value": 84542230}]}, {"key": "2024-11", "label": "NOV 24", "rows": [{"date": "2024-11-01", "label": "1/11", "value": 118556835}, {"date": "2024-11-04", "label": "4/11", "value": 556944568}, {"date": "2024-11-05", "label": "5/11", "value": -768499603}, {"date": "2024-11-06", "label": "6/11", "value": -768499603}, {"date": "2024-11-07", "label": "7/11", "value": -633934629}, {"date": "2024-11-08", "label": "8/11", "value": -630829357}, {"date": "2024-11-11", "label": "11/11", "value": -488846372}, {"date": "2024-11-12", "label": "12/11", "value": -392927201}, {"date": "2024-11-13", "label": "13/11", "value": -858443732}, {"date": "2024-11-14", "label": "14/11", "value": -724107213}, {"date": "2024-11-15", "label": "15/11", "value": -789555214}, {"date": "2024-11-18", "label": "18/11", "value": -789555214}, {"date": "2024-11-19", "label": "19/11", "value": -713175570}, {"date": "2024-11-20", "label": "20/11", "value": -502419583}, {"date": "2024-11-21", "label": "21/11", "value": -342141618}, {"date": "2024-11-22", "label": "22/11", "value": -280128661}, {"date": "2024-11-25", "label": "25/11", "value": -323051849}, {"date": "2024-11-26", "label": "26/11", "value": -233859567}, {"date": "2024-11-27", "label": "27/11", "value": -169874389}, {"date": "2024-11-28", "label": "28/11", "value": -158754192}, {"date": "2024-11-29", "label": "29/11", "value": -130251333}]}, {"key": "2024-12", "label": "DIC 24", "rows": [{"date": "2024-12-02", "label": "2/12", "value": 22775032}, {"date": "2024-12-03", "label": "3/12", "value": 944430367}, {"date": "2024-12-04", "label": "4/12", "value": 929457826}, {"date": "2024-12-05", "label": "5/12", "value": -745045049}, {"date": "2024-12-06", "label": "6/12", "value": -718192545}, {"date": "2024-12-09", "label": "9/12", "value": -515838715}, {"date": "2024-12-10", "label": "10/12", "value": -274247783}, {"date": "2024-12-11", "label": "11/12", "value": -827331181}, {"date": "2024-12-12", "label": "12/12", "value": -655301581}, {"date": "2024-12-13", "label": "13/12", "value": -570248901}, {"date": "2024-12-16", "label": "16/12", "value": -636574726}, {"date": "2024-12-17", "label": "17/12", "value": -562184658}, {"date": "2024-12-18", "label": "18/12", "value": -1118076694}, {"date": "2024-12-19", "label": "19/12", "value": -1083215563}, {"date": "2024-12-20", "label": "20/12", "value": -1033241817}, {"date": "2024-12-23", "label": "23/12", "value": -867935960}, {"date": "2024-12-24", "label": "24/12", "value": -867935960}, {"date": "2024-12-25", "label": "25/12", "value": -867935960}, {"date": "2024-12-26", "label": "26/12", "value": -800851591}, {"date": "2024-12-27", "label": "27/12", "value": -776826430}, {"date": "2024-12-30", "label": "30/12", "value": -634530102}, {"date": "2024-12-31", "label": "31/12", "value": -634530102}]}, {"key": "2025-01", "label": "ENE 25", "rows": [{"date": "2025-01-06", "label": "6/1", "value": 233912479}, {"date": "2025-01-07", "label": "7/1", "value": -50891018}, {"date": "2025-01-08", "label": "8/1", "value": 90009503}, {"date": "2025-01-09", "label": "9/1", "value": 116097439}, {"date": "2025-01-10", "label": "10/1", "value": 190737621}, {"date": "2025-01-13", "label": "13/1", "value": -217774102}, {"date": "2025-01-14", "label": "14/1", "value": -202380018}, {"date": "2025-01-15", "label": "15/1", "value": 195828023}, {"date": "2025-01-16", "label": "16/1", "value": 194331757}, {"date": "2025-01-17", "label": "17/1", "value": 205739827}, {"date": "2025-01-20", "label": "20/1", "value": 303681345}, {"date": "2025-01-21", "label": "21/1", "value": 447195638}, {"date": "2025-01-22", "label": "22/1", "value": 483895589}, {"date": "2025-01-23", "label": "23/1", "value": 525537235}, {"date": "2025-01-24", "label": "24/1", "value": 564388757}, {"date": "2025-01-27", "label": "27/1", "value": 644693516}, {"date": "2025-01-28", "label": "28/1", "value": 706658537}, {"date": "2025-01-29", "label": "29/1", "value": 766510436}, {"date": "2025-01-30", "label": "30/1", "value": 806673752}, {"date": "2025-01-31", "label": "31/1", "value": 814951110}]}, {"key": "2025-02", "label": "FEB 25", "rows": [{"date": "2025-02-03", "label": "3/2", "value": 1089130774}, {"date": "2025-02-04", "label": "4/2", "value": 1489320535}, {"date": "2025-02-05", "label": "5/2", "value": 1524845997}, {"date": "2025-02-06", "label": "6/2", "value": -102952674}, {"date": "2025-02-07", "label": "7/2", "value": -33270375}, {"date": "2025-02-10", "label": "10/2", "value": 28482367}, {"date": "2025-02-11", "label": "11/2", "value": 290115928}, {"date": "2025-02-12", "label": "12/2", "value": 206701880}, {"date": "2025-02-13", "label": "13/2", "value": 332886319}, {"date": "2025-02-14", "label": "14/2", "value": 365495407}, {"date": "2025-02-17", "label": "17/2", "value": 364879244}, {"date": "2025-02-18", "label": "18/2", "value": 388119561}, {"date": "2025-02-19", "label": "19/2", "value": 500389077}, {"date": "2025-02-20", "label": "20/2", "value": 477991661}, {"date": "2025-02-21", "label": "21/2", "value": 685864652}, {"date": "2025-02-24", "label": "24/2", "value": 607162038}, {"date": "2025-02-25", "label": "25/2", "value": 631542456}, {"date": "2025-02-26", "label": "26/2", "value": 680732557}, {"date": "2025-02-27", "label": "27/2", "value": 802429243}, {"date": "2025-02-28", "label": "28/2", "value": 836611670}]}, {"key": "2025-03", "label": "MAR 25", "rows": [{"date": "2025-03-03", "label": "3/3", "value": 836611670}, {"date": "2025-03-04", "label": "4/3", "value": 836611670}, {"date": "2025-03-05", "label": "5/3", "value": 1210101340}, {"date": "2025-03-06", "label": "6/3", "value": 1509374421}, {"date": "2025-03-07", "label": "7/3", "value": 1607212234}, {"date": "2025-03-10", "label": "10/3", "value": 368483197}, {"date": "2025-03-11", "label": "11/3", "value": 329422062}, {"date": "2025-03-12", "label": "12/3", "value": 78063218}, {"date": "2025-03-13", "label": "13/3", "value": 307050966}, {"date": "2025-03-14", "label": "14/3", "value": 455631091}, {"date": "2025-03-17", "label": "17/3", "value": 461572147}, {"date": "2025-03-18", "label": "18/3", "value": 465424323}, {"date": "2025-03-19", "label": "19/3", "value": 474962511}, {"date": "2025-03-20", "label": "20/3", "value": 500674900}, {"date": "2025-03-21", "label": "21/3", "value": 601305260}, {"date": "2025-03-24", "label": "24/3", "value": 601305260}, {"date": "2025-03-25", "label": "25/3", "value": 681854665}, {"date": "2025-03-26", "label": "26/3", "value": 641206671}, {"date": "2025-03-27", "label": "27/3", "value": 766360818}, {"date": "2025-03-28", "label": "28/3", "value": 921249657}, {"date": "2025-03-31", "label": "31/3", "value": 963342604}]}, {"key": "2025-04", "label": "ABR 25", "rows": [{"date": "2025-04-01", "label": "1/4", "value": 994305483}, {"date": "2025-04-02", "label": "2/4", "value": 994305483}, {"date": "2025-04-03", "label": "3/4", "value": 1604865802}, {"date": "2025-04-04", "label": "4/4", "value": 1776681868}, {"date": "2025-04-07", "label": "7/4", "value": 167501954}, {"date": "2025-04-08", "label": "8/4", "value": -5567608}, {"date": "2025-04-09", "label": "9/4", "value": 93013672}, {"date": "2025-04-10", "label": "10/4", "value": 251196891}, {"date": "2025-04-11", "label": "11/4", "value": -246254691}, {"date": "2025-04-14", "label": "14/4", "value": -17742627}, {"date": "2025-04-15", "label": "15/4", "value": 3854274}, {"date": "2025-04-16", "label": "16/4", "value": 50359195}, {"date": "2025-04-17", "label": "17/4", "value": 50359195}, {"date": "2025-04-18", "label": "18/4", "value": 50359195}, {"date": "2025-04-21", "label": "21/4", "value": 78335718}, {"date": "2025-04-22", "label": "22/4", "value": 257942979}, {"date": "2025-04-23", "label": "23/4", "value": 243565466}, {"date": "2025-04-24", "label": "24/4", "value": 293705143}, {"date": "2025-04-25", "label": "25/4", "value": 363517085}, {"date": "2025-04-28", "label": "28/4", "value": 523652401}, {"date": "2025-04-29", "label": "29/4", "value": 713479905}, {"date": "2025-04-30", "label": "30/4", "value": 923299359}]}, {"key": "2025-05", "label": "MAY 25", "rows": [{"date": "2025-05-02", "label": "2/5", "value": 923299359}, {"date": "2025-05-05", "label": "5/5", "value": 1373031756}, {"date": "2025-05-06", "label": "6/5", "value": 1898256357}, {"date": "2025-05-07", "label": "7/5", "value": 307730726}, {"date": "2025-05-08", "label": "8/5", "value": 449162970}, {"date": "2025-05-09", "label": "9/5", "value": 358719100}, {"date": "2025-05-12", "label": "12/5", "value": 643307541}, {"date": "2025-05-13", "label": "13/5", "value": 438565112}, {"date": "2025-05-14", "label": "14/5", "value": 569523725}, {"date": "2025-05-15", "label": "15/5", "value": 562104673}, {"date": "2025-05-16", "label": "16/5", "value": 582566260}, {"date": "2025-05-19", "label": "19/5", "value": 639700854}, {"date": "2025-05-20", "label": "20/5", "value": 612108189}, {"date": "2025-05-21", "label": "21/5", "value": 625641496}, {"date": "2025-05-22", "label": "22/5", "value": 836615052}, {"date": "2025-05-23", "label": "23/5", "value": 739598173}, {"date": "2025-05-26", "label": "26/5", "value": 784301154}, {"date": "2025-05-27", "label": "27/5", "value": 844844913}, {"date": "2025-05-28", "label": "28/5", "value": 1010084282}, {"date": "2025-05-29", "label": "29/5", "value": 1050533070}, {"date": "2025-05-30", "label": "30/5", "value": 1080601615}]}, {"key": "2025-06", "label": "JUN 25", "rows": [{"date": "2025-06-02", "label": "2/6", "value": 1258024198}, {"date": "2025-06-03", "label": "3/6", "value": 1955400813}, {"date": "2025-06-04", "label": "4/6", "value": 2469055119}, {"date": "2025-06-05", "label": "5/6", "value": 771694997}, {"date": "2025-06-06", "label": "6/6", "value": 802415935}, {"date": "2025-06-09", "label": "9/6", "value": 1047085600}, {"date": "2025-06-10", "label": "10/6", "value": 1125131215}, {"date": "2025-06-11", "label": "11/6", "value": 589822844}, {"date": "2025-06-12", "label": "12/6", "value": 802066820}, {"date": "2025-06-13", "label": "13/6", "value": 965295777}, {"date": "2025-06-16", "label": "16/6", "value": 965295777}, {"date": "2025-06-17", "label": "17/6", "value": 1036618182}, {"date": "2025-06-18", "label": "18/6", "value": 1005711886}, {"date": "2025-06-19", "label": "19/6", "value": 1051941801}, {"date": "2025-06-20", "label": "20/6", "value": 1051941801}, {"date": "2025-06-23", "label": "23/6", "value": 1493807758}, {"date": "2025-06-24", "label": "24/6", "value": 1532234699}, {"date": "2025-06-25", "label": "25/6", "value": 1583910187}, {"date": "2025-06-26", "label": "26/6", "value": 1599960237}, {"date": "2025-06-27", "label": "27/6", "value": 1502210293}, {"date": "2025-06-30", "label": "30/6", "value": 1096176815}]}, {"key": "2025-07", "label": "JUL 25", "rows": [{"date": "2025-07-01", "label": "1/7", "value": 1176839223}, {"date": "2025-07-02", "label": "2/7", "value": 1440907482}, {"date": "2025-07-03", "label": "3/7", "value": 1415459780}, {"date": "2025-07-04", "label": "4/7", "value": -49796411}, {"date": "2025-07-07", "label": "7/7", "value": 29530013}, {"date": "2025-07-08", "label": "8/7", "value": 6378134}, {"date": "2025-07-09", "label": "9/7", "value": 6378134}, {"date": "2025-07-10", "label": "10/7", "value": 193149703}, {"date": "2025-07-11", "label": "11/7", "value": 226801920}, {"date": "2025-07-14", "label": "14/7", "value": 161175940}, {"date": "2025-07-15", "label": "15/7", "value": 147449123}, {"date": "2025-07-16", "label": "16/7", "value": 294851014}, {"date": "2025-07-17", "label": "17/7", "value": 317902224}, {"date": "2025-07-18", "label": "18/7", "value": 291964492}, {"date": "2025-07-21", "label": "21/7", "value": 641420569}, {"date": "2025-07-22", "label": "22/7", "value": 389665682}, {"date": "2025-07-23", "label": "23/7", "value": 477262980}, {"date": "2025-07-24", "label": "24/7", "value": 342525733}, {"date": "2025-07-25", "label": "25/7", "value": 439985986}, {"date": "2025-07-28", "label": "28/7", "value": 500632935}, {"date": "2025-07-29", "label": "29/7", "value": 612343065}, {"date": "2025-07-30", "label": "30/7", "value": 628793764}, {"date": "2025-07-31", "label": "31/7", "value": 696862279}]}, {"key": "2025-08", "label": "AGO 25", "rows": [{"date": "2025-08-04", "label": "4/8", "value": 985382787}, {"date": "2025-08-05", "label": "5/8", "value": 1362214460}, {"date": "2025-08-06", "label": "6/8", "value": 296999092}, {"date": "2025-08-07", "label": "7/8", "value": 302320779}, {"date": "2025-08-08", "label": "8/8", "value": 319439494}, {"date": "2025-08-11", "label": "11/8", "value": 236433458}, {"date": "2025-08-12", "label": "12/8", "value": 821356213}, {"date": "2025-08-13", "label": "13/8", "value": 243069518}, {"date": "2025-08-14", "label": "14/8", "value": 472680318}, {"date": "2025-08-15", "label": "15/8", "value": 472680318}, {"date": "2025-08-18", "label": "18/8", "value": 579058436}, {"date": "2025-08-19", "label": "19/8", "value": 617799407}, {"date": "2025-08-20", "label": "20/8", "value": 646255483}, {"date": "2025-08-21", "label": "21/8", "value": 642834045}, {"date": "2025-08-22", "label": "22/8", "value": 319787019}, {"date": "2025-08-25", "label": "25/8", "value": 432604549}, {"date": "2025-08-26", "label": "26/8", "value": 494317438}, {"date": "2025-08-27", "label": "27/8", "value": 679033137}, {"date": "2025-08-28", "label": "28/8", "value": 754989612}, {"date": "2025-08-29", "label": "29/8", "value": 774072503}]}, {"key": "2025-09", "label": "SEP 25", "rows": [{"date": "2025-09-01", "label": "1/9", "value": 878358823}, {"date": "2025-09-02", "label": "2/9", "value": 1437066862}, {"date": "2025-09-03", "label": "3/9", "value": 1943167802}, {"date": "2025-09-04", "label": "4/9", "value": 58531796}, {"date": "2025-09-05", "label": "5/9", "value": 68990564}, {"date": "2025-09-08", "label": "8/9", "value": 151490985}, {"date": "2025-09-09", "label": "9/9", "value": 160256862}, {"date": "2025-09-10", "label": "10/9", "value": 189998526}, {"date": "2025-09-11", "label": "11/9", "value": -249719292}, {"date": "2025-09-12", "label": "12/9", "value": -214747162}, {"date": "2025-09-15", "label": "15/9", "value": 43022684}, {"date": "2025-09-16", "label": "16/9", "value": 141452447}, {"date": "2025-09-17", "label": "17/9", "value": 387262892}, {"date": "2025-09-18", "label": "18/9", "value": 414925370}, {"date": "2025-09-19", "label": "19/9", "value": 442502250}, {"date": "2025-09-22", "label": "22/9", "value": 494205371}, {"date": "2025-09-23", "label": "23/9", "value": 579773294}, {"date": "2025-09-24", "label": "24/9", "value": 360741109}, {"date": "2025-09-25", "label": "25/9", "value": 448637484}, {"date": "2025-09-26", "label": "26/9", "value": 583293667}, {"date": "2025-09-29", "label": "29/9", "value": 622949887}, {"date": "2025-09-30", "label": "30/9", "value": 852701127}]}, {"key": "2025-10", "label": "OCT 25", "rows": [{"date": "2025-10-01", "label": "1/10", "value": 875015465}, {"date": "2025-10-02", "label": "2/10", "value": 1015180180}, {"date": "2025-10-03", "label": "3/10", "value": 1561058077}, {"date": "2025-10-06", "label": "6/10", "value": 334380874}, {"date": "2025-10-07", "label": "7/10", "value": 590870143}, {"date": "2025-10-08", "label": "8/10", "value": 507591917}, {"date": "2025-10-09", "label": "9/10", "value": 465805728}, {"date": "2025-10-10", "label": "10/10", "value": 465805728}, {"date": "2025-10-13", "label": "13/10", "value": 479911408}, {"date": "2025-10-14", "label": "14/10", "value": 286451298}, {"date": "2025-10-15", "label": "15/10", "value": 265294328}, {"date": "2025-10-16", "label": "16/10", "value": 386450809}, {"date": "2025-10-17", "label": "17/10", "value": 452445093}, {"date": "2025-10-20", "label": "20/10", "value": 533988782}, {"date": "2025-10-21", "label": "21/10", "value": 450593599}, {"date": "2025-10-22", "label": "22/10", "value": 397585571}, {"date": "2025-10-23", "label": "23/10", "value": 569449009}, {"date": "2025-10-24", "label": "24/10", "value": 399686937}, {"date": "2025-10-27", "label": "27/10", "value": 613263547}, {"date": "2025-10-28", "label": "28/10", "value": 642725258}, {"date": "2025-10-29", "label": "29/10", "value": 797971560}, {"date": "2025-10-30", "label": "30/10", "value": 618790008}, {"date": "2025-10-31", "label": "31/10", "value": 623553041}]}, {"key": "2025-11", "label": "NOV 25", "rows": [{"date": "2025-11-03", "label": "3/11", "value": 775696961}, {"date": "2025-11-04", "label": "4/11", "value": 1160032456}, {"date": "2025-11-05", "label": "5/11", "value": 81227657}, {"date": "2025-11-06", "label": "6/11", "value": 81227657}, {"date": "2025-11-07", "label": "7/11", "value": 79302550}, {"date": "2025-11-10", "label": "10/11", "value": 90281254}, {"date": "2025-11-11", "label": "11/11", "value": 105336813}, {"date": "2025-11-12", "label": "12/11", "value": 43885826}, {"date": "2025-11-13", "label": "13/11", "value": 88952990}, {"date": "2025-11-14", "label": "14/11", "value": 45379530}, {"date": "2025-11-17", "label": "17/11", "value": 255203636}, {"date": "2025-11-18", "label": "18/11", "value": 351195752}, {"date": "2025-11-19", "label": "19/11", "value": 331821646}, {"date": "2025-11-20", "label": "20/11", "value": 339313957}, {"date": "2025-11-21", "label": "21/11", "value": 345707542}, {"date": "2025-11-24", "label": "24/11", "value": 345707542}, {"date": "2025-11-25", "label": "25/11", "value": 533268283}, {"date": "2025-11-26", "label": "26/11", "value": 663238126}, {"date": "2025-11-27", "label": "27/11", "value": 718261122}, {"date": "2025-11-28", "label": "28/11", "value": 743414212}]}, {"key": "2025-12", "label": "DIC 25", "rows": [{"date": "2025-12-01", "label": "1/12", "value": 917210169}, {"date": "2025-12-02", "label": "2/12", "value": 1224550955}, {"date": "2025-12-03", "label": "3/12", "value": 1483870104}, {"date": "2025-12-04", "label": "4/12", "value": -40058188}, {"date": "2025-12-05", "label": "5/12", "value": 13579572}, {"date": "2025-12-08", "label": "8/12", "value": 13579572}, {"date": "2025-12-09", "label": "9/12", "value": 65377645}, {"date": "2025-12-10", "label": "10/12", "value": 156032659}, {"date": "2025-12-11", "label": "11/12", "value": -61368279}, {"date": "2025-12-12", "label": "12/12", "value": 54051848}, {"date": "2025-12-15", "label": "15/12", "value": 166164391}, {"date": "2025-12-16", "label": "16/12", "value": 257414170}, {"date": "2025-12-17", "label": "17/12", "value": 305551508}, {"date": "2025-12-18", "label": "18/12", "value": 41305019}, {"date": "2025-12-19", "label": "19/12", "value": 48815394}, {"date": "2025-12-22", "label": "22/12", "value": 149937678}, {"date": "2025-12-23", "label": "23/12", "value": 291238531}, {"date": "2025-12-24", "label": "24/12", "value": 291238531}, {"date": "2025-12-25", "label": "25/12", "value": 291238531}, {"date": "2025-12-26", "label": "26/12", "value": 288856957}, {"date": "2025-12-29", "label": "29/12", "value": 394386881}, {"date": "2025-12-30", "label": "30/12", "value": 493557446}, {"date": "2025-12-31", "label": "31/12", "value": 493557446}]}, {"key": "2026-01", "label": "ENE 26", "rows": [{"date": "2026-01-01", "label": "1/1", "value": 493557446}, {"date": "2026-01-02", "label": "2/1", "value": 767407312}, {"date": "2026-01-05", "label": "5/1", "value": 1293466017}, {"date": "2026-01-06", "label": "6/1", "value": 1357895376}, {"date": "2026-01-07", "label": "7/1", "value": -333628599}, {"date": "2026-01-08", "label": "8/1", "value": -330445192}, {"date": "2026-01-09", "label": "9/1", "value": -327210214}, {"date": "2026-01-12", "label": "12/1", "value": -318155041}, {"date": "2026-01-13", "label": "13/1", "value": -827249612}, {"date": "2026-01-14", "label": "14/1", "value": -822112330}, {"date": "2026-01-15", "label": "15/1", "value": -488991369}, {"date": "2026-01-16", "label": "16/1", "value": -425072595}, {"date": "2026-01-19", "label": "19/1", "value": 20657803}, {"date": "2026-01-20", "label": "20/1", "value": -38763661}, {"date": "2026-01-21", "label": "21/1", "value": 60494249}, {"date": "2026-01-22", "label": "22/1", "value": 181808528}, {"date": "2026-01-23", "label": "23/1", "value": 196377768}, {"date": "2026-01-26", "label": "26/1", "value": 362744169}, {"date": "2026-01-27", "label": "27/1", "value": 355959216}, {"date": "2026-01-28", "label": "28/1", "value": 409818307}, {"date": "2026-01-29", "label": "29/1", "value": 462735947}, {"date": "2026-01-30", "label": "30/1", "value": 494957559}]}, {"key": "2026-02", "label": "FEB 26", "rows": [{"date": "2026-02-02", "label": "2/2", "value": 523796304}, {"date": "2026-02-03", "label": "3/2", "value": 1286552776}, {"date": "2026-02-04", "label": "4/2", "value": 1360665879}, {"date": "2026-02-05", "label": "5/2", "value": -489652200}, {"date": "2026-02-06", "label": "6/2", "value": -459446818}, {"date": "2026-02-09", "label": "9/2", "value": -335785418}, {"date": "2026-02-10", "label": "10/2", "value": -59243510}, {"date": "2026-02-11", "label": "11/2", "value": -337386477}, {"date": "2026-02-12", "label": "12/2", "value": -141492418}, {"date": "2026-02-13", "label": "13/2", "value": -84539037}, {"date": "2026-02-16", "label": "16/2", "value": -84539037}, {"date": "2026-02-17", "label": "17/2", "value": -84539037}, {"date": "2026-02-18", "label": "18/2", "value": -161633128}, {"date": "2026-02-19", "label": "19/2", "value": -6373007}, {"date": "2026-02-20", "label": "20/2", "value": -65624965}, {"date": "2026-02-23", "label": "23/2", "value": 155812373}, {"date": "2026-02-24", "label": "24/2", "value": 449150215}, {"date": "2026-02-25", "label": "25/2", "value": 554375651}, {"date": "2026-02-26", "label": "26/2", "value": 633269638}, {"date": "2026-02-27", "label": "27/2", "value": 637073917}]}, {"key": "2026-03", "label": "MAR 26", "rows": [{"date": "2026-03-02", "label": "2/3", "value": 958059765}, {"date": "2026-03-03", "label": "3/3", "value": 1262647855}, {"date": "2026-03-04", "label": "4/3", "value": 1707457441}, {"date": "2026-03-05", "label": "5/3", "value": -216250932}, {"date": "2026-03-06", "label": "6/3", "value": -145901776}, {"date": "2026-03-09", "label": "9/3", "value": -37132771}, {"date": "2026-03-10", "label": "10/3", "value": 114534363}, {"date": "2026-03-11", "label": "11/3", "value": -318787105}, {"date": "2026-03-12", "label": "12/3", "value": -6713161}, {"date": "2026-03-13", "label": "13/3", "value": -17373944}, {"date": "2026-03-16", "label": "16/3", "value": -59135021}, {"date": "2026-03-17", "label": "17/3", "value": 35197085}, {"date": "2026-03-18", "label": "18/3", "value": 72452424}, {"date": "2026-03-19", "label": "19/3", "value": 175555499}, {"date": "2026-03-20", "label": "20/3", "value": 223255914}, {"date": "2026-03-23", "label": "23/3", "value": 224729609}, {"date": "2026-03-24", "label": "24/3", "value": 224729609}, {"date": "2026-03-25", "label": "25/3", "value": 500428550}, {"date": "2026-03-26", "label": "26/3", "value": 634736108}, {"date": "2026-03-27", "label": "27/3", "value": 626772699}, {"date": "2026-03-30", "label": "30/3", "value": 676079554}, {"date": "2026-03-31", "label": "31/3", "value": 1086552501}]}, {"key": "2026-04", "label": "ABR 26", "rows": [{"date": "2026-04-01", "label": "1/4", "value": 1128575518}, {"date": "2026-04-02", "label": "2/4", "value": 1128575518}, {"date": "2026-04-03", "label": "3/4", "value": 1128575518}, {"date": "2026-04-06", "label": "6/4", "value": 1368246721}, {"date": "2026-04-07", "label": "7/4", "value": 1695080848}, {"date": "2026-04-08", "label": "8/4", "value": 13411832}, {"date": "2026-04-09", "label": "9/4", "value": -112344281}, {"date": "2026-04-10", "label": "10/4", "value": -79796344}, {"date": "2026-04-13", "label": "13/4", "value": -347615761}, {"date": "2026-04-14", "label": "14/4", "value": 62098487}, {"date": "2026-04-15", "label": "15/4", "value": 98313275}, {"date": "2026-04-16", "label": "16/4", "value": 112303219}, {"date": "2026-04-17", "label": "17/4", "value": 163409281}, {"date": "2026-04-20", "label": "20/4", "value": 290844871}, {"date": "2026-04-21", "label": "21/4", "value": 424208253}, {"date": "2026-04-22", "label": "22/4", "value": 456062957}, {"date": "2026-04-23", "label": "23/4", "value": 516675590}, {"date": "2026-04-24", "label": "24/4", "value": 332416860}, {"date": "2026-04-27", "label": "27/4", "value": 461046416}, {"date": "2026-04-28", "label": "28/4", "value": 684541966}, {"date": "2026-04-29", "label": "29/4", "value": 743636063}, {"date": "2026-04-30", "label": "30/4", "value": 817266255}]}, {"key": "2026-05", "label": "MAY 26", "rows": [{"date": "2026-05-01", "label": "1/5", "value": 817266255}, {"date": "2026-05-04", "label": "4/5", "value": 822708301}, {"date": "2026-05-05", "label": "5/5", "value": 1592923485}, {"date": "2026-05-06", "label": "6/5", "value": 1644441337}, {"date": "2026-05-07", "label": "7/5", "value": -186705081}, {"date": "2026-05-08", "label": "8/5", "value": -69262300}, {"date": "2026-05-11", "label": "11/5", "value": 143152401}, {"date": "2026-05-12", "label": "12/5", "value": 222089575}, {"date": "2026-05-13", "label": "13/5", "value": -141419546}, {"date": "2026-05-14", "label": "14/5", "value": -99176831}, {"date": "2026-05-15", "label": "15/5", "value": -110015143}, {"date": "2026-05-18", "label": "18/5", "value": 430102835}, {"date": "2026-05-19", "label": "19/5", "value": 562476184}, {"date": "2026-05-20", "label": "20/5", "value": 553917886}, {"date": "2026-05-21", "label": "21/5", "value": 590908776}, {"date": "2026-05-22", "label": "22/5", "value": 572219896}, {"date": "2026-05-25", "label": "25/5", "value": 572219896}, {"date": "2026-05-26", "label": "26/5", "value": 911958869}, {"date": "2026-05-27", "label": "27/5", "value": 1039893729}, {"date": "2026-05-28", "label": "28/5", "value": 1114350359}, {"date": "2026-05-29", "label": "29/5", "value": 1175304167}]}, {"key": "2026-07", "label": "JUL 26", "rows": [{"date": "2026-07-01", "label": "1/7", "value": 318665063}, {"date": "2026-07-02", "label": "2/7", "value": 421742053}, {"date": "2026-07-03", "label": "3/7", "value": 609140016}, {"date": "2026-07-06", "label": "6/7", "value": -645706654}, {"date": "2026-07-07", "label": "7/7", "value": -451591909}, {"date": "2026-07-08", "label": "8/7", "value": -565739733}, {"date": "2026-07-09", "label": "9/7", "value": -565739733}, {"date": "2026-07-10", "label": "10/7", "value": -565739733}, {"date": "2026-07-13", "label": "13/7", "value": -572382568}, {"date": "2026-07-14", "label": "14/7", "value": -230826346}, {"date": "2026-07-15", "label": "15/7", "value": -1160234167}, {"date": "2026-07-16", "label": "16/7", "value": -1127862512}, {"date": "2026-07-17", "label": "17/7", "value": -1043443220}, {"date": "2026-07-20", "label": "20/7", "value": -849789376}, {"date": "2026-07-21", "label": "21/7", "value": -795860757}, {"date": "2026-07-22", "label": "22/7", "value": -455259253}, {"date": "2026-07-23", "label": "23/7", "value": -277242953}, {"date": "2026-07-24", "label": "24/7", "value": -155561627}, {"date": "2026-07-27", "label": "27/7", "value": 18083671}, {"date": "2026-07-28", "label": "28/7", "value": 64603712}, {"date": "2026-07-29", "label": "29/7", "value": 67948469}, {"date": "2026-07-30", "label": "30/7", "value": 226593814}, {"date": "2026-07-31", "label": "31/7", "value": 265578179}]}, {"key": "2026-08", "label": "AGO 26", "rows": [{"date": "2026-08-03", "label": "3/8", "value": 520544354}, {"date": "2026-08-04", "label": "4/8", "value": 733351216}, {"date": "2026-08-05", "label": "5/8", "value": 1021127432}, {"date": "2026-08-06", "label": "6/8", "value": -998482805}, {"date": "2026-08-07", "label": "7/8", "value": -1027707105}, {"date": "2026-08-10", "label": "10/8", "value": -836930348}, {"date": "2026-08-11", "label": "11/8", "value": -864708648}, {"date": "2026-08-12", "label": "12/8", "value": -906616398}, {"date": "2026-08-13", "label": "13/8", "value": -870113736}, {"date": "2026-08-14", "label": "14/8", "value": -787472750}, {"date": "2026-08-17", "label": "17/8", "value": -584464722}, {"date": "2026-08-18", "label": "18/8", "value": -501018021}, {"date": "2026-08-19", "label": "19/8", "value": -355404653}, {"date": "2026-08-20", "label": "20/8", "value": -326101478}, {"date": "2026-08-21", "label": "21/8", "value": -36654629}, {"date": "2026-08-24", "label": "24/8", "value": 196646378}, {"date": "2026-08-25", "label": "25/8", "value": 333254945}, {"date": "2026-08-26", "label": "26/8", "value": 313690645}, {"date": "2026-08-27", "label": "27/8", "value": 357653930}, {"date": "2026-08-28", "label": "28/8", "value": 473210428}, {"date": "2026-08-31", "label": "31/8", "value": 468849897}]}, {"key": "2026-09", "label": "SEP 26", "rows": [{"date": "2026-09-01", "label": "1/9", "value": 764474795}, {"date": "2026-09-02", "label": "2/9", "value": 801478264}, {"date": "2026-09-03", "label": "3/9", "value": 857873926}, {"date": "2026-09-04", "label": "4/9", "value": 1058905220}, {"date": "2026-09-07", "label": "7/9", "value": -1034334135}, {"date": "2026-09-08", "label": "8/9", "value": -1062112435}, {"date": "2026-09-09", "label": "9/9", "value": -970094782}, {"date": "2026-09-10", "label": "10/9", "value": -754825729}, {"date": "2026-09-11", "label": "11/9", "value": -1408952898}, {"date": "2026-09-14", "label": "14/9", "value": -702895201}, {"date": "2026-09-15", "label": "15/9", "value": -647543891}, {"date": "2026-09-16", "label": "16/9", "value": -399538721}, {"date": "2026-09-17", "label": "17/9", "value": -404555407}, {"date": "2026-09-18", "label": "18/9", "value": -158740418}, {"date": "2026-09-21", "label": "21/9", "value": 199437593}, {"date": "2026-09-22", "label": "22/9", "value": 384465192}, {"date": "2026-09-23", "label": "23/9", "value": 447101944}, {"date": "2026-09-24", "label": "24/9", "value": 345219541}, {"date": "2026-09-25", "label": "25/9", "value": 557603494}, {"date": "2026-09-28", "label": "28/9", "value": 558279397}, {"date": "2026-09-29", "label": "29/9", "value": 739099358}, {"date": "2026-09-30", "label": "30/9", "value": 728423058}]}, {"key": "2026-10", "label": "OCT 26", "rows": [{"date": "2026-10-01", "label": "1/10", "value": 850655393}, {"date": "2026-10-02", "label": "2/10", "value": 937478809}, {"date": "2026-10-05", "label": "5/10", "value": -951627819}, {"date": "2026-10-06", "label": "6/10", "value": -979406119}, {"date": "2026-10-07", "label": "7/10", "value": -883784158}, {"date": "2026-10-08", "label": "8/10", "value": -885406458}, {"date": "2026-10-09", "label": "9/10", "value": -863884278}, {"date": "2026-10-12", "label": "12/10", "value": -535706545}, {"date": "2026-10-13", "label": "13/10", "value": -647160244}, {"date": "2026-10-14", "label": "14/10", "value": -463461275}, {"date": "2026-10-15", "label": "15/10", "value": -422551335}, {"date": "2026-10-16", "label": "16/10", "value": -183519790}, {"date": "2026-10-19", "label": "19/10", "value": -18386392}, {"date": "2026-10-20", "label": "20/10", "value": 106417979}, {"date": "2026-10-21", "label": "21/10", "value": 281259623}, {"date": "2026-10-22", "label": "22/10", "value": 641066047}, {"date": "2026-10-23", "label": "23/10", "value": 560729465}, {"date": "2026-10-26", "label": "26/10", "value": 579959165}, {"date": "2026-10-27", "label": "27/10", "value": 591401165}, {"date": "2026-10-28", "label": "28/10", "value": 664111096}, {"date": "2026-10-29", "label": "29/10", "value": 664111096}, {"date": "2026-10-30", "label": "30/10", "value": 690121275}]}, {"key": "2026-11", "label": "NOV 26", "rows": [{"date": "2026-11-02", "label": "2/11", "value": 679996340}, {"date": "2026-11-03", "label": "3/11", "value": 933895009}, {"date": "2026-11-04", "label": "4/11", "value": 1147700988}, {"date": "2026-11-05", "label": "5/11", "value": -897988113}, {"date": "2026-11-06", "label": "6/11", "value": -932242413}, {"date": "2026-11-09", "label": "9/11", "value": -1038237281}, {"date": "2026-11-10", "label": "10/11", "value": -851434956}, {"date": "2026-11-11", "label": "11/11", "value": -1369547106}, {"date": "2026-11-12", "label": "12/11", "value": -852298905}, {"date": "2026-11-13", "label": "13/11", "value": -861746049}, {"date": "2026-11-16", "label": "16/11", "value": -590932104}, {"date": "2026-11-17", "label": "17/11", "value": -456716013}, {"date": "2026-11-18", "label": "18/11", "value": -291595880}, {"date": "2026-11-19", "label": "19/11", "value": -360314580}, {"date": "2026-11-20", "label": "20/11", "value": -60833795}, {"date": "2026-11-23", "label": "23/11", "value": 274378936}, {"date": "2026-11-24", "label": "24/11", "value": 340852251}, {"date": "2026-11-25", "label": "25/11", "value": 420873881}, {"date": "2026-11-26", "label": "26/11", "value": 527537072}, {"date": "2026-11-27", "label": "27/11", "value": 661989693}, {"date": "2026-11-30", "label": "30/11", "value": 662675934}]}, {"key": "2026-12", "label": "DIC 26", "rows": [{"date": "2026-12-01", "label": "1/12", "value": 976706102}, {"date": "2026-12-02", "label": "2/12", "value": 1016692141}, {"date": "2026-12-03", "label": "3/12", "value": 1037604796}, {"date": "2026-12-04", "label": "4/12", "value": -825197002}, {"date": "2026-12-07", "label": "7/12", "value": -935456643}, {"date": "2026-12-08", "label": "8/12", "value": -963234943}, {"date": "2026-12-09", "label": "9/12", "value": -860219016}, {"date": "2026-12-10", "label": "10/12", "value": -656321993}, {"date": "2026-12-11", "label": "11/12", "value": -1279952217}, {"date": "2026-12-14", "label": "14/12", "value": -562560050}, {"date": "2026-12-15", "label": "15/12", "value": -446211527}, {"date": "2026-12-16", "label": "16/12", "value": -222801433}, {"date": "2026-12-17", "label": "17/12", "value": -215555660}, {"date": "2026-12-18", "label": "18/12", "value": -804128225}, {"date": "2026-12-21", "label": "21/12", "value": -446324920}, {"date": "2026-12-22", "label": "22/12", "value": -251212999}, {"date": "2026-12-23", "label": "23/12", "value": -178961753}, {"date": "2026-12-24", "label": "24/12", "value": -270774815}, {"date": "2026-12-25", "label": "25/12", "value": -169161178}, {"date": "2026-12-28", "label": "28/12", "value": -57909694}, {"date": "2026-12-29", "label": "29/12", "value": -58258565}, {"date": "2026-12-30", "label": "30/12", "value": -54735606}, {"date": "2026-12-31", "label": "31/12", "value": -54735606}]}];
-let showNeg = true;
-let showPos = true;
-let showPeaks = true;
+const DATA = [{"key": "2026-07", "label": "JUL 26", "rows": [{"date": "2026-07-01", "label": "1/7", "value": 318665063}, {"date": "2026-07-02", "label": "2/7", "value": 421742053}, {"date": "2026-07-03", "label": "3/7", "value": 609140016}, {"date": "2026-07-06", "label": "6/7", "value": -645706654}, {"date": "2026-07-07", "label": "7/7", "value": -451591909}, {"date": "2026-07-08", "label": "8/7", "value": -565739733}, {"date": "2026-07-09", "label": "9/7", "value": -565739733}, {"date": "2026-07-10", "label": "10/7", "value": -565739733}, {"date": "2026-07-13", "label": "13/7", "value": -572382568}, {"date": "2026-07-14", "label": "14/7", "value": -230826346}, {"date": "2026-07-15", "label": "15/7", "value": -1160234167}, {"date": "2026-07-16", "label": "16/7", "value": -1127862512}, {"date": "2026-07-17", "label": "17/7", "value": -1043443220}, {"date": "2026-07-20", "label": "20/7", "value": -849789376}, {"date": "2026-07-21", "label": "21/7", "value": -795860757}, {"date": "2026-07-22", "label": "22/7", "value": -455259253}, {"date": "2026-07-23", "label": "23/7", "value": -277242953}, {"date": "2026-07-24", "label": "24/7", "value": -155561627}, {"date": "2026-07-27", "label": "27/7", "value": 18083671}, {"date": "2026-07-28", "label": "28/7", "value": 64603712}, {"date": "2026-07-29", "label": "29/7", "value": 67948469}, {"date": "2026-07-30", "label": "30/7", "value": 226593814}, {"date": "2026-07-31", "label": "31/7", "value": 265578179}]}, {"key": "2026-08", "label": "AGO 26", "rows": [{"date": "2026-08-03", "label": "3/8", "value": 520544354}, {"date": "2026-08-04", "label": "4/8", "value": 733351216}, {"date": "2026-08-05", "label": "5/8", "value": 1021127432}, {"date": "2026-08-06", "label": "6/8", "value": -998482805}, {"date": "2026-08-07", "label": "7/8", "value": -1027707105}, {"date": "2026-08-10", "label": "10/8", "value": -836930348}, {"date": "2026-08-11", "label": "11/8", "value": -864708648}, {"date": "2026-08-12", "label": "12/8", "value": -906616398}, {"date": "2026-08-13", "label": "13/8", "value": -870113736}, {"date": "2026-08-14", "label": "14/8", "value": -787472750}, {"date": "2026-08-17", "label": "17/8", "value": -584464722}, {"date": "2026-08-18", "label": "18/8", "value": 48981979}, {"date": "2026-08-19", "label": "19/8", "value": 194595347}, {"date": "2026-08-20", "label": "20/8", "value": 223898522}, {"date": "2026-08-21", "label": "21/8", "value": 513345371}, {"date": "2026-08-24", "label": "24/8", "value": 746646378}, {"date": "2026-08-25", "label": "25/8", "value": 883254945}, {"date": "2026-08-26", "label": "26/8", "value": 863690645}, {"date": "2026-08-27", "label": "27/8", "value": 907653930}, {"date": "2026-08-28", "label": "28/8", "value": 1023210428}, {"date": "2026-08-31", "label": "31/8", "value": 1028091363}]}, {"key": "2026-09", "label": "SEP 26", "rows": [{"date": "2026-09-01", "label": "1/9", "value": 1232724321}, {"date": "2026-09-02", "label": "2/9", "value": 1595492580}, {"date": "2026-09-03", "label": "3/9", "value": 1619848926}, {"date": "2026-09-04", "label": "4/9", "value": -355566980}, {"date": "2026-09-07", "label": "7/9", "value": -116530464}, {"date": "2026-09-08", "label": "8/9", "value": -96205149}, {"date": "2026-09-09", "label": "9/9", "value": -176425141}, {"date": "2026-09-10", "label": "10/9", "value": -257060938}, {"date": "2026-09-11", "label": "11/9", "value": -789804102}, {"date": "2026-09-14", "label": "14/9", "value": -278468675}, {"date": "2026-09-15", "label": "15/9", "value": -164968532}, {"date": "2026-09-16", "label": "16/9", "value": -69849475}, {"date": "2026-09-17", "label": "17/9", "value": -81370121}, {"date": "2026-09-18", "label": "18/9", "value": -78968916}, {"date": "2026-09-21", "label": "21/9", "value": 324935684}, {"date": "2026-09-22", "label": "22/9", "value": 455412131}, {"date": "2026-09-23", "label": "23/9", "value": 515663108}, {"date": "2026-09-24", "label": "24/9", "value": 214304636}, {"date": "2026-09-25", "label": "25/9", "value": 475330712}, {"date": "2026-09-28", "label": "28/9", "value": 715251295}, {"date": "2026-09-29", "label": "29/9", "value": 897517257}, {"date": "2026-09-30", "label": "30/9", "value": 970451892}]}, {"key": "2026-10", "label": "OCT 26", "rows": [{"date": "2026-10-01", "label": "1/10", "value": 1271818577}, {"date": "2026-10-02", "label": "2/10", "value": 1358839105}, {"date": "2026-10-05", "label": "5/10", "value": -497804041}, {"date": "2026-10-06", "label": "6/10", "value": -525582341}, {"date": "2026-10-07", "label": "7/10", "value": -405413274}, {"date": "2026-10-08", "label": "8/10", "value": -407035574}, {"date": "2026-10-09", "label": "9/10", "value": -385645049}, {"date": "2026-10-12", "label": "12/10", "value": 12986686}, {"date": "2026-10-13", "label": "13/10", "value": -38251795}, {"date": "2026-10-14", "label": "14/10", "value": 142617526}, {"date": "2026-10-15", "label": "15/10", "value": 186602809}, {"date": "2026-10-16", "label": "16/10", "value": 425634355}, {"date": "2026-10-19", "label": "19/10", "value": 584716808}, {"date": "2026-10-20", "label": "20/10", "value": 712373507}, {"date": "2026-10-21", "label": "21/10", "value": 883725932}, {"date": "2026-10-22", "label": "22/10", "value": 1070145542}, {"date": "2026-10-23", "label": "23/10", "value": 870719990}, {"date": "2026-10-26", "label": "26/10", "value": 889949690}, {"date": "2026-10-27", "label": "27/10", "value": 901391690}, {"date": "2026-10-28", "label": "28/10", "value": 974101621}, {"date": "2026-10-29", "label": "29/10", "value": 974101621}, {"date": "2026-10-30", "label": "30/10", "value": 1003472083}]}, {"key": "2026-11", "label": "NOV 26", "rows": [{"date": "2026-11-02", "label": "2/11", "value": 1009324515}, {"date": "2026-11-03", "label": "3/11", "value": 1266299305}, {"date": "2026-11-04", "label": "4/11", "value": 1477230809}, {"date": "2026-11-05", "label": "5/11", "value": -556747788}, {"date": "2026-11-06", "label": "6/11", "value": -591002088}, {"date": "2026-11-09", "label": "9/11", "value": -696996956}, {"date": "2026-11-10", "label": "10/11", "value": -511521020}, {"date": "2026-11-11", "label": "11/11", "value": -1004403044}, {"date": "2026-11-12", "label": "12/11", "value": -487154844}, {"date": "2026-11-13", "label": "13/11", "value": -493166116}, {"date": "2026-11-16", "label": "16/11", "value": -214080558}, {"date": "2026-11-17", "label": "17/11", "value": -82457911}, {"date": "2026-11-18", "label": "18/11", "value": 82662223}, {"date": "2026-11-19", "label": "19/11", "value": 13943523}, {"date": "2026-11-20", "label": "20/11", "value": 316526837}, {"date": "2026-11-23", "label": "23/11", "value": 646866152}, {"date": "2026-11-24", "label": "24/11", "value": 425208904}, {"date": "2026-11-25", "label": "25/11", "value": 501481253}, {"date": "2026-11-26", "label": "26/11", "value": 605919426}, {"date": "2026-11-27", "label": "27/11", "value": 743792774}, {"date": "2026-11-30", "label": "30/11", "value": 744479015}]}, {"key": "2026-12", "label": "DIC 26", "rows": [{"date": "2026-12-01", "label": "1/12", "value": 1078191043}, {"date": "2026-12-02", "label": "2/12", "value": 1117275024}, {"date": "2026-12-03", "label": "3/12", "value": 1142220613}, {"date": "2026-12-04", "label": "4/12", "value": -708556286}, {"date": "2026-12-07", "label": "7/12", "value": -821844586}, {"date": "2026-12-08", "label": "8/12", "value": -849622886}, {"date": "2026-12-09", "label": "9/12", "value": -746606959}, {"date": "2026-12-10", "label": "10/12", "value": -544786080}, {"date": "2026-12-11", "label": "11/12", "value": -1142460107}, {"date": "2026-12-14", "label": "14/12", "value": -409305442}, {"date": "2026-12-15", "label": "15/12", "value": -288617551}, {"date": "2026-12-16", "label": "16/12", "value": -69175897}, {"date": "2026-12-17", "label": "17/12", "value": -68785695}, {"date": "2026-12-18", "label": "18/12", "value": -658480109}, {"date": "2026-12-21", "label": "21/12", "value": -301356906}, {"date": "2026-12-22", "label": "22/12", "value": -283648906}, {"date": "2026-12-23", "label": "23/12", "value": -211397659}, {"date": "2026-12-24", "label": "24/12", "value": -419338490}, {"date": "2026-12-25", "label": "25/12", "value": -321541622}, {"date": "2026-12-28", "label": "28/12", "value": -210290137}, {"date": "2026-12-29", "label": "29/12", "value": -210649295}, {"date": "2026-12-30", "label": "30/12", "value": -203633797}, {"date": "2026-12-31", "label": "31/12", "value": 495264394}]}];
+const showNeg = true;
+const showPos = true;
+const showPeaks = true;
+const INFLOWS = [
+  {date:"2026-08-18", label:"CAUCIÓN +$550 M"}
+];
+const HIGHLIGHTS = [
+  {date:"2026-07-06", label:"SUELDOS"},
+  {date:"2026-07-15", label:"F 931"},
+  {date:"2026-07-20", label:"IIBB"},
+  {date:"2026-07-24", label:"IVA"},
+  {date:"2026-08-06", label:"SUELDOS"},
+  {date:"2026-08-12", label:"F 931"},
+  {date:"2026-08-20", label:"IIBB"},
+  {date:"2026-08-24", label:"IVA"},
+  {date:"2026-09-04", label:"SUELDOS"},
+  {date:"2026-09-11", label:"F 931"},
+  {date:"2026-09-18", label:"IIBB"},
+  {date:"2026-09-24", label:"IVA"},
+  {date:"2026-10-06", label:"SUELDOS"},
+  {date:"2026-10-14", label:"F 931"},
+  {date:"2026-10-20", label:"IIBB"},
+  {date:"2026-10-23", label:"IVA"},
+  {date:"2026-11-05", label:"SUELDOS"},
+  {date:"2026-11-11", label:"F 931"},
+  {date:"2026-11-19", label:"IIBB"},
+  {date:"2026-11-24", label:"IVA"},
+  {date:"2026-12-04", label:"SUELDOS"},
+  {date:"2026-12-11", label:"F 931"},
+  {date:"2026-12-18", label:"SAC"},
+  {date:"2026-12-18", label:"IIBB"},
+  {date:"2026-12-24", label:"IVA"}
+];
 
-const fromSel = document.getElementById("fromMonth");
-const toSel = document.getElementById("toMonth");
-const singleSel = document.getElementById("singleMonth");
 const svg = document.getElementById("chart");
 const tip = document.getElementById("tooltip");
-const strip = document.getElementById("monthStrip");
 
 const fmtMoney = (n) => {
   const sign = n < 0 ? "-" : n > 0 ? "+" : "";
@@ -457,287 +252,10 @@ const fmtMoney = (n) => {
   return sign + "$" + (abs/1e6).toLocaleString("es-AR", {maximumFractionDigits:1}) + " M";
 };
 const fmtExact = (n) => (n<0?"-":"") + "$" + Math.abs(n).toLocaleString("es-AR");
-
-DATA.forEach((m,i) => {
-  const a = document.createElement("option");
-  a.value = i; a.textContent = m.label; fromSel.appendChild(a);
-
-  const b = document.createElement("option");
-  b.value = i; b.textContent = m.label; toSel.appendChild(b);
-
-  const c = document.createElement("option");
-  c.value = i; c.textContent = m.label; singleSel.appendChild(c);
-});
-fromSel.value = 0;
-toSel.value = DATA.length - 1;
-
-function setRange(a,b) {
-  fromSel.value = a;
-  toSel.value = b;
-  draw();
-}
-
-function selectedMonths() {
-  let a = +fromSel.value, b = +toSel.value;
-  if (a>b) [a,b] = [b,a];
-  return DATA.slice(a,b+1);
-}
-
-
-function parseISO(s) {
-  const [y,m,d] = s.split("-").map(Number);
-  return new Date(y, m-1, d);
-}
-function dayOfMonth(s) {
-  return Number(s.slice(8,10));
-}
-function daysBetween(a,b) {
-  return Math.round((parseISO(b)-parseISO(a))/86400000);
-}
-function riskWindow(day) {
-  if (day <= 4) return "1-4";
-  if (day <= 7) return "5-7";
-  if (day <= 10) return "8-10";
-  if (day <= 15) return "11-15";
-  if (day <= 20) return "16-20";
-  if (day <= 25) return "21-25";
-  return "26-fin";
-}
-function longestNegativeRun(rows) {
-  let best = null;
-  let i = 0;
-  while (i < rows.length) {
-    if (rows[i].value < 0) {
-      const start = i;
-      while (i + 1 < rows.length && rows[i+1].value < 0) i++;
-      const end = i;
-      const runRows = rows.slice(start, end+1);
-      const trough = runRows.reduce((a,b)=>a.value < b.value ? a : b);
-      const recovery = (end+1 < rows.length && rows[end+1].value >= 0) ? rows[end+1] : null;
-      const prevPositive = (start > 0 && rows[start-1].value >= 0) ? rows[start-1] : null;
-      const candidate = {
-        start, end, rows:runRows, trough, recovery, prevPositive,
-        obsDays:runRows.length,
-        calendarSpan:daysBetween(runRows[0].date, runRows[runRows.length-1].date)+1,
-        calendarToRecovery: recovery ? daysBetween(runRows[0].date, recovery.date) : null
-      };
-      if (!best || candidate.obsDays > best.obsDays) best = candidate;
-    }
-    i++;
-  }
-  return best;
-}
-function median(arr) {
-  if (!arr.length) return null;
-  const a = [...arr].sort((x,y)=>x-y);
-  const mid = Math.floor(a.length/2);
-  return a.length%2 ? a[mid] : (a[mid-1]+a[mid])/2;
-}
-function pct(n,d) {
-  return d ? Math.round(n/d*100) : 0;
-}
-function compactM(v) {
-  if (v == null) return "—";
-  const sign = v < 0 ? "-" : v > 0 ? "+" : "";
-  return sign + "$" + (Math.abs(v)/1e6).toLocaleString("es-AR",{maximumFractionDigits:0}) + " M";
-}
-function buildMonthMetrics(month) {
-  const rows = month.rows;
-  const negs = rows.filter(r=>r.value<0);
-  const firstNeg = negs.length ? negs[0] : null;
-  const trough = negs.length ? negs.reduce((a,b)=>a.value < b.value ? a:b) : null;
-  const run = longestNegativeRun(rows);
-  return {
-    month,
-    rows,
-    negs,
-    firstNeg,
-    trough,
-    run,
-    close: rows[rows.length-1]
-  };
-}
-function updatePatterns(months) {
-  const cards = document.getElementById("patternCards");
-  const riskBox = document.getElementById("riskWindows");
-  const conclusion = document.getElementById("patternConclusion");
-  const yearCompare = document.getElementById("yearCompare");
-  const tbody = document.getElementById("patternTableBody");
-  const note = document.getElementById("patternNote");
-  if (!cards || !months.length) return;
-
-  const metrics = months.map(buildMonthMetrics);
-  const allRows = months.flatMap(m=>m.rows.map(r=>({...r, month:m.label, key:m.key})));
-  const years = [...new Set(months.map(m=>Number(m.key.slice(0,4))))].sort((a,b)=>a-b);
-  const latestYear = Math.max(...years);
-  const latestMonths = months.filter(m=>Number(m.key.slice(0,4))===latestYear);
-  const latestMetrics = latestMonths.map(buildMonthMetrics);
-  const latestRows = latestMonths.flatMap(m=>m.rows);
-
-  const monthsWithDef = metrics.filter(m=>m.negs.length);
-  const starts = monthsWithDef.map(m=>dayOfMonth(m.firstNeg.date));
-  const troughDays = monthsWithDef.map(m=>dayOfMonth(m.trough.date));
-  const runs = monthsWithDef.map(m=>m.run).filter(Boolean);
-  const recoveredRuns = runs.filter(r=>r.recovery);
-
-  const onsetBuckets = {};
-  starts.forEach(d=>onsetBuckets[riskWindow(d)] = (onsetBuckets[riskWindow(d)]||0)+1);
-  const dominantOnset = Object.entries(onsetBuckets).sort((a,b)=>b[1]-a[1])[0] || ["—",0];
-
-  const troughBuckets = {};
-  troughDays.forEach(d=>troughBuckets[riskWindow(d)] = (troughBuckets[riskWindow(d)]||0)+1);
-  const dominantTrough = Object.entries(troughBuckets).sort((a,b)=>b[1]-a[1])[0] || ["—",0];
-
-  const medianRun = median(runs.map(r=>r.obsDays));
-  const medianRecovery = median(recoveredRuns.map(r=>r.calendarToRecovery));
-
-  // Últimos 6 meses cargados del último año: detecta régimen reciente sin inventar meses faltantes.
-  const recentMonths = latestMonths.slice(-6);
-  const recentMetrics = recentMonths.map(buildMonthMetrics);
-  const recentRows = recentMonths.flatMap(m=>m.rows);
-  const recentNeg = recentRows.filter(r=>r.value<0).length;
-
-  // Shock: último positivo inmediatamente anterior a la racha principal -> primer negativo.
-  const shocks = recentMetrics
-    .filter(m=>m.run && m.run.prevPositive)
-    .map(m=>m.run.rows[0].value - m.run.prevPositive.value);
-  const avgShock = shocks.length ? shocks.reduce((a,b)=>a+b,0)/shocks.length : null;
-
-  // Último año: estadísticas 1-4 / 5-7 / 8-15 / 16-20 / 21-25 / 26-fin.
-  const windows = [
-    {label:"1-4", match:d=>d<=4},
-    {label:"5-7", match:d=>d>=5&&d<=7},
-    {label:"8-10", match:d=>d>=8&&d<=10},
-    {label:"11-15", match:d=>d>=11&&d<=15},
-    {label:"16-20", match:d=>d>=16&&d<=20},
-    {label:"21-25", match:d=>d>=21&&d<=25},
-    {label:"26-fin", match:d=>d>=26}
-  ];
-  const winStats = windows.map(w=>{
-    const rr = latestRows.filter(r=>w.match(dayOfMonth(r.date)));
-    const nn = rr.filter(r=>r.value<0).length;
-    const avg = rr.length ? rr.reduce((s,r)=>s+r.value,0)/rr.length : 0;
-    return {label:w.label, n:rr.length, neg:nn, negPct:pct(nn,rr.length), avg};
-  });
-
-  const critical815 = latestRows.filter(r=>{
-    const d=dayOfMonth(r.date); return d>=8 && d<=15;
-  });
-  const critical815Neg = critical815.filter(r=>r.value<0).length;
-
-  const troughLatest = latestMetrics.filter(m=>m.trough);
-  const trough1115 = troughLatest.filter(m=>{
-    const d=dayOfMonth(m.trough.date); return d>=11 && d<=15;
-  }).length;
-
-  const firstFour = latestRows.filter(r=>dayOfMonth(r.date)<=4);
-  const firstFourNeg = firstFour.filter(r=>r.value<0).length;
-  const after26 = latestRows.filter(r=>dayOfMonth(r.date)>=26);
-  const after26Neg = after26.filter(r=>r.value<0).length;
-
-  cards.innerHTML = `
-    <div class="pattern-card">
-      <div class="eyebrow">Inicio recurrente</div>
-      <div class="big">Días ${dominantOnset[0]}</div>
-      <div class="detail">${dominantOnset[1]} de ${monthsWithDef.length} meses con déficit comienzan dentro de esa ventana en el período filtrado.</div>
-    </div>
-    <div class="pattern-card">
-      <div class="eyebrow">Ventana crítica ${latestYear}</div>
-      <div class="big">8 al 15</div>
-      <div class="detail">${pct(critical815Neg,critical815.length)}% de los saldos registrados entre los días 8 y 15 fueron negativos. Es la zona de mayor presión recurrente.</div>
-    </div>
-    <div class="pattern-card">
-      <div class="eyebrow">Dónde toca el mínimo</div>
-      <div class="big">Días ${dominantTrough[0]}</div>
-      <div class="detail">${dominantTrough[1]} de ${monthsWithDef.length} mínimos mensuales caen en esa ventana. En ${latestYear}, ${trough1115} de ${troughLatest.length} mínimos ocurrieron entre el 11 y el 15.</div>
-    </div>
-    <div class="pattern-card">
-      <div class="eyebrow">Duración típica</div>
-      <div class="big">${medianRun ?? "—"} días</div>
-      <div class="detail">Mediana de días registrados consecutivos bajo cero en la racha principal. La mediana calendario hasta recuperar positivo es ${medianRecovery ?? "—"} días.</div>
-    </div>
-    <div class="pattern-card">
-      <div class="eyebrow">Régimen reciente</div>
-      <div class="big">${pct(recentNeg,recentRows.length)}% negativos</div>
-      <div class="detail">En los últimos ${recentMonths.length} meses cargados de ${latestYear}. Shock medio previo al descalce principal: ${avgShock!=null ? compactM(avgShock) : "—"}.</div>
-    </div>
-    <div class="pattern-card">
-      <div class="eyebrow">Fin de mes ${latestYear}</div>
-      <div class="big">${pct(after26Neg,after26.length)}% negativos</div>
-      <div class="detail">Desde el día 26 en adelante. Esto muestra que el problema está concentrado principalmente en la mitad del mes, salvo excepciones como cierres que permanecen negativos.</div>
-    </div>
-  `;
-
-  riskBox.innerHTML = winStats.map(w=>`
-    <div class="risk-row">
-      <div class="risk-label">Días ${w.label}</div>
-      <div class="risk-track"><div class="risk-fill" style="width:${w.negPct}%"></div></div>
-      <div class="risk-value">${w.negPct}% negativo</div>
-    </div>
-  `).join("");
-
-  const recentStarts = recentMetrics.filter(m=>m.firstNeg).map(m=>dayOfMonth(m.firstNeg.date));
-  const recentRecoveries = recentMetrics
-    .filter(m=>m.run && m.run.recovery)
-    .map(m=>dayOfMonth(m.run.recovery.date));
-  const recMin = recentRecoveries.length ? Math.min(...recentRecoveries) : null;
-  const recMax = recentRecoveries.length ? Math.max(...recentRecoveries) : null;
-
-  conclusion.innerHTML = `
-    <strong>Patrón operativo más importante detectado</strong>
-    En ${latestYear}, los días 1–4 casi siempre funcionan como colchón de liquidez:
-    solo ${firstFourNeg} de ${firstFour.length} registros fueron negativos. Luego aparece un quiebre recurrente
-    entre los días 5–7 y la presión se concentra entre el 8 y el 15. En los meses recientes cargados,
-    la recuperación a saldo positivo suele aparecer ${recMin!=null ? `entre los días ${recMin} y ${recMax}` : "más adelante en el mes"}.
-    El patrón es compatible con una concentración de egresos en la primera quincena y cobranzas que recomponen caja después,
-    pero el saldo diario por sí solo no permite atribuir la causa a sueldos, F931, proveedores u otro concepto.
-  `;
-
-  yearCompare.innerHTML = years.map(y=>{
-    const ym = months.filter(m=>Number(m.key.slice(0,4))===y);
-    const yr = ym.flatMap(m=>m.rows);
-    const neg = yr.filter(r=>r.value<0).length;
-    const closesNeg = ym.filter(m=>m.rows[m.rows.length-1].value<0).length;
-    const withDef = ym.map(buildMonthMetrics).filter(m=>m.trough);
-    const avgWorst = withDef.length ? withDef.reduce((s,m)=>s+m.trough.value,0)/withDef.length : null;
-    return `
-      <div class="year-box">
-        <strong>${y}</strong>
-        <span>${neg} de ${yr.length} registros negativos (${pct(neg,yr.length)}%).</span>
-        <span>${closesNeg} de ${ym.length} meses cerraron bajo cero.</span>
-        <span>Pico mensual negativo promedio: ${avgWorst!=null ? compactM(avgWorst) : "sin déficit"}.</span>
-      </div>
-    `;
-  }).join("");
-
-  tbody.innerHTML = metrics.map(m=>{
-    const r = m.run;
-    const recover = r && r.recovery ? r.recovery.label : (r ? "No recupera en el mes" : "—");
-    const cal = r && r.recovery ? `${r.calendarToRecovery} días` : (r ? "—" : "—");
-    const closeClass = m.close.value < 0 ? "neg-text" : "pos-text";
-    return `
-      <tr>
-        <td><strong>${m.month.label}</strong></td>
-        <td>${m.firstNeg ? m.firstNeg.label : "Sin déficit"}</td>
-        <td class="${m.trough ? "neg-text" : ""}">${m.trough ? `${m.trough.label} · ${compactM(m.trough.value)}` : "—"}</td>
-        <td>${m.negs.length} / ${m.rows.length}</td>
-        <td>${r ? `${r.obsDays} registros · ${r.rows[0].label} a ${r.rows[r.rows.length-1].label}` : "—"}</td>
-        <td>${recover}</td>
-        <td>${cal}</td>
-        <td class="${closeClass}">${compactM(m.close.value)}</td>
-      </tr>
-    `;
-  }).join("");
-
-  const hasJune2026 = DATA.some(m=>m.key==="2026-06");
-  note.innerHTML =
-    `${hasJune2026 ? "" : "<strong>Dato faltante:</strong> junio 2026 no fue cargado y no se interpola. "} ` +
-    `La lectura de “días” usa los registros diarios disponibles. Los fines de semana y feriados pueden hacer que una racha de 10 registros represente más días calendario. ` +
-    `La tabla muestra ambos conceptos cuando existe recuperación dentro del mismo mes.`;
-}
+const OVERDRAFT_LIMIT = 2420000000;
 
 function draw() {
-  const selected = selectedMonths();
+  const selected = DATA;
   const rows = [];
   const monthBounds = [];
   selected.forEach(m => {
@@ -761,7 +279,7 @@ function draw() {
   const botVal = Math.min(...vals, 0);
   const topPad = Math.max(topVal*1.15, maxAbs*.15);
   const botPad = Math.min(botVal*1.15, -maxAbs*.15);
-  const yMin = Math.floor(botPad/250000000)*250000000;
+  const yMin = Math.min(Math.floor(botPad/250000000)*250000000, -Math.ceil(OVERDRAFT_LIMIT*1.1/250000000)*250000000);
   const yMax = Math.ceil(topPad/250000000)*250000000;
 
   const y = v => margin.top + (yMax-v)/(yMax-yMin)*(height-margin.top-margin.bottom);
@@ -769,9 +287,8 @@ function draw() {
   const x = i => margin.left + i*(barW+gap);
 
   let out = "";
-  out += `<rect x="0" y="0" width="${width}" height="${height}" fill="white"/>`;
+  out += `<rect x="0" y="0" width="${width}" height="${height}" fill="#f1f3f5"/>`;
 
-  // Grid + eje Y
   const ticks = 6;
   for(let i=0;i<=ticks;i++) {
     const tv = yMin + (yMax-yMin)*i/ticks;
@@ -783,7 +300,10 @@ function draw() {
   out += `<text x="18" y="${height/2}" transform="rotate(-90 18 ${height/2})" font-size="11" fill="#6b7280">ARS millones</text>`;
   out += `<line x1="${margin.left}" y1="${zeroY}" x2="${width-margin.right}" y2="${zeroY}" stroke="#94a3b8" stroke-width="1.2"/>`;
 
-  // Bandas mensuales alternadas + separadores más claros
+  const limitY = y(-OVERDRAFT_LIMIT);
+  out += `<line x1="${margin.left}" y1="${limitY}" x2="${width-margin.right}" y2="${limitY}" stroke="#991b1b" stroke-width="1.5" stroke-dasharray="6 4"/>`;
+  out += `<text x="${width-margin.right-6}" y="${limitY-6}" text-anchor="end" font-size="11" font-weight="700" fill="#991b1b">Límite descubierto: ${fmtMoney(-OVERDRAFT_LIMIT)}</text>`;
+
   monthBounds.forEach((m, idx) => {
     const sx = x(m.start) - gap/2;
     const ex = x(m.end) + barW + gap/2;
@@ -793,7 +313,6 @@ function draw() {
     out += `<text x="${(sx+ex)/2}" y="27" text-anchor="middle" font-size="12" font-weight="800" fill="#111827">${m.label}</text>`;
   });
 
-  // Barras
   rows.forEach((r,i) => {
     const isNeg = r.value < 0;
     const visible = isNeg ? showNeg : showPos;
@@ -801,11 +320,10 @@ function draw() {
     const yy = y(r.value);
     const h = Math.max(1, Math.abs(zeroY-yy));
     const by = isNeg ? zeroY : yy;
-    const fill = isNeg ? "#2563eb" : "#f97316";
+    const fill = isNeg ? "#dc2626" : "#16a34a";
     out += `<rect class="bar" data-i="${i}" x="${x(i)}" y="${by}" width="${barW}" height="${h}" rx="1" fill="${fill}" opacity=".96"/>`;
   });
 
-  // Marcar automáticamente el máximo y mínimo de cada mes
   if (showPeaks) {
     monthBounds.forEach(m => {
       const mr = rows.slice(m.start, m.end + 1);
@@ -823,22 +341,61 @@ function draw() {
       if (showPos && localMax.value > 0) {
         const yy = y(localMax.value);
         const xx = x(maxIndex) + barW/2;
-        out += `<circle cx="${xx}" cy="${yy}" r="4" fill="#f97316" stroke="white" stroke-width="2"/>`;
-        out += `<text x="${xx}" y="${Math.max(42, yy-22)}" text-anchor="middle" fill="#c2410c" class="peak-label">${localMax.label}</text>`;
-        out += `<text x="${xx}" y="${Math.max(54, yy-10)}" text-anchor="middle" fill="#c2410c" class="peak-label">${fmtMoney(localMax.value)}</text>`;
+        out += `<circle cx="${xx}" cy="${yy}" r="4" fill="#16a34a" stroke="#ffffff" stroke-width="2"/>`;
+        out += `<text x="${xx}" y="${Math.max(42, yy-22)}" text-anchor="middle" fill="#15803d" class="peak-label">${localMax.label}</text>`;
+        out += `<text x="${xx}" y="${Math.max(54, yy-10)}" text-anchor="middle" fill="#15803d" class="peak-label">${fmtMoney(localMax.value)}</text>`;
       }
 
       if (showNeg && localMin.value < 0) {
         const yy = y(localMin.value);
         const xx = x(minIndex) + barW/2;
-        out += `<circle cx="${xx}" cy="${yy}" r="4" fill="#2563eb" stroke="white" stroke-width="2"/>`;
-        out += `<text x="${xx}" y="${Math.min(height-margin.bottom-18, yy+18)}" text-anchor="middle" fill="#1d4ed8" class="peak-label">${localMin.label}</text>`;
-        out += `<text x="${xx}" y="${Math.min(height-margin.bottom-6, yy+31)}" text-anchor="middle" fill="#1d4ed8" class="peak-label">${fmtMoney(localMin.value)}</text>`;
+        const pctUsed = Math.round(Math.abs(localMin.value) / OVERDRAFT_LIMIT * 100);
+        out += `<circle cx="${xx}" cy="${yy}" r="4" fill="#dc2626" stroke="#ffffff" stroke-width="2"/>`;
+        out += `<text x="${xx}" y="${Math.min(height-margin.bottom-30, yy+18)}" text-anchor="middle" fill="#b91c1c" class="peak-label">${localMin.label}</text>`;
+        out += `<text x="${xx}" y="${Math.min(height-margin.bottom-18, yy+31)}" text-anchor="middle" fill="#b91c1c" class="peak-label">${fmtMoney(localMin.value)}</text>`;
+        out += `<text x="${xx}" y="${Math.min(height-margin.bottom-6, yy+44)}" text-anchor="middle" fill="#991b1b" font-weight="800" class="peak-label">${pctUsed}% del límite</text>`;
       }
     });
   }
 
-  // Etiquetas x reducidas
+  const highlightGroups = {};
+  HIGHLIGHTS.forEach(h => {
+    if (!highlightGroups[h.date]) highlightGroups[h.date] = [];
+    highlightGroups[h.date].push(h.label);
+  });
+  Object.keys(highlightGroups).forEach(date => {
+    const idx = rows.findIndex(r => r.date === date);
+    if (idx < 0) return;
+    const xx = x(idx) + barW/2;
+    const topY = margin.top + 4;
+    const bottomY = height - margin.bottom + 8;
+    out += `<line x1="${xx}" y1="${topY}" x2="${xx}" y2="${bottomY}" stroke="#7c3aed" stroke-width="1.3" stroke-dasharray="3 3" opacity=".85"/>`;
+    out += `<circle cx="${xx}" cy="${topY}" r="3" fill="#7c3aed" stroke="#ffffff" stroke-width="1.2"/>`;
+    highlightGroups[date].forEach((label, i) => {
+      const ly = topY + 14 + i*14;
+      out += `<text x="${xx}" y="${ly}" text-anchor="middle" font-size="10" font-weight="800" fill="#6d28d9" class="peak-label">${label}</text>`;
+    });
+  });
+
+  const inflowGroups = {};
+  INFLOWS.forEach(h => {
+    if (!inflowGroups[h.date]) inflowGroups[h.date] = [];
+    inflowGroups[h.date].push(h.label);
+  });
+  Object.keys(inflowGroups).forEach(date => {
+    const idx = rows.findIndex(r => r.date === date);
+    if (idx < 0) return;
+    const xx = x(idx) + barW/2;
+    const topY = margin.top + 4;
+    const bottomY = height - margin.bottom + 8;
+    out += `<line x1="${xx}" y1="${topY}" x2="${xx}" y2="${bottomY}" stroke="#ea580c" stroke-width="1.6" stroke-dasharray="2 3" opacity=".9"/>`;
+    out += `<circle cx="${xx}" cy="${topY}" r="3.5" fill="#ea580c" stroke="#ffffff" stroke-width="1.2"/>`;
+    inflowGroups[date].forEach((label, i) => {
+      const ly = topY + 14 + i*14;
+      out += `<text x="${xx}" y="${ly}" text-anchor="middle" font-size="10" font-weight="800" fill="#c2410c" class="peak-label">${label}</text>`;
+    });
+  });
+
   const every = Math.max(1, Math.ceil(rows.length / 24));
   rows.forEach((r,i) => {
     if(i % every !== 0 && i !== rows.length-1) return;
@@ -853,7 +410,8 @@ function draw() {
       tip.style.opacity = 1;
       tip.style.left = ev.clientX + "px";
       tip.style.top = ev.clientY + "px";
-      tip.innerHTML = `<strong>${r.month} · ${r.label}</strong><br>${fmtExact(r.value)}`;
+      const pctLine = r.value < 0 ? `<br>${Math.round(Math.abs(r.value)/OVERDRAFT_LIMIT*100)}% del límite de descubierto` : "";
+      tip.innerHTML = `<strong>${r.month} · ${r.label}</strong><br>${fmtExact(r.value)}${pctLine}`;
       el.setAttribute("opacity","0.72");
     });
     el.addEventListener("mouseleave", () => {
@@ -861,91 +419,96 @@ function draw() {
       el.setAttribute("opacity","0.96");
     });
   });
-
-  // KPIs
-  const negRows = rows.filter(r=>r.value<0);
-  const posRows = rows.filter(r=>r.value>=0);
-  const worst = negRows.length ? negRows.reduce((a,b)=>a.value<b.value?a:b) : null;
-  const close = rows[rows.length-1];
-
-  document.getElementById("defDays").textContent = `${negRows.length} de ${rows.length}`;
-  document.getElementById("worst").textContent = worst ? fmtMoney(worst.value) : "Sin déficit";
-  document.getElementById("closing").textContent = close ? fmtMoney(close.value) : "—";
-  document.getElementById("posDays").textContent = `${posRows.length} de ${rows.length}`;
-
-  // Strip mensual con resumen
-  strip.innerHTML = "";
-  monthBounds.forEach((m, idx) => {
-    const negs = m.rows.filter(r=>r.value<0);
-    const worstRowM = negs.length ? negs.reduce((a,b)=>a.value<b.value?a:b) : null;
-    const pill = document.createElement("div");
-    pill.className = "month-pill";
-    pill.innerHTML = `<strong>${m.label}</strong><span>${negs.length} déficit${negs.length===1?"":"s"}${worstRowM ? " · crítico " + worstRowM.label + " · " + fmtMoney(worstRowM.value) : ""}</span>`;
-    pill.onclick = () => {
-      const globalIndex = DATA.findIndex(d=>d.key===m.key);
-      singleSel.value = globalIndex;
-      document.querySelectorAll(".controls > button").forEach(b=>b.classList.remove("active"));
-      setRange(globalIndex, globalIndex);
-    };
-    strip.appendChild(pill);
-  });
-
-  updatePatterns(selected);
 }
-
-fromSel.addEventListener("change", () => {
-  singleSel.value = "";
-  draw();
-});
-toSel.addEventListener("change", () => {
-  singleSel.value = "";
-  draw();
-});
-
-singleSel.addEventListener("change", () => {
-  if (singleSel.value === "") return;
-  const i = Number(singleSel.value);
-
-  document.querySelectorAll(".controls > button").forEach(b=>b.classList.remove("active"));
-  fromSel.value = i;
-  toSel.value = i;
-  draw();
-});
-
-document.getElementById("allBtn").onclick = () => {
-  singleSel.value = "";
-  document.querySelectorAll(".controls > button").forEach(b=>b.classList.remove("active"));
-  document.getElementById("allBtn").classList.add("active");
-  setRange(0, DATA.length-1);
-};
-function setYearRange(year, buttonId) {
-  singleSel.value = "";
-  const idx = DATA.map((d,i)=>d.key.startsWith(String(year)) ? i : -1).filter(i=>i>=0);
-  if (!idx.length) return;
-  document.querySelectorAll(".controls > button").forEach(b=>b.classList.remove("active"));
-  document.getElementById(buttonId).classList.add("active");
-  setRange(Math.min(...idx), Math.max(...idx));
-}
-document.getElementById("y2024Btn").onclick = () => setYearRange(2024, "y2024Btn");
-document.getElementById("y2025Btn").onclick = () => setYearRange(2025, "y2025Btn");
-document.getElementById("y2026Btn").onclick = () => setYearRange(2026, "y2026Btn");
-document.getElementById("negBtn").onclick = (e) => {
-  showNeg = !showNeg;
-  e.target.classList.toggle("active", showNeg);
-  draw();
-};
-document.getElementById("posBtn").onclick = (e) => {
-  showPos = !showPos;
-  e.target.classList.toggle("active", showPos);
-  draw();
-};
-document.getElementById("peakBtn").onclick = (e) => {
-  showPeaks = !showPeaks;
-  e.target.classList.toggle("active", showPeaks);
-  draw();
-};
 
 draw();
+
+function buildExecSummary() {
+  const box = document.getElementById("execSummary");
+  if (!box) return;
+
+  const parseISO = s => { const [yy,mm,dd] = s.split("-").map(Number); return new Date(yy,mm-1,dd); };
+  const daysBetween = (a,b) => Math.round((parseISO(b)-parseISO(a))/86400000);
+
+  const monthStats = DATA.map(month => {
+    const rows = month.rows;
+    const vals = rows.map(r=>r.value);
+    const minVal = Math.min(...vals);
+    const minRow = rows.find(r=>r.value===minVal);
+    const maxVal = Math.max(...vals);
+    const maxRow = rows.find(r=>r.value===maxVal);
+    const close = vals[vals.length-1];
+    const negDays = rows.filter(r=>r.value<0).length;
+    const pctNeg = Math.round(negDays/rows.length*100);
+    const pctLimit = Math.round(Math.abs(minVal)/OVERDRAFT_LIMIT*100);
+    const event = HIGHLIGHTS.find(h=>h.date===minRow.date);
+
+    let best=null, i=0;
+    while (i<rows.length) {
+      if (rows[i].value<0) {
+        const start=i;
+        while(i+1<rows.length && rows[i+1].value<0) i++;
+        const end=i;
+        const runRows = rows.slice(start,end+1);
+        const recovery = (end+1<rows.length && rows[end+1].value>=0) ? rows[end+1] : null;
+        const calSpan = daysBetween(runRows[0].date, runRows[runRows.length-1].date)+1;
+        const calToRecovery = recovery ? daysBetween(runRows[0].date, recovery.date) : null;
+        if (!best || runRows.length>best.obsDays) best = {obsDays:runRows.length, calSpan, startLabel:runRows[0].label, endLabel:runRows[runRows.length-1].label, recovery, calToRecovery};
+      }
+      i++;
+    }
+    return {label:month.label, minVal, minLabel:minRow.label, maxVal, maxLabel:maxRow.label, close, negDays, totalDays:rows.length, pctNeg, pctLimit, event: event?event.label:null, run:best};
+  });
+
+  const worstMonth = monthStats.reduce((a,b)=>a.minVal<b.minVal?a:b);
+  const dec = monthStats[monthStats.length-1];
+  const overallNegDays = DATA.reduce((s,m)=>s+m.rows.filter(r=>r.value<0).length,0);
+  const overallDays = DATA.reduce((s,m)=>s+m.rows.length,0);
+  const f931Matches = monthStats.filter(m=>m.event && m.event.includes("F 931")).length;
+  const decRecovers = !!dec.run.recovery;
+  const worstOverallMonth = monthStats.reduce((a,b)=>a.pctLimit>b.pctLimit?a:b);
+  const monthsOver60 = monthStats.filter(m=>m.pctLimit>=60).map(m=>m.label);
+
+  box.innerHTML = `
+    <h2>Resumen</h2>
+
+    <div class="exec-table-wrap">
+      <table class="exec-table">
+        <thead>
+          <tr>
+            <th>Mes</th>
+            <th>Días en rojo</th>
+            <th>Pico negativo</th>
+            <th>Pico positivo</th>
+            <th>% descubierto usado</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${monthStats.map(m => `
+            <tr class="${m.pctLimit>=60?'crit':''}">
+              <td><strong>${m.label}</strong></td>
+              <td>${m.negDays} de ${m.totalDays} (${m.pctNeg}%)</td>
+              <td class="neg-c">${fmtMoney(m.minVal)} (${m.minLabel})</td>
+              <td class="pos-c">${fmtMoney(m.maxVal)} (${m.maxLabel})</td>
+              <td class="${m.pctLimit>=60?'neg-c':''}">${m.pctLimit}%</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="conclusion-box">
+      <p>El patrón se repite mes tras mes: entra plata los primeros días, se paga sueldos alrededor del cuarto día hábil y ahí arranca el pozo. En ${f931Matches} de los 6 meses el fondo real no lo toca el día de sueldos sino unos días después, cuando se suma F 931 — ahí es donde más aprieta. IIBB e IVA, que vencen recién a mediados/fin de mes, en general ya encuentran la cuenta recuperando y no suman tanto.</p>
+      <p>Diciembre es el mes más largo en rojo: ${dec.run.calSpan} días seguidos en déficit, del ${dec.run.startLabel} al ${dec.run.endLabel}${decRecovers ? ", y recién vuelve a positivo el último día del año" : ", sin volver a positivo en todo el mes"}.</p>
+      <p>El ingreso de <b>$550.000.000</b> por la devolución de la caución el 18/08 pesa bastante en esta lectura: como es saldo de caja, se arrastra para adelante y sostiene todos los meses siguientes. Buena parte de la mejora que se ve entre septiembre y diciembre frente a un escenario sin ese ingreso viene de ahí.</p>
+      <p class="conclusion-risk">${dec.close<0
+        ? `Si noviembre y diciembre siguen esta curva, enero 2027 arrancaría directamente en negativo, lo que deja menos margen contra el límite de ${fmtMoney(-OVERDRAFT_LIMIT)}.`
+        : `Diciembre cierra en positivo (${fmtMoney(dec.close)}), pero recién el último día y después de ${dec.run.calSpan} jornadas seguidas en déficit, llegando a usar hasta el ${dec.pctLimit}% del límite. El margen contra los ${fmtMoney(-OVERDRAFT_LIMIT)} sigue siendo justo en ese tramo del año.`
+      }</p>
+    </div>
+  `;
+}
+buildExecSummary();
 </script>
 </body>
 </html>
