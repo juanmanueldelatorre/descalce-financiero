@@ -121,6 +121,14 @@
     border-radius:12px;
     padding:22px 24px 26px;
   }
+  .steps { display:grid; grid-template-columns:repeat(5,1fr); gap:16px; }
+  .step { background:rgba(255,255,255,.03); border:1px solid var(--card-border); border-radius:10px; padding:12px 14px; position:relative; }
+  .step:not(:last-child)::after { content:"→"; position:absolute; right:-14px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:14px; }
+  .step .k { color:var(--muted); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; }
+  .step .v { font-size:17px; font-weight:800; margin-top:5px; font-variant-numeric:tabular-nums; }
+  .step .n { color:var(--muted); font-size:11.5px; margin-top:5px; }
+  .step.ok .v { color:#4ade80; } .step.debt .v { color:#fb923c; } .step.pay .v { color:#a78bfa; } .step.bad .v { color:#f87171; }
+  @media (max-width:1100px) { .steps { grid-template-columns:1fr 1fr; } .step::after { display:none; } }
   .exec-summary h2 {
     margin:0 0 4px;
     font-size:18px;
@@ -179,21 +187,74 @@
   .exec-table tr.crit td { background:rgba(220,38,38,.10); }
   .neg-c { color:#f87171; font-weight:700; }
   .pos-c { color:#4ade80; font-weight:700; }
+
+  /* Pestañas */
+  .tabs { display:flex; gap:8px; margin-bottom:22px; }
+  .tab-btn {
+    background:var(--card); color:var(--muted); border:1px solid var(--card-border);
+    border-radius:999px; padding:9px 18px; font:inherit; font-size:13px; font-weight:700;
+    letter-spacing:.02em; cursor:pointer;
+  }
+  .tab-btn:hover { color:var(--text); }
+  .tab-btn.active { background:#16345a; color:var(--text); border-color:rgba(255,255,255,.22); }
+  [hidden] { display:none !important; }
+
+  /* Seguimiento de cobranza */
+  .cob-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-bottom:16px; }
+  .cob-card { background:var(--card); border:1px solid var(--card-border); border-radius:12px; padding:14px 16px; }
+  .cob-card .k { color:var(--muted); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
+  .cob-card .v { font-size:20px; font-weight:800; margin-top:4px; }
+  .cob-card .v.ok { color:#4ade80; }
+  .cob-card .v.warn { color:#fbbf24; }
+  .cob-bar { height:6px; border-radius:999px; background:rgba(255,255,255,.08); margin-top:10px; overflow:hidden; }
+  .cob-bar > i { display:block; height:100%; background:#16a34a; width:0; transition:width .2s; }
+  .cob-filters { display:flex; gap:8px; margin:0 0 12px; }
+  .cob-filters button {
+    background:transparent; color:var(--muted); border:1px solid var(--card-border); border-radius:8px;
+    padding:6px 12px; font:inherit; font-size:12px; font-weight:700; cursor:pointer;
+  }
+  .cob-filters button.active { color:var(--text); background:rgba(255,255,255,.08); }
+  .cob-wrap { background:var(--card); border:1px solid var(--card-border); border-radius:12px; overflow:hidden; }
+  .cob-table { width:100%; border-collapse:collapse; font-size:13px; }
+  .cob-table th, .cob-table td { padding:10px 14px; border-bottom:1px solid var(--card-border); text-align:left; }
+  .cob-table th { background:rgba(255,255,255,.03); color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.04em; }
+  .cob-table td.num, .cob-table th.num { text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; }
+  .cob-table td.chk, .cob-table th.chk { width:64px; text-align:center; }
+  .cob-table tr:last-child td { border-bottom:0; }
+  .cob-table tr:hover td { background:rgba(255,255,255,.025); }
+  .cob-table input[type=checkbox] { width:18px; height:18px; accent-color:#16a34a; cursor:pointer; }
+  .cob-table tr.done td { color:var(--muted); background:rgba(22,163,74,.08); }
+  .cob-table tr.done td.name { text-decoration:line-through; }
+  .cob-table tr.rev-head td { background:rgba(250,204,21,.22); color:#fde047; font-weight:800; font-size:11px; text-transform:uppercase; letter-spacing:.05em; }
+  .cob-table tr.rev td { background:rgba(250,204,21,.13); color:#fef08a; }
+  .cob-table tr.rev:hover td { background:rgba(250,204,21,.18); }
+  .cob-table tr.rev-sum td { background:rgba(250,204,21,.22); color:#fde047; font-weight:800; }
+  .cob-table tr.rev .sinmonto { color:#a8a05a; font-style:italic; }
+  .cob-table input[type=date] {
+    color-scheme:dark; background:rgba(0,0,0,.25); color:#fef08a; border:1px solid rgba(250,204,21,.45);
+    border-radius:6px; padding:4px 8px; font:inherit; font-size:12.5px;
+  }
+  .cob-note { color:var(--muted); font-size:12px; margin-top:10px; }
 </style>
 </head>
 <body>
 <div class="page">
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="flujo">Evolución de fondos</button>
+    <button class="tab-btn" data-tab="cobranza">Seguimiento de cobranza</button>
+  </nav>
+  <div id="tab-flujo">
   <h1>Evolución de fondos</h1>
-  <div class="sub">Datos reales · Julio 2026 a Diciembre 2026 · meses separados visualmente · máximos y mínimos destacados</div>
+  <div class="sub">Datos reales · Julio 2026 a Diciembre 2026 · barra = caja, tramo naranja = deuda de la caución que resta (el borde inferior es el fondo neto) · meses separados visualmente · máximos y mínimos destacados</div>
 
   <div class="chart-card">
     <div class="chart-head">
       <div></div>
       <div class="legend">
-        <span><i class="dot" style="background:var(--neg)"></i>Déficit</span>
-        <span><i class="dot" style="background:var(--pos)"></i>Positivo</span>
+        <span><i class="dot" style="background:var(--neg)"></i>Caja en déficit</span>
+        <span><i class="dot" style="background:var(--pos)"></i>Caja positiva</span>
         <span><i class="dot" style="background:#7c3aed"></i>Egresos clave</span>
-        <span><i class="dot" style="background:#ea580c"></i>Ingresos extraordinarios</span>
+        <span><i class="dot" style="background:repeating-linear-gradient(45deg,#ea580c 0 2px,#fed7aa 2px 4px)"></i>Tramo de deuda de la caución (capital + interés)</span>
       </div>
     </div>
     <div class="chart-scroll" id="chartScroll">
@@ -201,18 +262,97 @@
     </div>
   </div>
 
-  <section class="exec-summary" id="execSummary"></section>
+  <section class="exec-summary" id="cierreSteps"></section>
 
+  <section class="exec-summary" id="execSummary"></section>
+  </div>
+
+  <div id="tab-cobranza" hidden>
+    <h1>Seguimiento de cobranza</h1>
+    <div class="sub">Tildá cada cobro cuando entra · las marcas quedan guardadas en este navegador</div>
+    <div class="cob-cards">
+      <div class="cob-card"><div class="k">Total a cobrar</div><div class="v" id="cobTotal"></div></div>
+      <div class="cob-card"><div class="k">Ya entró</div><div class="v ok" id="cobOk"></div></div>
+      <div class="cob-card"><div class="k">Pendiente</div><div class="v warn" id="cobPend"></div></div>
+      <div class="cob-card"><div class="k">Cobros tildados</div><div class="v" id="cobCount"></div><div class="cob-bar"><i id="cobProg"></i></div></div>
+    </div>
+    <div class="cob-filters" id="cobFilters">
+      <button data-f="all" class="active">Todos</button>
+      <button data-f="pend">Pendientes</button>
+      <button data-f="ok">Cobrados</button>
+    </div>
+    <div class="cob-wrap">
+      <table class="cob-table">
+        <thead><tr><th class="chk">Entró</th><th>Cliente</th><th class="num">Monto</th><th>Fecha de cobro</th></tr></thead>
+        <tbody id="cobBody"></tbody>
+      </table>
+    </div>
+    <div class="cob-note" id="cobNote"></div>
+  </div>
 </div>
 <div class="tooltip" id="tooltip"></div>
 
 <script>
-const DATA = [{"key": "2026-07", "label": "JUL 26", "rows": [{"date": "2026-07-01", "label": "1/7", "value": 318665063}, {"date": "2026-07-02", "label": "2/7", "value": 421742053}, {"date": "2026-07-03", "label": "3/7", "value": 609140016}, {"date": "2026-07-06", "label": "6/7", "value": -645706654}, {"date": "2026-07-07", "label": "7/7", "value": -451591909}, {"date": "2026-07-08", "label": "8/7", "value": -565739733}, {"date": "2026-07-09", "label": "9/7", "value": -565739733}, {"date": "2026-07-10", "label": "10/7", "value": -565739733}, {"date": "2026-07-13", "label": "13/7", "value": -572382568}, {"date": "2026-07-14", "label": "14/7", "value": -230826346}, {"date": "2026-07-15", "label": "15/7", "value": -1160234167}, {"date": "2026-07-16", "label": "16/7", "value": -1127862512}, {"date": "2026-07-17", "label": "17/7", "value": -1043443220}, {"date": "2026-07-20", "label": "20/7", "value": -849789376}, {"date": "2026-07-21", "label": "21/7", "value": -795860757}, {"date": "2026-07-22", "label": "22/7", "value": -455259253}, {"date": "2026-07-23", "label": "23/7", "value": -277242953}, {"date": "2026-07-24", "label": "24/7", "value": -155561627}, {"date": "2026-07-27", "label": "27/7", "value": 18083671}, {"date": "2026-07-28", "label": "28/7", "value": 64603712}, {"date": "2026-07-29", "label": "29/7", "value": 67948469}, {"date": "2026-07-30", "label": "30/7", "value": 226593814}, {"date": "2026-07-31", "label": "31/7", "value": 265578179}]}, {"key": "2026-08", "label": "AGO 26", "rows": [{"date": "2026-08-03", "label": "3/8", "value": 520544354}, {"date": "2026-08-04", "label": "4/8", "value": 733351216}, {"date": "2026-08-05", "label": "5/8", "value": 1021127432}, {"date": "2026-08-06", "label": "6/8", "value": -998482805}, {"date": "2026-08-07", "label": "7/8", "value": -1027707105}, {"date": "2026-08-10", "label": "10/8", "value": -836930348}, {"date": "2026-08-11", "label": "11/8", "value": -864708648}, {"date": "2026-08-12", "label": "12/8", "value": -906616398}, {"date": "2026-08-13", "label": "13/8", "value": -870113736}, {"date": "2026-08-14", "label": "14/8", "value": -787472750}, {"date": "2026-08-17", "label": "17/8", "value": -584464722}, {"date": "2026-08-18", "label": "18/8", "value": 48981979}, {"date": "2026-08-19", "label": "19/8", "value": 194595347}, {"date": "2026-08-20", "label": "20/8", "value": 223898522}, {"date": "2026-08-21", "label": "21/8", "value": 513345371}, {"date": "2026-08-24", "label": "24/8", "value": 746646378}, {"date": "2026-08-25", "label": "25/8", "value": 883254945}, {"date": "2026-08-26", "label": "26/8", "value": 863690645}, {"date": "2026-08-27", "label": "27/8", "value": 907653930}, {"date": "2026-08-28", "label": "28/8", "value": 1023210428}, {"date": "2026-08-31", "label": "31/8", "value": 1028091363}]}, {"key": "2026-09", "label": "SEP 26", "rows": [{"date": "2026-09-01", "label": "1/9", "value": 1232724321}, {"date": "2026-09-02", "label": "2/9", "value": 1595492580}, {"date": "2026-09-03", "label": "3/9", "value": 1619848926}, {"date": "2026-09-04", "label": "4/9", "value": -355566980}, {"date": "2026-09-07", "label": "7/9", "value": -116530464}, {"date": "2026-09-08", "label": "8/9", "value": -96205149}, {"date": "2026-09-09", "label": "9/9", "value": -176425141}, {"date": "2026-09-10", "label": "10/9", "value": -257060938}, {"date": "2026-09-11", "label": "11/9", "value": -789804102}, {"date": "2026-09-14", "label": "14/9", "value": -278468675}, {"date": "2026-09-15", "label": "15/9", "value": -164968532}, {"date": "2026-09-16", "label": "16/9", "value": -520300000}, {"date": "2026-09-17", "label": "17/9", "value": -531820646}, {"date": "2026-09-18", "label": "18/9", "value": -529419441}, {"date": "2026-09-21", "label": "21/9", "value": -125514841}, {"date": "2026-09-22", "label": "22/9", "value": 4961606}, {"date": "2026-09-23", "label": "23/9", "value": 65212583}, {"date": "2026-09-24", "label": "24/9", "value": -236145889}, {"date": "2026-09-25", "label": "25/9", "value": 24880187}, {"date": "2026-09-28", "label": "28/9", "value": 264800770}, {"date": "2026-09-29", "label": "29/9", "value": 447066732}, {"date": "2026-09-30", "label": "30/9", "value": 520001367}]}, {"key": "2026-10", "label": "OCT 26", "rows": [{"date": "2026-10-01", "label": "1/10", "value": 821368052}, {"date": "2026-10-02", "label": "2/10", "value": 908388580}, {"date": "2026-10-05", "label": "5/10", "value": -948254566}, {"date": "2026-10-06", "label": "6/10", "value": -976032866}, {"date": "2026-10-07", "label": "7/10", "value": -855863799}, {"date": "2026-10-08", "label": "8/10", "value": -857486099}, {"date": "2026-10-09", "label": "9/10", "value": -836095574}, {"date": "2026-10-12", "label": "12/10", "value": -437463839}, {"date": "2026-10-13", "label": "13/10", "value": -488702320}, {"date": "2026-10-14", "label": "14/10", "value": -307832999}, {"date": "2026-10-15", "label": "15/10", "value": -263847716}, {"date": "2026-10-16", "label": "16/10", "value": -24816170}, {"date": "2026-10-19", "label": "19/10", "value": 134266283}, {"date": "2026-10-20", "label": "20/10", "value": 261922982}, {"date": "2026-10-21", "label": "21/10", "value": 433275407}, {"date": "2026-10-22", "label": "22/10", "value": 619695017}, {"date": "2026-10-23", "label": "23/10", "value": 420269465}, {"date": "2026-10-26", "label": "26/10", "value": 439499165}, {"date": "2026-10-27", "label": "27/10", "value": 450941165}, {"date": "2026-10-28", "label": "28/10", "value": 523651096}, {"date": "2026-10-29", "label": "29/10", "value": 523651096}, {"date": "2026-10-30", "label": "30/10", "value": 553021558}]}, {"key": "2026-11", "label": "NOV 26", "rows": [{"date": "2026-11-02", "label": "2/11", "value": 558873990}, {"date": "2026-11-03", "label": "3/11", "value": 815848780}, {"date": "2026-11-04", "label": "4/11", "value": 1026780284}, {"date": "2026-11-05", "label": "5/11", "value": -1007198313}, {"date": "2026-11-06", "label": "6/11", "value": -1041452613}, {"date": "2026-11-09", "label": "9/11", "value": -1147447481}, {"date": "2026-11-10", "label": "10/11", "value": -961971545}, {"date": "2026-11-11", "label": "11/11", "value": -1454853569}, {"date": "2026-11-12", "label": "12/11", "value": -937605369}, {"date": "2026-11-13", "label": "13/11", "value": -943616641}, {"date": "2026-11-16", "label": "16/11", "value": -664531083}, {"date": "2026-11-17", "label": "17/11", "value": -532908436}, {"date": "2026-11-18", "label": "18/11", "value": -367788302}, {"date": "2026-11-19", "label": "19/11", "value": -436507002}, {"date": "2026-11-20", "label": "20/11", "value": -133923688}, {"date": "2026-11-23", "label": "23/11", "value": 196415627}, {"date": "2026-11-24", "label": "24/11", "value": -25241621}, {"date": "2026-11-25", "label": "25/11", "value": 51030728}, {"date": "2026-11-26", "label": "26/11", "value": 155468901}, {"date": "2026-11-27", "label": "27/11", "value": 293342249}, {"date": "2026-11-30", "label": "30/11", "value": 294028490}]}, {"key": "2026-12", "label": "DIC 26", "rows": [{"date": "2026-12-01", "label": "1/12", "value": 627740518}, {"date": "2026-12-02", "label": "2/12", "value": 666824499}, {"date": "2026-12-03", "label": "3/12", "value": 691770088}, {"date": "2026-12-04", "label": "4/12", "value": -1159006811}, {"date": "2026-12-07", "label": "7/12", "value": -1272295111}, {"date": "2026-12-08", "label": "8/12", "value": -1300073411}, {"date": "2026-12-09", "label": "9/12", "value": -1197057484}, {"date": "2026-12-10", "label": "10/12", "value": -995236605}, {"date": "2026-12-11", "label": "11/12", "value": -1592910632}, {"date": "2026-12-14", "label": "14/12", "value": -859755967}, {"date": "2026-12-15", "label": "15/12", "value": -739068076}, {"date": "2026-12-16", "label": "16/12", "value": -519626422}, {"date": "2026-12-17", "label": "17/12", "value": -519236220}, {"date": "2026-12-18", "label": "18/12", "value": -1108930634}, {"date": "2026-12-21", "label": "21/12", "value": -751807431}, {"date": "2026-12-22", "label": "22/12", "value": -734099431}, {"date": "2026-12-23", "label": "23/12", "value": -661848184}, {"date": "2026-12-24", "label": "24/12", "value": -869789015}, {"date": "2026-12-25", "label": "25/12", "value": -771992147}, {"date": "2026-12-28", "label": "28/12", "value": -660740662}, {"date": "2026-12-29", "label": "29/12", "value": -661099820}, {"date": "2026-12-30", "label": "30/12", "value": -654084322}, {"date": "2026-12-31", "label": "31/12", "value": 44813869}]}];
+const RAW_DATA = [{"key": "2026-07", "label": "JUL 26", "rows": [{"date": "2026-07-01", "label": "1/7", "value": 318665063}, {"date": "2026-07-02", "label": "2/7", "value": 421742053}, {"date": "2026-07-03", "label": "3/7", "value": 609140016}, {"date": "2026-07-06", "label": "6/7", "value": -645706654}, {"date": "2026-07-07", "label": "7/7", "value": -451591909}, {"date": "2026-07-08", "label": "8/7", "value": -565739733}, {"date": "2026-07-09", "label": "9/7", "value": -565739733}, {"date": "2026-07-10", "label": "10/7", "value": -565739733}, {"date": "2026-07-13", "label": "13/7", "value": -572382568}, {"date": "2026-07-14", "label": "14/7", "value": -230826346}, {"date": "2026-07-15", "label": "15/7", "value": -1160234167}, {"date": "2026-07-16", "label": "16/7", "value": -1127862512}, {"date": "2026-07-17", "label": "17/7", "value": -1043443220}, {"date": "2026-07-20", "label": "20/7", "value": -849789376}, {"date": "2026-07-21", "label": "21/7", "value": -795860757}, {"date": "2026-07-22", "label": "22/7", "value": -455259253}, {"date": "2026-07-23", "label": "23/7", "value": -277242953}, {"date": "2026-07-24", "label": "24/7", "value": -155561627}, {"date": "2026-07-27", "label": "27/7", "value": 18083671}, {"date": "2026-07-28", "label": "28/7", "value": 64603712}, {"date": "2026-07-29", "label": "29/7", "value": 67948469}, {"date": "2026-07-30", "label": "30/7", "value": 226593814}, {"date": "2026-07-31", "label": "31/7", "value": 265578179}]}, {"key": "2026-08", "label": "AGO 26", "rows": [{"date": "2026-08-03", "label": "3/8", "value": 520544354}, {"date": "2026-08-04", "label": "4/8", "value": 733351216}, {"date": "2026-08-05", "label": "5/8", "value": 1021127432}, {"date": "2026-08-06", "label": "6/8", "value": -998482805}, {"date": "2026-08-07", "label": "7/8", "value": -1027707105}, {"date": "2026-08-10", "label": "10/8", "value": -836930348}, {"date": "2026-08-11", "label": "11/8", "value": -864708648}, {"date": "2026-08-12", "label": "12/8", "value": -906616398}, {"date": "2026-08-13", "label": "13/8", "value": -870113736}, {"date": "2026-08-14", "label": "14/8", "value": -787472750}, {"date": "2026-08-17", "label": "17/8", "value": -584464722}, {"date": "2026-08-18", "label": "18/8", "value": 48981979}, {"date": "2026-08-19", "label": "19/8", "value": 194595347}, {"date": "2026-08-20", "label": "20/8", "value": 223898522}, {"date": "2026-08-21", "label": "21/8", "value": 513345371}, {"date": "2026-08-24", "label": "24/8", "value": 746646378}, {"date": "2026-08-25", "label": "25/8", "value": 883254945}, {"date": "2026-08-26", "label": "26/8", "value": 863690645}, {"date": "2026-08-27", "label": "27/8", "value": 907653930}, {"date": "2026-08-28", "label": "28/8", "value": 1023210428}, {"date": "2026-08-31", "label": "31/8", "value": 1028091363}]}, {"key": "2026-09", "label": "SEP 26", "rows": [{"date": "2026-09-01", "label": "1/9", "value": 1232724321}, {"date": "2026-09-02", "label": "2/9", "value": 1595492580}, {"date": "2026-09-03", "label": "3/9", "value": 1619848926}, {"date": "2026-09-04", "label": "4/9", "value": -355566980}, {"date": "2026-09-07", "label": "7/9", "value": -116530464}, {"date": "2026-09-08", "label": "8/9", "value": -96205149}, {"date": "2026-09-09", "label": "9/9", "value": -176425141}, {"date": "2026-09-10", "label": "10/9", "value": -257060938}, {"date": "2026-09-11", "label": "11/9", "value": -789804102}, {"date": "2026-09-14", "label": "14/9", "value": -278468675}, {"date": "2026-09-15", "label": "15/9", "value": -164968532}, {"date": "2026-09-16", "label": "16/9", "value": -520300000}, {"date": "2026-09-17", "label": "17/9", "value": -531820646}, {"date": "2026-09-18", "label": "18/9", "value": -529419441}, {"date": "2026-09-21", "label": "21/9", "value": -125514841}, {"date": "2026-09-22", "label": "22/9", "value": 4961606}, {"date": "2026-09-23", "label": "23/9", "value": 65212583}, {"date": "2026-09-24", "label": "24/9", "value": -236145889}, {"date": "2026-09-25", "label": "25/9", "value": 24880187}, {"date": "2026-09-28", "label": "28/9", "value": 264800770}, {"date": "2026-09-29", "label": "29/9", "value": 447066732}, {"date": "2026-09-30", "label": "30/9", "value": 520001367}]}, {"key": "2026-10", "label": "OCT 26", "rows": [{"date": "2026-10-01", "label": "1/10", "value": 821368052}, {"date": "2026-10-02", "label": "2/10", "value": 908388580}, {"date": "2026-10-05", "label": "5/10", "value": -948254566}, {"date": "2026-10-06", "label": "6/10", "value": -976032866}, {"date": "2026-10-07", "label": "7/10", "value": -855863799}, {"date": "2026-10-08", "label": "8/10", "value": -857486099}, {"date": "2026-10-09", "label": "9/10", "value": -836095574}, {"date": "2026-10-12", "label": "12/10", "value": -437463839}, {"date": "2026-10-13", "label": "13/10", "value": -488702320}, {"date": "2026-10-14", "label": "14/10", "value": -307832999}, {"date": "2026-10-15", "label": "15/10", "value": -263847716}, {"date": "2026-10-16", "label": "16/10", "value": -24816170}, {"date": "2026-10-19", "label": "19/10", "value": 134266283}, {"date": "2026-10-20", "label": "20/10", "value": 261922982}, {"date": "2026-10-21", "label": "21/10", "value": 433275407}, {"date": "2026-10-22", "label": "22/10", "value": 619695017}, {"date": "2026-10-23", "label": "23/10", "value": 420269465}, {"date": "2026-10-26", "label": "26/10", "value": 439499165}, {"date": "2026-10-27", "label": "27/10", "value": 450941165}, {"date": "2026-10-28", "label": "28/10", "value": 523651096}, {"date": "2026-10-29", "label": "29/10", "value": 523651096}, {"date": "2026-10-30", "label": "30/10", "value": 553021558}]}, {"key": "2026-11", "label": "NOV 26", "rows": [{"date": "2026-11-02", "label": "2/11", "value": 558873990}, {"date": "2026-11-03", "label": "3/11", "value": 815848780}, {"date": "2026-11-04", "label": "4/11", "value": 1026780284}, {"date": "2026-11-05", "label": "5/11", "value": -1007198313}, {"date": "2026-11-06", "label": "6/11", "value": -1041452613}, {"date": "2026-11-09", "label": "9/11", "value": -1147447481}, {"date": "2026-11-10", "label": "10/11", "value": -961971545}, {"date": "2026-11-11", "label": "11/11", "value": -1454853569}, {"date": "2026-11-12", "label": "12/11", "value": -937605369}, {"date": "2026-11-13", "label": "13/11", "value": -943616641}, {"date": "2026-11-16", "label": "16/11", "value": -664531083}, {"date": "2026-11-17", "label": "17/11", "value": -532908436}, {"date": "2026-11-18", "label": "18/11", "value": -367788302}, {"date": "2026-11-19", "label": "19/11", "value": -436507002}, {"date": "2026-11-20", "label": "20/11", "value": -133923688}, {"date": "2026-11-23", "label": "23/11", "value": 196415627}, {"date": "2026-11-24", "label": "24/11", "value": -25241621}, {"date": "2026-11-25", "label": "25/11", "value": 51030728}, {"date": "2026-11-26", "label": "26/11", "value": 155468901}, {"date": "2026-11-27", "label": "27/11", "value": 293342249}, {"date": "2026-11-30", "label": "30/11", "value": 294028490}]}, {"key": "2026-12", "label": "DIC 26", "rows": [{"date": "2026-12-01", "label": "1/12", "value": 627740518}, {"date": "2026-12-02", "label": "2/12", "value": 666824499}, {"date": "2026-12-03", "label": "3/12", "value": 691770088}, {"date": "2026-12-04", "label": "4/12", "value": -1159006811}, {"date": "2026-12-07", "label": "7/12", "value": -1272295111}, {"date": "2026-12-08", "label": "8/12", "value": -1300073411}, {"date": "2026-12-09", "label": "9/12", "value": -1197057484}, {"date": "2026-12-10", "label": "10/12", "value": -995236605}, {"date": "2026-12-11", "label": "11/12", "value": -1592910632}, {"date": "2026-12-14", "label": "14/12", "value": -859755967}, {"date": "2026-12-15", "label": "15/12", "value": -739068076}, {"date": "2026-12-16", "label": "16/12", "value": -519626422}, {"date": "2026-12-17", "label": "17/12", "value": -519236220}, {"date": "2026-12-18", "label": "18/12", "value": -1108930634}, {"date": "2026-12-21", "label": "21/12", "value": -751807431}, {"date": "2026-12-22", "label": "22/12", "value": -734099431}, {"date": "2026-12-23", "label": "23/12", "value": -661848184}, {"date": "2026-12-24", "label": "24/12", "value": -869789015}, {"date": "2026-12-25", "label": "25/12", "value": -771992147}, {"date": "2026-12-28", "label": "28/12", "value": -660740662}, {"date": "2026-12-29", "label": "29/12", "value": -661099820}, {"date": "2026-12-30", "label": "30/12", "value": -654084322}, {"date": "2026-12-31", "label": "31/12", "value": 44813869}]}];
+// Caución: entra a caja pero es DEUDA (capital + interés diario). Los saldos del gráfico van netos de esa deuda.
+const CAUCION = {
+  start: "2026-08-18",          // fecha de ingreso de los fondos
+  principal: 550000000,         // capital recibido
+  anchorDate: "2026-09-21",     // fecha de referencia conocida
+  anchorDebt: 566044967         // deuda total a esa fecha (capital + interés)
+  // endDate: "2026-MM-DD"      // fecha de cancelación (si se define, la deuda deja de correr ese día)
+};
+const _pd = s => { const [y,m,d] = s.split("-").map(Number); return Date.UTC(y,m-1,d); };
+const _days = (a,b) => Math.round((_pd(b)-_pd(a))/86400000);
+CAUCION.daily = (CAUCION.anchorDebt - CAUCION.principal) / _days(CAUCION.start, CAUCION.anchorDate);
+const cauDebt = date => {
+  if (date < CAUCION.start) return 0;
+  if (CAUCION.endDate && date >= CAUCION.endDate) return 0;
+  return Math.round(CAUCION.principal + CAUCION.daily * _days(CAUCION.start, date));
+};
+// Escenario 21/09 → 06/10: saldo de caja al 21/09, ingresos parciales hasta el 06/10, y ese día devolución de la caución + sueldos.
+// Desde el 07/10 se mantienen los movimientos diarios originales, desplazados por la diferencia contra el saldo objetivo del 06/10.
+const ESCENARIO = {
+  fechaBase: "2026-09-21", saldoBase: -447945824,
+  ingresos: { desde: "2026-09-22", hasta: "2026-10-05", total: 2179799153 },   // repartidos en partes iguales entre los días hábiles del rango; el 05/10 se llega con el saldo previo a la devolución
+  fechaCierre: "2026-10-06",
+  devolucionCaucion: 566044967,
+  sueldos: 2205861154
+};
+CAUCION.endDate = ESCENARIO.fechaCierre;   // el 06/10 se devuelve la caución: la deuda deja de correr
+const BASE_DATA = (() => {
+  const E = ESCENARIO;
+  const flat = RAW_DATA.flatMap(m => m.rows);
+  const incDates = flat.map(r => r.date).filter(d => d >= E.ingresos.desde && d <= E.ingresos.hasta);
+  const each = Math.floor(E.ingresos.total / incDates.length);
+  const inc = {};
+  incDates.forEach((d,i) => inc[d] = (i === incDates.length-1) ? E.ingresos.total - each*(incDates.length-1) : each);
+  const saldoCierre = E.saldoBase + E.ingresos.total - E.devolucionCaucion - E.sueldos;   // = -1.040.052.792
+  const shift = saldoCierre - flat.find(r => r.date === E.fechaCierre).value;
+  let saldo = E.saldoBase;
+  const cash = {};
+  flat.forEach(r => {
+    if (r.date < E.fechaBase) cash[r.date] = r.value;
+    else if (r.date === E.fechaBase) cash[r.date] = E.saldoBase;
+    else if (r.date <= E.fechaCierre) {
+      saldo += inc[r.date] || 0;
+      if (r.date === E.fechaCierre) saldo -= (E.devolucionCaucion + E.sueldos);
+      cash[r.date] = saldo;
+    } else cash[r.date] = r.value + shift;
+  });
+  return RAW_DATA.map(m => ({...m, rows: m.rows.map(r => ({...r, value: cash[r.date]}))}));
+})();
+const DATA = BASE_DATA.map(m => ({...m, rows: m.rows.map(r => {
+  const debt = cauDebt(r.date);
+  return {...r, cash: r.value, debt, value: r.value - debt};
+})}));
+
 const showNeg = true;
 const showPos = true;
 const showPeaks = true;
 const INFLOWS = [
-  {date:"2026-08-18", label:"CAUCIÓN +$550 M"}
+  {date:"2026-08-18", label:"CAUCIÓN $550 M (DEUDA)"},
+  {date:"2026-10-06", label:"DEVOLUCIÓN CAUCIÓN"}
 ];
 const HIGHLIGHTS = [
   {date:"2026-07-06", label:"SUELDOS"},
@@ -253,6 +393,7 @@ const fmtMoney = (n) => {
 };
 const fmtExact = (n) => (n<0?"-":"") + "$" + Math.abs(n).toLocaleString("es-AR");
 const OVERDRAFT_LIMIT = 2420000000;
+const fmtPct = v => v.toFixed(2).replace(".", ",") + "%";
 
 function draw() {
   const selected = DATA;
@@ -275,9 +416,9 @@ function draw() {
 
   const vals = rows.map(r=>r.value);
   const maxAbs = Math.max(...vals.map(v=>Math.abs(v)), 1);
-  const topVal = Math.max(...vals, 0);
-  const botVal = Math.min(...vals, 0);
-  const topPad = Math.max(topVal*1.15, maxAbs*.15);
+  const topVal = Math.max(...vals, ...rows.map(r=>r.cash), 0);
+  const botVal = Math.min(...vals, ...rows.map(r=>r.cash), 0);
+  const topPad = Math.max(topVal*1.3, maxAbs*.15);
   const botPad = Math.min(botVal*1.15, -maxAbs*.15);
   const yMin = Math.min(Math.floor(botPad/250000000)*250000000, -Math.ceil(OVERDRAFT_LIMIT*1.1/250000000)*250000000);
   const yMax = Math.ceil(topPad/250000000)*250000000;
@@ -288,6 +429,7 @@ function draw() {
 
   let out = "";
   out += `<rect x="0" y="0" width="${width}" height="${height}" fill="#f1f3f5"/>`;
+  out += `<defs><pattern id="hatchDebt" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#fed7aa"/><line x1="0" y1="0" x2="0" y2="6" stroke="#ea580c" stroke-width="3"/></pattern></defs>`;
 
   const ticks = 6;
   for(let i=0;i<=ticks;i++) {
@@ -314,14 +456,20 @@ function draw() {
   });
 
   rows.forEach((r,i) => {
-    const isNeg = r.value < 0;
-    const visible = isNeg ? showNeg : showPos;
+    // Barra de caja (0 → caja); desde el ingreso de la caución, un tramo de deuda cuelga desde la caja hasta el neto.
+    const cashNeg = r.cash < 0;
+    const netNeg = r.value < 0;
+    const visible = (r.debt > 0) ? true : (netNeg ? showNeg : showPos);
     if (!visible) return;
-    const yy = y(r.value);
-    const h = Math.max(1, Math.abs(zeroY-yy));
-    const by = isNeg ? zeroY : yy;
-    const fill = isNeg ? "#dc2626" : "#16a34a";
-    out += `<rect class="bar" data-i="${i}" x="${x(i)}" y="${by}" width="${barW}" height="${h}" rx="1" fill="${fill}" opacity=".96"/>`;
+    const yc = y(r.cash);
+    const hc = Math.max(1, Math.abs(zeroY-yc));
+    const byc = cashNeg ? zeroY : yc;
+    const fill = cashNeg ? "#dc2626" : "#16a34a";
+    out += `<rect class="bar" data-i="${i}" x="${x(i)}" y="${byc}" width="${barW}" height="${hc}" rx="1" fill="${fill}" opacity=".96"/>`;
+    if (r.debt > 0) {
+      const yn = y(r.value);
+      out += `<rect class="bar" data-i="${i}" x="${x(i)}" y="${yc}" width="${barW}" height="${Math.max(1, yn-yc)}" fill="url(#hatchDebt)" stroke="#ea580c" stroke-width=".8" opacity=".97"/>`;
+    }
   });
 
   if (showPeaks) {
@@ -338,22 +486,31 @@ function draw() {
       const maxIndex = rows.indexOf(localMax);
       const minIndex = rows.indexOf(localMin);
 
+      const _rows = rows;
+      const preIdx = _rows.findIndex(r => r.date === ESCENARIO.ingresos.hasta);
+      const isPre = maxIndex === preIdx;
       if (showPos && localMax.value > 0) {
         const yy = y(localMax.value);
         const xx = x(maxIndex) + barW/2;
         out += `<circle cx="${xx}" cy="${yy}" r="4" fill="#16a34a" stroke="#ffffff" stroke-width="2"/>`;
-        out += `<text x="${xx}" y="${Math.max(42, yy-22)}" text-anchor="middle" fill="#15803d" class="peak-label">${localMax.label}</text>`;
-        out += `<text x="${xx}" y="${Math.max(54, yy-10)}" text-anchor="middle" fill="#15803d" class="peak-label">${fmtMoney(localMax.value)}</text>`;
+        const yl = y(Math.max(localMax.cash, localMax.value));
+        if (isPre) {
+          out += `<text x="${xx-14}" y="${yl-20}" text-anchor="end" fill="#15803d" class="peak-label">${localMax.label} · en cuenta</text>`;
+          out += `<text x="${xx-14}" y="${yl-8}" text-anchor="end" fill="#15803d" font-weight="800" class="peak-label">${fmtExact(localMax.cash)}</text>`;
+        } else {
+        out += `<text x="${xx}" y="${Math.max(42, yl-22)}" text-anchor="middle" fill="#15803d" class="peak-label">${localMax.label}</text>`;
+        out += `<text x="${xx}" y="${Math.max(54, yl-10)}" text-anchor="middle" fill="#15803d" class="peak-label">${fmtMoney(localMax.value)}</text>`;
+        }
       }
 
       if (showNeg && localMin.value < 0) {
         const yy = y(localMin.value);
         const xx = x(minIndex) + barW/2;
-        const pctUsed = Math.round(Math.abs(localMin.value) / OVERDRAFT_LIMIT * 100);
+        const pctUsed = fmtPct(Math.abs(localMin.value) / OVERDRAFT_LIMIT * 100);
         out += `<circle cx="${xx}" cy="${yy}" r="4" fill="#dc2626" stroke="#ffffff" stroke-width="2"/>`;
         out += `<text x="${xx}" y="${Math.min(height-margin.bottom-30, yy+18)}" text-anchor="middle" fill="#b91c1c" class="peak-label">${localMin.label}</text>`;
         out += `<text x="${xx}" y="${Math.min(height-margin.bottom-18, yy+31)}" text-anchor="middle" fill="#b91c1c" class="peak-label">${fmtMoney(localMin.value)}</text>`;
-        out += `<text x="${xx}" y="${Math.min(height-margin.bottom-6, yy+44)}" text-anchor="middle" fill="#991b1b" font-weight="800" class="peak-label">${pctUsed}% del límite</text>`;
+        out += `<text x="${xx}" y="${Math.min(height-margin.bottom-6, yy+44)}" text-anchor="middle" fill="#991b1b" font-weight="800" class="peak-label">${pctUsed} del límite</text>`;
       }
     });
   }
@@ -390,8 +547,9 @@ function draw() {
     const bottomY = height - margin.bottom + 8;
     out += `<line x1="${xx}" y1="${topY}" x2="${xx}" y2="${bottomY}" stroke="#ea580c" stroke-width="1.6" stroke-dasharray="2 3" opacity=".9"/>`;
     out += `<circle cx="${xx}" cy="${topY}" r="3.5" fill="#ea580c" stroke="#ffffff" stroke-width="1.2"/>`;
+    const already = (highlightGroups[date] || []).length;
     inflowGroups[date].forEach((label, i) => {
-      const ly = topY + 14 + i*14;
+      const ly = topY + 14 + (i + already)*14;
       out += `<text x="${xx}" y="${ly}" text-anchor="middle" font-size="10" font-weight="800" fill="#c2410c" class="peak-label">${label}</text>`;
     });
   });
@@ -410,8 +568,9 @@ function draw() {
       tip.style.opacity = 1;
       tip.style.left = ev.clientX + "px";
       tip.style.top = ev.clientY + "px";
-      const pctLine = r.value < 0 ? `<br>${Math.round(Math.abs(r.value)/OVERDRAFT_LIMIT*100)}% del límite de descubierto` : "";
-      tip.innerHTML = `<strong>${r.month} · ${r.label}</strong><br>${fmtExact(r.value)}${pctLine}`;
+      const pctLine = r.value < 0 ? `<br>${fmtPct(Math.abs(r.value)/OVERDRAFT_LIMIT*100)} del límite de descubierto` : "";
+      const cauLine = r.debt > 0 ? `<br><span style="color:#8aa0bd">Caja: ${fmtExact(r.cash)}<br>Deuda caución: -${fmtExact(r.debt)}</span><br><strong>Neto: ${fmtExact(r.value)}</strong>` : `<br>${fmtExact(r.value)}`;
+      tip.innerHTML = `<strong>${r.month} · ${r.label}</strong>${cauLine}${pctLine}`;
       el.setAttribute("opacity","0.72");
     });
     el.addEventListener("mouseleave", () => {
@@ -440,7 +599,7 @@ function buildExecSummary() {
     const close = vals[vals.length-1];
     const negDays = rows.filter(r=>r.value<0).length;
     const pctNeg = Math.round(negDays/rows.length*100);
-    const pctLimit = Math.round(Math.abs(minVal)/OVERDRAFT_LIMIT*100);
+    const pctLimit = Math.abs(minVal)/OVERDRAFT_LIMIT*100;
     const event = HIGHLIGHTS.find(h=>h.date===minRow.date);
 
     let best=null, i=0;
@@ -490,7 +649,7 @@ function buildExecSummary() {
               <td>${m.negDays} de ${m.totalDays} (${m.pctNeg}%)</td>
               <td class="neg-c">${fmtMoney(m.minVal)} (${m.minLabel})</td>
               <td class="pos-c">${fmtMoney(m.maxVal)} (${m.maxLabel})</td>
-              <td class="${m.pctLimit>=60?'neg-c':''}">${m.pctLimit}%</td>
+              <td class="${m.pctLimit>=60?'neg-c':''}">${fmtPct(m.pctLimit)}</td>
             </tr>
           `).join("")}
         </tbody>
@@ -500,15 +659,139 @@ function buildExecSummary() {
     <div class="conclusion-box">
       <p>El patrón se repite mes tras mes: entra plata los primeros días, se paga sueldos alrededor del cuarto día hábil y ahí arranca el pozo. En ${f931Matches} de los 6 meses el fondo real no lo toca el día de sueldos sino unos días después, cuando se suma F 931 — ahí es donde más aprieta. IIBB e IVA, que vencen recién a mediados/fin de mes, en general ya encuentran la cuenta recuperando y no suman tanto.</p>
       <p>Diciembre es el mes más largo en rojo: ${dec.run.calSpan} días seguidos en déficit, del ${dec.run.startLabel} al ${dec.run.endLabel}${decRecovers ? ", y recién vuelve a positivo el último día del año" : ", sin volver a positivo en todo el mes"}.</p>
-      <p>El ingreso de <b>$550.000.000</b> por la devolución de la caución el 18/08 pesa bastante en esta lectura: como es saldo de caja, se arrastra para adelante y sostiene todos los meses siguientes. Buena parte de la mejora que se ve entre septiembre y diciembre frente a un escenario sin ese ingreso viene de ahí.</p>
+      <p>La caución de <b>${fmtExact(CAUCION.principal)}</b> del 18/08 <b>no se cuenta como ingreso</b>: entra a caja, pero se registra como deuda que crece todos los días con el interés. Al ${CAUCION.anchorDate.split("-").reverse().slice(0,2).join("/")} debés ${fmtExact(CAUCION.anchorDebt)} (unos ${fmtExact(Math.round(CAUCION.daily))} por día). El ${CAUCION.endDate.split("-").reverse().slice(0,2).join("/")} se devuelve por ${fmtExact(ESCENARIO.devolucionCaucion)} y, con los sueldos (${fmtExact(ESCENARIO.sueldos)}), la cuenta queda en ${fmtExact(ESCENARIO.saldoBase + ESCENARIO.ingresos.total - ESCENARIO.devolucionCaucion - ESCENARIO.sueldos)}. Hasta ahí los saldos del tablero van netos de la deuda.</p>
       <p class="conclusion-risk">${dec.close<0
         ? `Si noviembre y diciembre siguen esta curva, enero 2027 arrancaría directamente en negativo, lo que deja menos margen contra el límite de ${fmtMoney(-OVERDRAFT_LIMIT)}.`
-        : `Diciembre cierra en positivo (${fmtMoney(dec.close)}), pero recién el último día y después de ${dec.run.calSpan} jornadas seguidas en déficit, llegando a usar hasta el ${dec.pctLimit}% del límite. El margen contra los ${fmtMoney(-OVERDRAFT_LIMIT)} sigue siendo justo en ese tramo del año.`
+        : `Diciembre cierra en positivo (${fmtMoney(dec.close)}), pero recién el último día y después de ${dec.run.calSpan} jornadas seguidas en déficit, llegando a usar hasta el ${fmtPct(dec.pctLimit)} del límite. El margen contra los ${fmtMoney(-OVERDRAFT_LIMIT)} sigue siendo justo en ese tramo del año.`
       }</p>
     </div>
   `;
 }
 buildExecSummary();
+
+// Detalle del cierre: día anterior a sueldos → devolución de la caución → sueldos
+(() => {
+  const E = ESCENARIO, d = f => f.split("-").reverse().slice(0,2).join("/");
+  const pre = E.saldoBase + E.ingresos.total, tras = pre - E.devolucionCaucion, fin = tras - E.sueldos;
+  document.getElementById("cierreSteps").innerHTML = `
+    <h2>Cierre ${d(E.ingresos.hasta)} → ${d(E.fechaCierre)}</h2>
+    <div class="exec-sub">Del saldo que tenés que juntar antes de sueldos a cómo queda la cuenta</div>
+    <div class="steps">
+      <div class="step ok"><div class="k">${d(E.ingresos.hasta)} · Saldo en cuenta</div><div class="v">${fmtExact(pre)}</div><div class="n">${fmtExact(E.saldoBase)} al ${d(E.fechaBase)} + ${fmtExact(E.ingresos.total)} de cobros</div></div>
+      <div class="step debt"><div class="k">${d(E.fechaCierre)} · Devolución caución</div><div class="v">-${fmtExact(E.devolucionCaucion)}</div><div class="n">capital + interés</div></div>
+      <div class="step ok"><div class="k">Saldo antes de sueldos</div><div class="v">${fmtExact(tras)}</div></div>
+      <div class="step pay"><div class="k">Sueldos</div><div class="v">-${fmtExact(E.sueldos)}</div></div>
+      <div class="step bad"><div class="k">La cuenta queda en</div><div class="v">${fmtExact(fin)}</div><div class="n">usa el ${fmtPct(Math.abs(fin)/OVERDRAFT_LIMIT*100)} del descubierto de ${fmtExact(OVERDRAFT_LIMIT)}</div></div>
+    </div>`;
+})();
+</script>
+<script>
+// Pestañas
+document.querySelectorAll(".tab-btn").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll(".tab-btn").forEach(x => x.classList.toggle("active", x === b));
+  document.getElementById("tab-flujo").hidden = b.dataset.tab !== "flujo";
+  document.getElementById("tab-cobranza").hidden = b.dataset.tab !== "cobranza";
+}));
+
+// Seguimiento de cobranza (datos del PDF)
+(() => {
+  const COBROS = [
+    {n:"BAGLEY ARGENTINA S.A.", m:100596043.81, f:"2026-10-05"},
+    {n:"BANCO MACRO SA", m:8005307.51, f:"2026-09-25"},
+    {n:"CARTOCOR SOCIEDAD ANONIMA", m:108448882.34, f:"2026-10-05"},
+    {n:"CELULOSA MOLDEADA S.A.", m:11555854.33, f:"2026-10-01"},
+    {n:"EMBOTELLADORA DEL ATLANTICO S.A.", m:208883755.68, f:"2026-09-22"},
+    {n:"EMP. PROV. ENERGIA SANTA FE", m:92307226.90, f:"2026-09-24"},
+    {n:"FALABELLA S.A", m:29431612.35, f:"2026-09-24"},
+    {n:"INSTITUTO NACIONAL DE TECNOLOGIA AGROPECUARIA", m:8532994.56, f:"2026-09-25"},
+    {n:"IRSA INVERSIONES Y REPRESENTACIONES S.A.", m:272666624.50, f:"2026-10-01"},
+    {n:"ROGIRO ACEROS SA", m:15876896.23, f:"2026-10-01"},
+    {n:"SIPAR ACEROS S.A", m:183535441.99, f:"2026-10-01"},
+    {n:"SOHIPREN S. A.", m:16195395.61, f:"2026-10-01"},
+    {n:"NUEVO PUERTO SANTA FE S.A", m:42646448.79, f:"2026-09-24"},
+    {n:"ARCOR SAIC", m:213472149.78, f:"2026-10-01"},
+    {n:"CLUB EL PINAR SOC CIVIL", m:29195968.31, f:"2026-10-02"},
+    {n:"METRO ROSARIO S.A", m:1063148.48, f:"2026-10-01"},
+    {n:"ASOCIACION CIVIL LAS TEJAS DEL SUR", m:31965250.00, f:"2026-10-01"},
+    {n:"FRANCISCO PESADO CASTRO S.A", m:2916469.27, f:"2026-10-01"},
+    {n:"DISTRIBUIDORA DE GAS DEL CENTRO S.A.", m:40570445.29, f:"2026-09-25"},
+    {n:"DISTRIBUIDORA DE GAS CUYANA SA", m:79329084.37, f:"2026-09-25"},
+    {n:"TUBOS TRANS ELECTRIC SA", m:59452433.91, f:"2026-10-01"},
+    {n:"SOCIEDAD ADMINISTRADORA DE SIETE SOLES S.A", m:237645235.00, f:null, nota:"1 PAGO DE 20M por 9 Días"},
+    {n:"DABRA SA", m:7761218.40, f:"2026-09-24"},
+    {n:"CLUB UNIVERSITARIO DE ROSARIO", m:938684.08, f:"2026-09-21"},
+    {n:"SWIFT ARGENTINA S.A", m:33115603.31, f:"2026-09-30"},
+    {n:"INGRECOR S.A", m:12760142.30, f:"2026-10-01"},
+    {n:"SEMAC CONSTRUCCIONES SA", m:14457817.15, f:"2026-10-01"},
+    {n:"CONDOMINIO RIOJA 1640", m:26313242.41, f:"2026-09-21"},
+    {n:"CONSORCIO PROPIETARIOS BARRIO PRIVADOS DOS LA", m:35257282.08, f:"2026-10-01"}
+  ].map((c,i) => ({...c, id:i}));
+
+  const KEY = "cobranza_checks_v1";
+  let mem = [];
+  const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || "[]"); } catch(e) { return mem; } };
+  const save = arr => { mem = arr; try { localStorage.setItem(KEY, JSON.stringify(arr)); } catch(e) {} };
+  let checked = new Set(load());
+  let filter = "all";
+
+  // A revisar: sin fecha asignada todavía (no suman a los totales de arriba)
+  const REVISAR = [
+    {id:"r0", n:"El Paso", m:5000000},
+    {id:"r1", n:"Jockey", m:110347062},
+    {id:"r2", n:"Macro", m:145000000},
+    {id:"r3", n:"Litoral Gas", m:null},
+    {id:"r4", n:"Cenco", m:null}
+  ];
+  const FKEY = "cobranza_fechas_v1";
+  const loadF = () => { try { return JSON.parse(localStorage.getItem(FKEY) || "{}"); } catch(e) { return {}; } };
+  let fechas = loadF();
+  const saveF = () => { try { localStorage.setItem(FKEY, JSON.stringify(fechas)); } catch(e) {} };
+
+  const money = new Intl.NumberFormat("es-AR", {style:"currency", currency:"ARS"});
+  const fdate = f => f.split("-").reverse().join("/");
+  const sorted = [...COBROS].sort((a,b) => (a.f || "9999").localeCompare(b.f || "9999") || a.id - b.id);
+
+  const body = document.getElementById("cobBody");
+  function render() {
+    const total = COBROS.reduce((t,c) => t + c.m, 0);
+    const ok = COBROS.filter(c => checked.has(c.id)).reduce((t,c) => t + c.m, 0);
+    document.getElementById("cobTotal").textContent = money.format(total);
+    document.getElementById("cobOk").textContent = money.format(ok);
+    document.getElementById("cobPend").textContent = money.format(total - ok);
+    document.getElementById("cobCount").textContent = `${checked.size} de ${COBROS.length}`;
+    document.getElementById("cobProg").style.width = (ok/total*100).toFixed(1) + "%";
+    const list = sorted.filter(c => filter === "all" || (filter === "ok") === checked.has(c.id));
+    body.innerHTML = list.map(c => `<tr class="${checked.has(c.id) ? "done" : ""}">
+      <td class="chk"><input type="checkbox" data-id="${c.id}" ${checked.has(c.id) ? "checked" : ""} aria-label="Cobrado: ${c.n}"></td>
+      <td class="name">${c.n}</td>
+      <td class="num">${money.format(c.m)}</td>
+      <td>${c.f ? fdate(c.f) : c.nota}</td></tr>`).join("")
+      + (() => {
+        const conMonto = REVISAR.filter(r => r.m != null);
+        const sub = conMonto.reduce((t,r) => t + r.m, 0);
+        return `<tr class="rev-head"><td colspan="4">A revisar · asignar fecha</td></tr>`
+          + REVISAR.map(r => `<tr class="rev"><td class="chk"></td><td class="name">${r.n}</td>
+            <td class="num">${r.m != null ? money.format(r.m) : `<span class="sinmonto">sin monto</span>`}</td>
+            <td><input type="date" data-rev="${r.id}" value="${fechas[r.id] || ""}" aria-label="Fecha de cobro de ${r.n}"></td></tr>`).join("")
+          + `<tr class="rev-sum"><td></td><td>Subtotal a revisar (${conMonto.length} con monto)</td><td class="num">${money.format(sub)}</td><td></td></tr>`;
+      })();
+  }
+  body.addEventListener("change", e => {
+    if (e.target.dataset.rev) { fechas[e.target.dataset.rev] = e.target.value; saveF(); return; }
+    const id = +e.target.dataset.id;
+    if (Number.isNaN(id)) return;
+    e.target.checked ? checked.add(id) : checked.delete(id);
+    save([...checked]);
+    render();
+  });
+  document.getElementById("cobFilters").addEventListener("click", e => {
+    const f = e.target.dataset.f; if (!f) return;
+    filter = f;
+    document.querySelectorAll("#cobFilters button").forEach(b => b.classList.toggle("active", b === e.target));
+    render();
+  });
+  render();
+})();
 </script>
 </body>
 </html>
