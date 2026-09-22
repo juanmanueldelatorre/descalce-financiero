@@ -314,10 +314,10 @@ const cauDebt = date => {
 // Desde el 07/10 se mantienen los movimientos diarios originales, desplazados por la diferencia contra el saldo objetivo del 06/10.
 const ESCENARIO = {
   fechaBase: "2026-09-21", saldoBase: -447945824,
-  ingresos: { desde: "2026-09-22", hasta: "2026-10-05", total: 2179799153 },   // repartidos en partes iguales entre los días hábiles del rango; el 05/10 se llega con el saldo previo a la devolución
+  ingresos: { desde: "2026-09-22", hasta: "2026-10-05", total: 3057240432 },   // repartidos en partes iguales entre los días hábiles del rango; el 05/10 se llega con el saldo previo a la devolución
   fechaCierre: "2026-10-06",
   devolucionCaucion: 566044967,
-  sueldos: 2205861154
+  sueldos: 2360780225
 };
 CAUCION.endDate = ESCENARIO.fechaCierre;   // el 06/10 se devuelve la caución: la deuda deja de correr
 const BASE_DATA = (() => {
