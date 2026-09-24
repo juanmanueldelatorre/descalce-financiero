@@ -187,6 +187,7 @@
   .exec-table tr.crit td { background:rgba(220,38,38,.10); }
   .neg-c { color:#f87171; font-weight:700; }
   .pos-c { color:#4ade80; font-weight:700; }
+  .muted-c { color:var(--muted); font-style:italic; }
 
   /* Pestañas */
   .tabs { display:flex; gap:8px; margin-bottom:22px; }
@@ -234,6 +235,26 @@
     color-scheme:dark; background:rgba(0,0,0,.25); color:#fef08a; border:1px solid rgba(250,204,21,.45);
     border-radius:6px; padding:4px 8px; font:inherit; font-size:12.5px;
   }
+
+  /* Caución */
+  .cau-card { background:var(--card); border:1px solid var(--card-border); border-radius:14px; padding:16px 22px; margin-bottom:22px; display:flex; align-items:center; gap:18px; flex-wrap:wrap; }
+  .cau-toggle { display:flex; align-items:center; gap:10px; cursor:pointer; font-size:14px; font-weight:800; letter-spacing:.03em; color:#fed7aa; }
+  .cau-toggle input { width:20px; height:20px; accent-color:#ea580c; cursor:pointer; }
+  .cau-toggle-sub { color:var(--muted); font-size:12.5px; }
+
+  /* % clave al pagar sueldos */
+  .pct-clave-card { background:var(--card); border:1px solid var(--card-border); border-radius:14px; padding:20px 22px; margin-bottom:22px; }
+  .pct-clave-card h2 { font-size:15px; margin:0 0 4px; }
+  .pct-clave-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:12px; margin-top:16px; }
+  .pct-tile { border-radius:12px; padding:14px 14px 12px; text-align:center; border:1px solid transparent; }
+  .pct-tile .m { font-size:11px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; opacity:.85; }
+  .pct-tile .p { font-size:26px; font-weight:800; margin-top:4px; line-height:1.1; }
+  .pct-tile .d { font-size:11px; opacity:.75; margin-top:3px; }
+  .pct-tile.ok { background:rgba(22,163,74,.14); border-color:rgba(22,163,74,.35); color:#4ade80; }
+  .pct-tile.warn { background:rgba(217,119,6,.16); border-color:rgba(217,119,6,.4); color:#fbbf24; }
+  .pct-tile.crit { background:rgba(220,38,38,.18); border-color:rgba(220,38,38,.45); color:#f87171; }
+  .pct-tile.na { background:rgba(255,255,255,.03); border-color:var(--card-border); color:var(--muted); }
+  .pct-tile.na .p { font-size:15px; font-weight:600; opacity:.7; }
   .cob-note { color:var(--muted); font-size:12px; margin-top:10px; }
 </style>
 </head>
@@ -245,7 +266,6 @@
   </nav>
   <div id="tab-flujo">
   <h1>Evolución de fondos</h1>
-  <div class="sub">Datos reales · Julio 2026 a Diciembre 2026 · barra = caja, tramo naranja = deuda de la caución que resta (el borde inferior es el fondo neto) · meses separados visualmente · máximos y mínimos destacados</div>
 
   <div class="chart-card">
     <div class="chart-head">
@@ -253,8 +273,8 @@
       <div class="legend">
         <span><i class="dot" style="background:var(--neg)"></i>Caja en déficit</span>
         <span><i class="dot" style="background:var(--pos)"></i>Caja positiva</span>
+        <span><i class="dot" style="background:#16a34a; opacity:.4;"></i>Caja sin la deuda de la caución</span>
         <span><i class="dot" style="background:#7c3aed"></i>Egresos clave</span>
-        <span><i class="dot" style="background:repeating-linear-gradient(45deg,#ea580c 0 2px,#fed7aa 2px 4px)"></i>Tramo de deuda de la caución (capital + interés)</span>
       </div>
     </div>
     <div class="chart-scroll" id="chartScroll">
@@ -262,7 +282,22 @@
     </div>
   </div>
 
+  <section class="cau-card">
+    <label class="cau-toggle">
+      <input type="checkbox" id="chkDevolverCaucion" checked>
+      <span>DEVOLVER CAUCIÓN</span>
+    </label>
+    <div class="cau-toggle-sub" id="cauToggleSub"></div>
+  </section>
+
+  <section class="pct-clave-card">
+    <h2>% del descubierto necesario al pagar sueldos</h2>
+    <div class="exec-sub">El número que importa: cuánto del límite de <span id="pctClaveLimite"></span> tenés que usar ese día, mes a mes</div>
+    <div class="pct-clave-grid" id="pctClaveGrid"></div>
+  </section>
+
   <section class="exec-summary" id="cierreSteps"></section>
+
 
   <section class="exec-summary" id="execSummary"></section>
   </div>
@@ -293,66 +328,133 @@
 <div class="tooltip" id="tooltip"></div>
 
 <script>
-const RAW_DATA = [{"key": "2026-07", "label": "JUL 26", "rows": [{"date": "2026-07-01", "label": "1/7", "value": 318665063}, {"date": "2026-07-02", "label": "2/7", "value": 421742053}, {"date": "2026-07-03", "label": "3/7", "value": 609140016}, {"date": "2026-07-06", "label": "6/7", "value": -645706654}, {"date": "2026-07-07", "label": "7/7", "value": -451591909}, {"date": "2026-07-08", "label": "8/7", "value": -565739733}, {"date": "2026-07-09", "label": "9/7", "value": -565739733}, {"date": "2026-07-10", "label": "10/7", "value": -565739733}, {"date": "2026-07-13", "label": "13/7", "value": -572382568}, {"date": "2026-07-14", "label": "14/7", "value": -230826346}, {"date": "2026-07-15", "label": "15/7", "value": -1160234167}, {"date": "2026-07-16", "label": "16/7", "value": -1127862512}, {"date": "2026-07-17", "label": "17/7", "value": -1043443220}, {"date": "2026-07-20", "label": "20/7", "value": -849789376}, {"date": "2026-07-21", "label": "21/7", "value": -795860757}, {"date": "2026-07-22", "label": "22/7", "value": -455259253}, {"date": "2026-07-23", "label": "23/7", "value": -277242953}, {"date": "2026-07-24", "label": "24/7", "value": -155561627}, {"date": "2026-07-27", "label": "27/7", "value": 18083671}, {"date": "2026-07-28", "label": "28/7", "value": 64603712}, {"date": "2026-07-29", "label": "29/7", "value": 67948469}, {"date": "2026-07-30", "label": "30/7", "value": 226593814}, {"date": "2026-07-31", "label": "31/7", "value": 265578179}]}, {"key": "2026-08", "label": "AGO 26", "rows": [{"date": "2026-08-03", "label": "3/8", "value": 520544354}, {"date": "2026-08-04", "label": "4/8", "value": 733351216}, {"date": "2026-08-05", "label": "5/8", "value": 1021127432}, {"date": "2026-08-06", "label": "6/8", "value": -998482805}, {"date": "2026-08-07", "label": "7/8", "value": -1027707105}, {"date": "2026-08-10", "label": "10/8", "value": -836930348}, {"date": "2026-08-11", "label": "11/8", "value": -864708648}, {"date": "2026-08-12", "label": "12/8", "value": -906616398}, {"date": "2026-08-13", "label": "13/8", "value": -870113736}, {"date": "2026-08-14", "label": "14/8", "value": -787472750}, {"date": "2026-08-17", "label": "17/8", "value": -584464722}, {"date": "2026-08-18", "label": "18/8", "value": 48981979}, {"date": "2026-08-19", "label": "19/8", "value": 194595347}, {"date": "2026-08-20", "label": "20/8", "value": 223898522}, {"date": "2026-08-21", "label": "21/8", "value": 513345371}, {"date": "2026-08-24", "label": "24/8", "value": 746646378}, {"date": "2026-08-25", "label": "25/8", "value": 883254945}, {"date": "2026-08-26", "label": "26/8", "value": 863690645}, {"date": "2026-08-27", "label": "27/8", "value": 907653930}, {"date": "2026-08-28", "label": "28/8", "value": 1023210428}, {"date": "2026-08-31", "label": "31/8", "value": 1028091363}]}, {"key": "2026-09", "label": "SEP 26", "rows": [{"date": "2026-09-01", "label": "1/9", "value": 1232724321}, {"date": "2026-09-02", "label": "2/9", "value": 1595492580}, {"date": "2026-09-03", "label": "3/9", "value": 1619848926}, {"date": "2026-09-04", "label": "4/9", "value": -355566980}, {"date": "2026-09-07", "label": "7/9", "value": -116530464}, {"date": "2026-09-08", "label": "8/9", "value": -96205149}, {"date": "2026-09-09", "label": "9/9", "value": -176425141}, {"date": "2026-09-10", "label": "10/9", "value": -257060938}, {"date": "2026-09-11", "label": "11/9", "value": -789804102}, {"date": "2026-09-14", "label": "14/9", "value": -278468675}, {"date": "2026-09-15", "label": "15/9", "value": -164968532}, {"date": "2026-09-16", "label": "16/9", "value": -520300000}, {"date": "2026-09-17", "label": "17/9", "value": -531820646}, {"date": "2026-09-18", "label": "18/9", "value": -529419441}, {"date": "2026-09-21", "label": "21/9", "value": -125514841}, {"date": "2026-09-22", "label": "22/9", "value": 4961606}, {"date": "2026-09-23", "label": "23/9", "value": 65212583}, {"date": "2026-09-24", "label": "24/9", "value": -236145889}, {"date": "2026-09-25", "label": "25/9", "value": 24880187}, {"date": "2026-09-28", "label": "28/9", "value": 264800770}, {"date": "2026-09-29", "label": "29/9", "value": 447066732}, {"date": "2026-09-30", "label": "30/9", "value": 520001367}]}, {"key": "2026-10", "label": "OCT 26", "rows": [{"date": "2026-10-01", "label": "1/10", "value": 821368052}, {"date": "2026-10-02", "label": "2/10", "value": 908388580}, {"date": "2026-10-05", "label": "5/10", "value": -948254566}, {"date": "2026-10-06", "label": "6/10", "value": -976032866}, {"date": "2026-10-07", "label": "7/10", "value": -855863799}, {"date": "2026-10-08", "label": "8/10", "value": -857486099}, {"date": "2026-10-09", "label": "9/10", "value": -836095574}, {"date": "2026-10-12", "label": "12/10", "value": -437463839}, {"date": "2026-10-13", "label": "13/10", "value": -488702320}, {"date": "2026-10-14", "label": "14/10", "value": -307832999}, {"date": "2026-10-15", "label": "15/10", "value": -263847716}, {"date": "2026-10-16", "label": "16/10", "value": -24816170}, {"date": "2026-10-19", "label": "19/10", "value": 134266283}, {"date": "2026-10-20", "label": "20/10", "value": 261922982}, {"date": "2026-10-21", "label": "21/10", "value": 433275407}, {"date": "2026-10-22", "label": "22/10", "value": 619695017}, {"date": "2026-10-23", "label": "23/10", "value": 420269465}, {"date": "2026-10-26", "label": "26/10", "value": 439499165}, {"date": "2026-10-27", "label": "27/10", "value": 450941165}, {"date": "2026-10-28", "label": "28/10", "value": 523651096}, {"date": "2026-10-29", "label": "29/10", "value": 523651096}, {"date": "2026-10-30", "label": "30/10", "value": 553021558}]}, {"key": "2026-11", "label": "NOV 26", "rows": [{"date": "2026-11-02", "label": "2/11", "value": 558873990}, {"date": "2026-11-03", "label": "3/11", "value": 815848780}, {"date": "2026-11-04", "label": "4/11", "value": 1026780284}, {"date": "2026-11-05", "label": "5/11", "value": -1007198313}, {"date": "2026-11-06", "label": "6/11", "value": -1041452613}, {"date": "2026-11-09", "label": "9/11", "value": -1147447481}, {"date": "2026-11-10", "label": "10/11", "value": -961971545}, {"date": "2026-11-11", "label": "11/11", "value": -1454853569}, {"date": "2026-11-12", "label": "12/11", "value": -937605369}, {"date": "2026-11-13", "label": "13/11", "value": -943616641}, {"date": "2026-11-16", "label": "16/11", "value": -664531083}, {"date": "2026-11-17", "label": "17/11", "value": -532908436}, {"date": "2026-11-18", "label": "18/11", "value": -367788302}, {"date": "2026-11-19", "label": "19/11", "value": -436507002}, {"date": "2026-11-20", "label": "20/11", "value": -133923688}, {"date": "2026-11-23", "label": "23/11", "value": 196415627}, {"date": "2026-11-24", "label": "24/11", "value": -25241621}, {"date": "2026-11-25", "label": "25/11", "value": 51030728}, {"date": "2026-11-26", "label": "26/11", "value": 155468901}, {"date": "2026-11-27", "label": "27/11", "value": 293342249}, {"date": "2026-11-30", "label": "30/11", "value": 294028490}]}, {"key": "2026-12", "label": "DIC 26", "rows": [{"date": "2026-12-01", "label": "1/12", "value": 627740518}, {"date": "2026-12-02", "label": "2/12", "value": 666824499}, {"date": "2026-12-03", "label": "3/12", "value": 691770088}, {"date": "2026-12-04", "label": "4/12", "value": -1159006811}, {"date": "2026-12-07", "label": "7/12", "value": -1272295111}, {"date": "2026-12-08", "label": "8/12", "value": -1300073411}, {"date": "2026-12-09", "label": "9/12", "value": -1197057484}, {"date": "2026-12-10", "label": "10/12", "value": -995236605}, {"date": "2026-12-11", "label": "11/12", "value": -1592910632}, {"date": "2026-12-14", "label": "14/12", "value": -859755967}, {"date": "2026-12-15", "label": "15/12", "value": -739068076}, {"date": "2026-12-16", "label": "16/12", "value": -519626422}, {"date": "2026-12-17", "label": "17/12", "value": -519236220}, {"date": "2026-12-18", "label": "18/12", "value": -1108930634}, {"date": "2026-12-21", "label": "21/12", "value": -751807431}, {"date": "2026-12-22", "label": "22/12", "value": -734099431}, {"date": "2026-12-23", "label": "23/12", "value": -661848184}, {"date": "2026-12-24", "label": "24/12", "value": -869789015}, {"date": "2026-12-25", "label": "25/12", "value": -771992147}, {"date": "2026-12-28", "label": "28/12", "value": -660740662}, {"date": "2026-12-29", "label": "29/12", "value": -661099820}, {"date": "2026-12-30", "label": "30/12", "value": -654084322}, {"date": "2026-12-31", "label": "31/12", "value": 44813869}]}];
+const RAW_DATA = [{"label":"ABR 26","rows":[{"date":"2026-04-01","label":"1/4","value":1128575518},{"date":"2026-04-02","label":"2/4","value":1128575518},{"date":"2026-04-03","label":"3/4","value":1128575518},{"date":"2026-04-06","label":"6/4","value":1368246721},{"date":"2026-04-07","label":"7/4","value":1695080848},{"date":"2026-04-08","label":"8/4","value":13411832},{"date":"2026-04-09","label":"9/4","value":-112344281},{"date":"2026-04-10","label":"10/4","value":-79796344},{"date":"2026-04-13","label":"13/4","value":-347615761},{"date":"2026-04-14","label":"14/4","value":62098487},{"date":"2026-04-15","label":"15/4","value":98313275},{"date":"2026-04-16","label":"16/4","value":112303219},{"date":"2026-04-17","label":"17/4","value":163409281},{"date":"2026-04-20","label":"20/4","value":290844871},{"date":"2026-04-21","label":"21/4","value":424208253},{"date":"2026-04-22","label":"22/4","value":456062957},{"date":"2026-04-23","label":"23/4","value":516675590},{"date":"2026-04-24","label":"24/4","value":332416860},{"date":"2026-04-27","label":"27/4","value":461046416},{"date":"2026-04-28","label":"28/4","value":684541966},{"date":"2026-04-29","label":"29/4","value":743636063},{"date":"2026-04-30","label":"30/4","value":817266255}]},{"label":"MAY 26","rows":[{"date":"2026-05-01","label":"1/5","value":817266255},{"date":"2026-05-04","label":"4/5","value":822708301},{"date":"2026-05-05","label":"5/5","value":1592923485},{"date":"2026-05-06","label":"6/5","value":1644441337},{"date":"2026-05-07","label":"7/5","value":-186705081},{"date":"2026-05-08","label":"8/5","value":-69262300},{"date":"2026-05-11","label":"11/5","value":143152401},{"date":"2026-05-12","label":"12/5","value":222089575},{"date":"2026-05-13","label":"13/5","value":-141419546},{"date":"2026-05-14","label":"14/5","value":-99176831},{"date":"2026-05-15","label":"15/5","value":-110015143},{"date":"2026-05-18","label":"18/5","value":430102835},{"date":"2026-05-19","label":"19/5","value":562476184},{"date":"2026-05-20","label":"20/5","value":553917886},{"date":"2026-05-21","label":"21/5","value":590908776},{"date":"2026-05-22","label":"22/5","value":572219896},{"date":"2026-05-25","label":"25/5","value":572219896},{"date":"2026-05-26","label":"26/5","value":911958869},{"date":"2026-05-27","label":"27/5","value":1039893729},{"date":"2026-05-28","label":"28/5","value":1114350359},{"date":"2026-05-29","label":"29/5","value":1175304167}]},{"label":"JUN 26","rows":[{"date":"2026-06-01","label":"1/6","value":1418154715},{"date":"2026-06-02","label":"2/6","value":1745369027},{"date":"2026-06-03","label":"3/6","value":2198384394},{"date":"2026-06-04","label":"4/6","value":230549692},{"date":"2026-06-05","label":"5/6","value":230051283},{"date":"2026-06-08","label":"8/6","value":160231503},{"date":"2026-06-09","label":"9/6","value":253486106},{"date":"2026-06-10","label":"10/6","value":211819776},{"date":"2026-06-11","label":"11/6","value":-332161309},{"date":"2026-06-12","label":"12/6","value":12807486},{"date":"2026-06-15","label":"15/6","value":12807486},{"date":"2026-06-16","label":"16/6","value":201149494},{"date":"2026-06-17","label":"17/6","value":338233745},{"date":"2026-06-18","label":"18/6","value":330702009},{"date":"2026-06-19","label":"19/6","value":350129955},{"date":"2026-06-22","label":"22/6","value":379153544},{"date":"2026-06-23","label":"23/6","value":709359030},{"date":"2026-06-24","label":"24/6","value":849091437},{"date":"2026-06-25","label":"25/6","value":977462435},{"date":"2026-06-26","label":"26/6","value":1049246420},{"date":"2026-06-29","label":"29/6","value":886317408},{"date":"2026-06-30","label":"30/6","value":172142095}]},{"label":"JUL 26","rows":[{"date":"2026-07-01","label":"1/7","value":318665063},{"date":"2026-07-02","label":"2/7","value":421742053},{"date":"2026-07-03","label":"3/7","value":609140016},{"date":"2026-07-06","label":"6/7","value":-645706654},{"date":"2026-07-07","label":"7/7","value":-451591909},{"date":"2026-07-08","label":"8/7","value":-565739733},{"date":"2026-07-09","label":"9/7","value":-565739733},{"date":"2026-07-10","label":"10/7","value":-565739733},{"date":"2026-07-13","label":"13/7","value":-572382568},{"date":"2026-07-14","label":"14/7","value":-230826346},{"date":"2026-07-15","label":"15/7","value":-1160234167},{"date":"2026-07-16","label":"16/7","value":-1127862512},{"date":"2026-07-17","label":"17/7","value":-1043443220},{"date":"2026-07-20","label":"20/7","value":-849789376},{"date":"2026-07-21","label":"21/7","value":-795860757},{"date":"2026-07-22","label":"22/7","value":-455259253},{"date":"2026-07-23","label":"23/7","value":-277242953},{"date":"2026-07-24","label":"24/7","value":-155561627},{"date":"2026-07-27","label":"27/7","value":18083671},{"date":"2026-07-28","label":"28/7","value":64603712},{"date":"2026-07-29","label":"29/7","value":67948469},{"date":"2026-07-30","label":"30/7","value":226593814},{"date":"2026-07-31","label":"31/7","value":265578179}]},{"label":"AGO 26","rows":[{"date":"2026-08-03","label":"3/8","value":360419015},{"date":"2026-08-04","label":"4/8","value":734819713},{"date":"2026-08-05","label":"5/8","value":1038213967},{"date":"2026-08-06","label":"6/8","value":-758750296},{"date":"2026-08-07","label":"7/8","value":-697907037},{"date":"2026-08-10","label":"10/8","value":-515170012},{"date":"2026-08-11","label":"11/8","value":-621250652},{"date":"2026-08-12","label":"12/8","value":-678285529},{"date":"2026-08-13","label":"13/8","value":-581358441},{"date":"2026-08-14","label":"14/8","value":-69238409},{"date":"2026-08-17","label":"17/8","value":-69238409},{"date":"2026-08-18","label":"18/8","value":-9922975},{"date":"2026-08-19","label":"19/8","value":220400971},{"date":"2026-08-20","label":"20/8","value":195077395},{"date":"2026-08-21","label":"21/8","value":162389716},{"date":"2026-08-24","label":"24/8","value":-35480613},{"date":"2026-08-25","label":"25/8","value":64607777},{"date":"2026-08-26","label":"26/8","value":53046380},{"date":"2026-08-27","label":"27/8","value":62015411},{"date":"2026-08-28","label":"28/8","value":128056610},{"date":"2026-08-31","label":"31/8","value":476701313}]},{"label":"SEP 26","rows":[{"date":"2026-09-01","label":"1/9","value":686846743},{"date":"2026-09-02","label":"2/9","value":1131140303},{"date":"2026-09-03","label":"3/9","value":1110951515},{"date":"2026-09-04","label":"4/9","value":-793109261},{"date":"2026-09-07","label":"7/9","value":-559273161},{"date":"2026-09-08","label":"8/9","value":-644865177},{"date":"2026-09-09","label":"9/9","value":-632089483},{"date":"2026-09-10","label":"10/9","value":-608761575},{"date":"2026-09-11","label":"11/9","value":-1218449834},{"date":"2026-09-14","label":"14/9","value":-614002277},{"date":"2026-09-15","label":"15/9","value":-519467031},{"date":"2026-09-16","label":"16/9","value":-521142989},{"date":"2026-09-17","label":"17/9","value":-449272981},{"date":"2026-09-18","label":"18/9","value":-447743463},{"date":"2026-09-21","label":"21/9","value":-441200948},{"date":"2026-09-22","label":"22/9","value":-263202598},{"date":"2026-09-23","label":"23/9","value":-213562182},{"date":"2026-09-24","label":"24/9","value":-398444438},{"date":"2026-09-25","label":"25/9","value":-189299274},{"date":"2026-09-28","label":"28/9","value":173084032},{"date":"2026-09-29","label":"29/9","value":355349993},{"date":"2026-09-30","label":"30/9","value":453457970}]},{"label":"OCT 26","rows":[{"date":"2026-10-01","label":"1/10","value":781716481},{"date":"2026-10-02","label":"2/10","value":877052576},{"date":"2026-10-05","label":"5/10","value":-1545634570},{"date":"2026-10-06","label":"6/10","value":-1573412870},{"date":"2026-10-07","label":"7/10","value":-1453243803},{"date":"2026-10-08","label":"8/10","value":-1445906555},{"date":"2026-10-09","label":"9/10","value":-1424516030},{"date":"2026-10-12","label":"12/10","value":-1027262127},{"date":"2026-10-13","label":"13/10","value":-1152810128},{"date":"2026-10-14","label":"14/10","value":-970530268},{"date":"2026-10-15","label":"15/10","value":-924130162},{"date":"2026-10-16","label":"16/10","value":-685098616},{"date":"2026-10-19","label":"19/10","value":-536593536},{"date":"2026-10-20","label":"20/10","value":-408936837},{"date":"2026-10-21","label":"21/10","value":-237584412},{"date":"2026-10-22","label":"22/10","value":87186530},{"date":"2026-10-23","label":"23/10","value":-16407849},{"date":"2026-10-26","label":"26/10","value":2821851},{"date":"2026-10-27","label":"27/10","value":16082380},{"date":"2026-10-28","label":"28/10","value":88792311},{"date":"2026-10-29","label":"29/10","value":88792311},{"date":"2026-10-30","label":"30/10","value":117999607}]},{"label":"NOV 26","rows":[{"date":"2026-11-02","label":"2/11","value":136265172},{"date":"2026-11-03","label":"3/11","value":393239962},{"date":"2026-11-04","label":"4/11","value":604171466},{"date":"2026-11-05","label":"5/11","value":-1429807131},{"date":"2026-11-06","label":"6/11","value":-1464061431},{"date":"2026-11-09","label":"9/11","value":-1570056299},{"date":"2026-11-10","label":"10/11","value":-1384580363},{"date":"2026-11-11","label":"11/11","value":-1951771906},{"date":"2026-11-12","label":"12/11","value":-1434523706},{"date":"2026-11-13","label":"13/11","value":-1440534978},{"date":"2026-11-16","label":"16/11","value":-1161455732},{"date":"2026-11-17","label":"17/11","value":-1045279282},{"date":"2026-11-18","label":"18/11","value":-880159148},{"date":"2026-11-19","label":"19/11","value":-948877848},{"date":"2026-11-20","label":"20/11","value":-641815689},{"date":"2026-11-23","label":"23/11","value":-311476374},{"date":"2026-11-24","label":"24/11","value":-296488464},{"date":"2026-11-25","label":"25/11","value":-220216115},{"date":"2026-11-26","label":"26/11","value":-115777942},{"date":"2026-11-27","label":"27/11","value":21929336},{"date":"2026-11-30","label":"30/11","value":22615577}]},{"label":"DIC 26","rows":[{"date":"2026-12-01","label":"1/12","value":356327604},{"date":"2026-12-02","label":"2/12","value":395411586},{"date":"2026-12-03","label":"3/12","value":420357175},{"date":"2026-12-04","label":"4/12","value":-1430419725},{"date":"2026-12-07","label":"7/12","value":-1543708025},{"date":"2026-12-08","label":"8/12","value":-1571486325},{"date":"2026-12-09","label":"9/12","value":-1468470397},{"date":"2026-12-10","label":"10/12","value":-1266649519},{"date":"2026-12-11","label":"11/12","value":-1938633065},{"date":"2026-12-14","label":"14/12","value":-1206906000},{"date":"2026-12-15","label":"15/12","value":-1086258413},{"date":"2026-12-16","label":"16/12","value":-880874168},{"date":"2026-12-17","label":"17/12","value":-880689299},{"date":"2026-12-18","label":"18/12","value":-1470732995},{"date":"2026-12-21","label":"21/12","value":-1108701045},{"date":"2026-12-22","label":"22/12","value":-951158236},{"date":"2026-12-23","label":"23/12","value":-875393161},{"date":"2026-12-24","label":"24/12","value":-987502819},{"date":"2026-12-25","label":"25/12","value":-889705951},{"date":"2026-12-28","label":"28/12","value":-778454467},{"date":"2026-12-29","label":"29/12","value":-778982684},{"date":"2026-12-30","label":"30/12","value":-771967186},{"date":"2026-12-31","label":"31/12","value":-771967186}]},{"label":"ENE 27","rows":[{"date":"2027-01-01","label":"1/1","value":-781071486}]}]
 // Caución: entra a caja pero es DEUDA (capital + interés diario). Los saldos del gráfico van netos de esa deuda.
 const CAUCION = {
   start: "2026-08-18",          // fecha de ingreso de los fondos
-  principal: 550000000,         // capital recibido
+  principal: 0,         // capital recibido
   anchorDate: "2026-09-21",     // fecha de referencia conocida
-  anchorDebt: 566044967         // deuda total a esa fecha (capital + interés)
-  // endDate: "2026-MM-DD"      // fecha de cancelación (si se define, la deuda deja de correr ese día)
+  anchorDebt: 0         // deuda total a esa fecha (capital + interés)
 };
-const _pd = s => { const [y,m,d] = s.split("-").map(Number); return Date.UTC(y,m-1,d); };
+const _pd = s2 => { const [y,m,d] = s2.split("-").map(Number); return Date.UTC(y,m-1,d); };
 const _days = (a,b) => Math.round((_pd(b)-_pd(a))/86400000);
 CAUCION.daily = (CAUCION.anchorDebt - CAUCION.principal) / _days(CAUCION.start, CAUCION.anchorDate);
+
+// Tilde "DEVOLVER CAUCIÓN": tildado (default) = el 06/10 sale de la caja la devolución y ahí se corta el interés.
+// Destildado = esa salida de plata se saca del gráfico y la deuda sigue creciendo sin cortarse nunca.
+const DEV_KEY = "devolver_caucion_v1";
+let DEVOLVER_CAUCION = (() => { try { const v = localStorage.getItem(DEV_KEY); return v === null ? true : v === "1"; } catch(e) { return true; } })();
+const saveDevolverCaucion = () => { try { localStorage.setItem(DEV_KEY, DEVOLVER_CAUCION ? "1" : "0"); } catch(e) {} };
 const cauDebt = date => {
   if (date < CAUCION.start) return 0;
-  if (CAUCION.endDate && date >= CAUCION.endDate) return 0;
+  if (DEVOLVER_CAUCION && date >= ESCENARIO.fechaCierre) return 0;
   return Math.round(CAUCION.principal + CAUCION.daily * _days(CAUCION.start, date));
 };
-// Escenario 21/09 → 06/10: saldo de caja al 21/09, ingresos parciales hasta el 06/10, y ese día devolución de la caución + sueldos.
+// Escenario 21/09 → 06/10: saldo de caja al 21/09, cobros reales día por día hasta el 06/10, y ese día devolución de la caución + sueldos.
 // Desde el 07/10 se mantienen los movimientos diarios originales, desplazados por la diferencia contra el saldo objetivo del 06/10.
 const ESCENARIO = {
-  fechaBase: "2026-09-21", saldoBase: -447945824,
-  ingresos: { desde: "2026-09-22", hasta: "2026-10-05", total: 3057240432 },   // repartidos en partes iguales entre los días hábiles del rango; el 05/10 se llega con el saldo previo a la devolución
+  fechaBase: "2026-09-21", saldoBase: 0,
   fechaCierre: "2026-10-06",
-  devolucionCaucion: 566044967,
-  sueldos: 2360780225
+  devolucionCaucion: 0,
+  sueldos: 0
 };
-CAUCION.endDate = ESCENARIO.fechaCierre;   // el 06/10 se devuelve la caución: la deuda deja de correr
-const BASE_DATA = (() => {
+// Cobros reales entre el 22/09 y el 05/10, con el cliente que paga cada uno (los del 21/09 ya están dentro del saldo de esa fecha).
+// SIETE SOLES se cobra en 8 cuotas de $20 M (la última de $10 M) en los días hábiles del 24/09 al 05/10.
+const INGRESOS_DETALLE = [
+  {n:"BAGLEY ARGENTINA S.A.", m:0.00, f:"2026-10-05"},
+  {n:"BANCO MACRO SA", m:0.00, f:"2026-10-05"},
+  {n:"CARTOCOR SOCIEDAD ANONIMA", m:0.00, f:"2026-10-05"},
+  {n:"EMBOTELLADORA DEL ATLANTICO S.A.", m:0.00, f:"2026-09-22"},
+  {n:"EMP. PROV. ENERGIA SANTA FE", m:0.00, f:"2026-09-24"},
+  {n:"EMP. PROV. ENERGIA SANTA FE (para sueldos)", m:0.00, f:"2026-10-05"},
+  {n:"FALABELLA S.A", m:0.00, f:"2026-09-24"},
+  {n:"INSTITUTO NACIONAL DE TECNOLOGIA AGROPECUARIA", m:0.00, f:"2026-09-25"},
+  {n:"IRSA INVERSIONES Y REPRESENTACIONES S.A.", m:0.00, f:"2026-10-01"},
+  {n:"ROGIRO ACEROS SA", m:0.00, f:"2026-10-01"},
+  {n:"SIPAR ACEROS S.A", m:0.00, f:"2026-10-01"},
+  {n:"SOHIPREN S. A.", m:0.00, f:"2026-10-01"},
+  {n:"NUEVO PUERTO SANTA FE S.A", m:0.00, f:"2026-09-24"},
+  {n:"ARCOR SAIC", m:0.00, f:"2026-10-01"},
+  {n:"CLUB EL PINAR SOC CIVIL", m:0.00, f:"2026-10-01"},
+  {n:"METRO ROSARIO S.A", m:0.00, f:"2026-10-01"},
+  {n:"ASOCIACION CIVIL LAS TEJAS DEL SUR", m:0.00, f:"2026-10-01"},
+  {n:"FRANCISCO PESADO CASTRO S.A", m:0.00, f:"2026-10-01"},
+  {n:"DISTRIBUIDORA DE GAS DEL CENTRO S.A.", m:0.00, f:"2026-09-25"},
+  {n:"DISTRIBUIDORA DE GAS CUYANA SA", m:0.00, f:"2026-09-25"},
+  {n:"TUBOS TRANS ELECTRIC SA", m:0.00, f:"2026-10-01"},
+  {n:"SOCIEDAD ADMINISTRADORA DE SIETE SOLES S.A", m:0.00, f:"2026-09-24"},
+  {n:"SOCIEDAD ADMINISTRADORA DE SIETE SOLES S.A", m:0.00, f:"2026-09-25"},
+  {n:"SOCIEDAD ADMINISTRADORA DE SIETE SOLES S.A", m:0.00, f:"2026-09-28"},
+  {n:"SOCIEDAD ADMINISTRADORA DE SIETE SOLES S.A", m:0.00, f:"2026-09-29"},
+  {n:"SOCIEDAD ADMINISTRADORA DE SIETE SOLES S.A", m:0.00, f:"2026-09-30"},
+  {n:"SOCIEDAD ADMINISTRADORA DE SIETE SOLES S.A", m:0.00, f:"2026-10-01"},
+  {n:"SOCIEDAD ADMINISTRADORA DE SIETE SOLES S.A", m:0.00, f:"2026-10-02"},
+  {n:"SOCIEDAD ADMINISTRADORA DE SIETE SOLES S.A", m:0.00, f:"2026-10-05"},
+  {n:"DABRA SA", m:0.00, f:"2026-09-24"},
+  {n:"SWIFT ARGENTINA S.A", m:0.00, f:"2026-09-30"},
+  {n:"INGRECOR S.A", m:0.00, f:"2026-10-01"},
+  {n:"CONSORCIO PROPIETARIOS BARRIO PRIVADOS DOS LA", m:0.00, f:"2026-10-01"},
+  {n:"JOCKEY", m:0.00, f:"2026-10-01"},
+  {n:"EL PASO", m:0.00, f:"2026-10-01"},
+  {n:"NACION", m:0.00, f:"2026-10-01"},
+  {n:"EPE", m:0.00, f:"2026-10-01"}
+];
+const INFLOW_BY_DATE = {};
+INGRESOS_DETALLE.forEach(c => (INFLOW_BY_DATE[c.f] = INFLOW_BY_DATE[c.f] || []).push(c));
+ESCENARIO.ingresosTotal = INGRESOS_DETALLE.reduce((t,c) => t + c.m, 0);
+const ESCENARIO_ACTIVA = () => !!(ESCENARIO.saldoBase || ESCENARIO.ingresosTotal || ESCENARIO.devolucionCaucion || ESCENARIO.sueldos);
+// La devolución de la caución ya está adentro de los datos reales cargados, el 05/10.
+// Tildado = tal cual está el dato cargado (con esa salida de plata). Destildado = se la suma de vuelta
+// desde el 05/10 hasta fin de año, como si nunca se hubiera devuelto.
+const CAUCION_DEVOLUCION = { date: "2026-10-05", amount: 566044000 };
+function buildBaseData() {
   const E = ESCENARIO;
   const flat = RAW_DATA.flatMap(m => m.rows);
-  const incDates = flat.map(r => r.date).filter(d => d >= E.ingresos.desde && d <= E.ingresos.hasta);
-  const each = Math.floor(E.ingresos.total / incDates.length);
-  const inc = {};
-  incDates.forEach((d,i) => inc[d] = (i === incDates.length-1) ? E.ingresos.total - each*(incDates.length-1) : each);
-  const saldoCierre = E.saldoBase + E.ingresos.total - E.devolucionCaucion - E.sueldos;   // = -1.040.052.792
-  const shift = saldoCierre - flat.find(r => r.date === E.fechaCierre).value;
-  let saldo = E.saldoBase;
-  const cash = {};
-  flat.forEach(r => {
-    if (r.date < E.fechaBase) cash[r.date] = r.value;
-    else if (r.date === E.fechaBase) cash[r.date] = E.saldoBase;
-    else if (r.date <= E.fechaCierre) {
-      saldo += inc[r.date] || 0;
-      if (r.date === E.fechaCierre) saldo -= (E.devolucionCaucion + E.sueldos);
-      cash[r.date] = saldo;
-    } else cash[r.date] = r.value + shift;
-  });
-  return RAW_DATA.map(m => ({...m, rows: m.rows.map(r => ({...r, value: cash[r.date]}))}));
-})();
-const DATA = BASE_DATA.map(m => ({...m, rows: m.rows.map(r => {
-  const debt = cauDebt(r.date);
-  return {...r, cash: r.value, debt, value: r.value - debt};
-})}));
+  let cash;
+  if (!ESCENARIO_ACTIVA()) {
+    // Sin escenario cargado (todo en 0): el dato real del PDF pasa directo, sin ningún ajuste.
+    cash = {};
+    flat.forEach(r => { cash[r.date] = r.value; });
+  } else {
+    const devolucion = DEVOLVER_CAUCION ? E.devolucionCaucion : 0;
+    const saldoCierre = E.saldoBase + E.ingresosTotal - devolucion - E.sueldos;
+    const shift = saldoCierre - flat.find(r => r.date === E.fechaCierre).value;
+    let saldo = E.saldoBase;
+    cash = {};
+    flat.forEach(r => {
+      if (r.date < E.fechaBase) cash[r.date] = r.value;
+      else if (r.date === E.fechaBase) cash[r.date] = E.saldoBase;
+      else if (r.date <= E.fechaCierre) {
+        const dayInflow = (INFLOW_BY_DATE[r.date] || []).reduce((t,c) => t + c.m, 0);
+        saldo += dayInflow;
+        if (r.date === E.fechaCierre) saldo -= (devolucion + E.sueldos);
+        cash[r.date] = saldo;
+      } else cash[r.date] = r.value + shift;
+    });
+  }
+  if (!DEVOLVER_CAUCION) {
+    flat.forEach(r => { if (r.date >= CAUCION_DEVOLUCION.date) cash[r.date] += CAUCION_DEVOLUCION.amount; });
+  }
+  return RAW_DATA.map(m => ({...m, rows: m.rows.map(r => ({...r, value: cash[r.date], clients: INFLOW_BY_DATE[r.date] || []}))}));
+}
+let BASE_DATA = buildBaseData();
+function buildData() {
+  return BASE_DATA.map(m => ({...m, rows: m.rows.map(r => {
+    const debt = cauDebt(r.date);
+    return {...r, cash: r.value, debt, value: r.value - debt, clients: r.clients};
+  })}));
+}
+let DATA = buildData();
+function getInflows() {
+  return DEVOLVER_CAUCION ? INFLOWS : INFLOWS.filter(h => h.label !== "DEVOLUCIÓN CAUCIÓN");
+}
 
 const showNeg = true;
 const showPos = true;
 const showPeaks = true;
 const INFLOWS = [
   {date:"2026-08-18", label:"CAUCIÓN $550 M (DEUDA)"},
-  {date:"2026-10-06", label:"DEVOLUCIÓN CAUCIÓN"}
+  {date:"2026-10-05", label:"DEVOLUCIÓN CAUCIÓN"}
 ];
 const HIGHLIGHTS = [
   {date:"2026-07-06", label:"SUELDOS"},
@@ -429,7 +531,6 @@ function draw() {
 
   let out = "";
   out += `<rect x="0" y="0" width="${width}" height="${height}" fill="#f1f3f5"/>`;
-  out += `<defs><pattern id="hatchDebt" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#fed7aa"/><line x1="0" y1="0" x2="0" y2="6" stroke="#ea580c" stroke-width="3"/></pattern></defs>`;
 
   const ticks = 6;
   for(let i=0;i<=ticks;i++) {
@@ -456,20 +557,24 @@ function draw() {
   });
 
   rows.forEach((r,i) => {
-    // Barra de caja (0 → caja); desde el ingreso de la caución, un tramo de deuda cuelga desde la caja hasta el neto.
-    const cashNeg = r.cash < 0;
-    const netNeg = r.value < 0;
-    const visible = (r.debt > 0) ? true : (netNeg ? showNeg : showPos);
-    if (!visible) return;
-    const yc = y(r.cash);
-    const hc = Math.max(1, Math.abs(zeroY-yc));
-    const byc = cashNeg ? zeroY : yc;
-    const fill = cashNeg ? "#dc2626" : "#16a34a";
-    out += `<rect class="bar" data-i="${i}" x="${x(i)}" y="${byc}" width="${barW}" height="${hc}" rx="1" fill="${fill}" opacity=".96"/>`;
+    // La caución es deuda desde que entra: el valor ya viene neto de esa deuda y se dibuja como una barra más del flujo.
+    // Atrás, del mismo grosor, va la barra de "sin la deuda de la caución" (la caja real), en un tono más tenue.
     if (r.debt > 0) {
-      const yn = y(r.value);
-      out += `<rect class="bar" data-i="${i}" x="${x(i)}" y="${yc}" width="${barW}" height="${Math.max(1, yn-yc)}" fill="url(#hatchDebt)" stroke="#ea580c" stroke-width=".8" opacity=".97"/>`;
+      const cashNeg = r.cash < 0;
+      const yc = y(r.cash);
+      const hc = Math.max(1, Math.abs(zeroY-yc));
+      const byc = cashNeg ? zeroY : yc;
+      const fillGhost = cashNeg ? "#dc2626" : "#16a34a";
+      out += `<rect data-i="${i}" x="${x(i)}" y="${byc}" width="${barW}" height="${hc}" rx="1" fill="${fillGhost}" opacity=".38"/>`;
     }
+    const netNeg = r.value < 0;
+    const visible = netNeg ? showNeg : showPos;
+    if (!visible) return;
+    const yv = y(r.value);
+    const hv = Math.max(1, Math.abs(zeroY-yv));
+    const byv = netNeg ? zeroY : yv;
+    const fill = netNeg ? "#dc2626" : "#16a34a";
+    out += `<rect class="bar" data-i="${i}" x="${x(i)}" y="${byv}" width="${barW}" height="${hv}" rx="1" fill="${fill}" opacity=".96"/>`;
   });
 
   if (showPeaks) {
@@ -487,7 +592,7 @@ function draw() {
       const minIndex = rows.indexOf(localMin);
 
       const _rows = rows;
-      const preIdx = _rows.findIndex(r => r.date === ESCENARIO.ingresos.hasta);
+      const preIdx = _rows.findIndex(r => r.date === "2026-10-05");
       const isPre = maxIndex === preIdx;
       if (showPos && localMax.value > 0) {
         const yy = y(localMax.value);
@@ -535,7 +640,7 @@ function draw() {
   });
 
   const inflowGroups = {};
-  INFLOWS.forEach(h => {
+  getInflows().forEach(h => {
     if (!inflowGroups[h.date]) inflowGroups[h.date] = [];
     inflowGroups[h.date].push(h.label);
   });
@@ -582,6 +687,19 @@ function draw() {
 
 draw();
 
+const POST_SUELDOS_DATES = [
+  {label:"ENERO", date:null}, {label:"FEBRERO", date:null}, {label:"MARZO", date:null},
+  {label:"ABRIL", date:"2026-04-06"}, {label:"MAYO", date:"2026-05-07"}, {label:"JUNIO", date:"2026-06-04"},
+  {label:"JULIO", date:"2026-07-03"}, {label:"AGOSTO", date:"2026-08-06"}, {label:"SEPTIEMBRE", date:"2026-09-07"},
+  {label:"OCTUBRE", date:"2026-10-05"}, {label:"NOVIEMBRE", date:"2026-11-05"}, {label:"DICIEMBRE", date:"2026-12-04"}
+];
+function getPostSueldosRows() {
+  const flatAll = DATA.flatMap(m => m.rows);
+  return POST_SUELDOS_DATES.map(ps => {
+    if (!ps.date) return {...ps, row: null};
+    return {...ps, row: flatAll.find(r => r.date === ps.date) || null};
+  });
+}
 function buildExecSummary() {
   const box = document.getElementById("execSummary");
   if (!box) return;
@@ -617,16 +735,18 @@ function buildExecSummary() {
       i++;
     }
     return {label:month.label, minVal, minLabel:minRow.label, maxVal, maxLabel:maxRow.label, close, negDays, totalDays:rows.length, pctNeg, pctLimit, event: event?event.label:null, run:best};
-  });
+  }).filter(m => m.totalDays > 1);   // saca meses de un solo día suelto (ej. ENE 27), que distorsionan el % y el análisis
 
   const worstMonth = monthStats.reduce((a,b)=>a.minVal<b.minVal?a:b);
   const dec = monthStats[monthStats.length-1];
   const overallNegDays = DATA.reduce((s,m)=>s+m.rows.filter(r=>r.value<0).length,0);
   const overallDays = DATA.reduce((s,m)=>s+m.rows.length,0);
   const f931Matches = monthStats.filter(m=>m.event && m.event.includes("F 931")).length;
-  const decRecovers = !!dec.run.recovery;
+  const decRecovers = !!(dec.run && dec.run.recovery);
   const worstOverallMonth = monthStats.reduce((a,b)=>a.pctLimit>b.pctLimit?a:b);
   const monthsOver60 = monthStats.filter(m=>m.pctLimit>=60).map(m=>m.label);
+
+  const postSueldosRows = getPostSueldosRows();
 
   box.innerHTML = `
     <h2>Resumen</h2>
@@ -656,34 +776,102 @@ function buildExecSummary() {
       </table>
     </div>
 
-    <div class="conclusion-box">
-      <p>El patrón se repite mes tras mes: entra plata los primeros días, se paga sueldos alrededor del cuarto día hábil y ahí arranca el pozo. En ${f931Matches} de los 6 meses el fondo real no lo toca el día de sueldos sino unos días después, cuando se suma F 931 — ahí es donde más aprieta. IIBB e IVA, que vencen recién a mediados/fin de mes, en general ya encuentran la cuenta recuperando y no suman tanto.</p>
-      <p>Diciembre es el mes más largo en rojo: ${dec.run.calSpan} días seguidos en déficit, del ${dec.run.startLabel} al ${dec.run.endLabel}${decRecovers ? ", y recién vuelve a positivo el último día del año" : ", sin volver a positivo en todo el mes"}.</p>
-      <p>La caución de <b>${fmtExact(CAUCION.principal)}</b> del 18/08 <b>no se cuenta como ingreso</b>: entra a caja, pero se registra como deuda que crece todos los días con el interés. Al ${CAUCION.anchorDate.split("-").reverse().slice(0,2).join("/")} debés ${fmtExact(CAUCION.anchorDebt)} (unos ${fmtExact(Math.round(CAUCION.daily))} por día). El ${CAUCION.endDate.split("-").reverse().slice(0,2).join("/")} se devuelve por ${fmtExact(ESCENARIO.devolucionCaucion)} y, con los sueldos (${fmtExact(ESCENARIO.sueldos)}), la cuenta queda en ${fmtExact(ESCENARIO.saldoBase + ESCENARIO.ingresos.total - ESCENARIO.devolucionCaucion - ESCENARIO.sueldos)}. Hasta ahí los saldos del tablero van netos de la deuda.</p>
-      <p class="conclusion-risk">${dec.close<0
-        ? `Si noviembre y diciembre siguen esta curva, enero 2027 arrancaría directamente en negativo, lo que deja menos margen contra el límite de ${fmtMoney(-OVERDRAFT_LIMIT)}.`
-        : `Diciembre cierra en positivo (${fmtMoney(dec.close)}), pero recién el último día y después de ${dec.run.calSpan} jornadas seguidas en déficit, llegando a usar hasta el ${fmtPct(dec.pctLimit)} del límite. El margen contra los ${fmtMoney(-OVERDRAFT_LIMIT)} sigue siendo justo en ese tramo del año.`
-      }</p>
+    <h2 style="margin-top:28px;">Saldo post pago sueldos</h2>
+    <div class="exec-sub">Caja del día de pago de sueldos de cada mes ${DEVOLVER_CAUCION ? "(con la devolución de la caución aplicada)" : "(sin la devolución de la caución)"}</div>
+    <div class="exec-sub" style="margin-top:2px;">Qué es el <strong>%</strong>: si ese día la cuenta queda negativa, es cuánto de tu límite de descubierto (${fmtExact(OVERDRAFT_LIMIT)}) estás usando en ese momento — por ejemplo 35% significa que usaste poco más de un tercio del límite disponible. Si la cuenta queda positiva, el % es 0% porque no hace falta usar descubierto.</div>
+    <div class="exec-table-wrap">
+      <table class="exec-table">
+        <thead>
+          <tr>
+            <th>Mes</th>
+            <th>Post pago sueldos</th>
+            <th>% del descubierto usado</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${postSueldosRows.filter(ps => !["ENERO","FEBRERO","MARZO","ABRIL","MAYO"].includes(ps.label)).map(ps => {
+            if (!ps.row) return `<tr><td><strong>${ps.label}</strong></td><td class="muted-c">sin datos cargados</td><td class="muted-c">—</td></tr>`;
+            const v = ps.row.value;
+            const pct = v < 0 ? Math.abs(v)/OVERDRAFT_LIMIT*100 : 0;
+            return `<tr class="${pct>=60?'crit':''}">
+              <td><strong>${ps.label}</strong></td>
+              <td class="${v<0?'neg-c':'pos-c'}">${fmtMoney(v)}</td>
+              <td class="${pct>=60?'neg-c':''}">${fmtPct(pct)}</td>
+            </tr>`;
+          }).join("")}
+        </tbody>
+      </table>
     </div>
   `;
 }
 buildExecSummary();
 
-// Detalle del cierre: día anterior a sueldos → devolución de la caución → sueldos
-(() => {
+// Detalle del cierre: día anterior a sueldos → (devolución de la caución) → sueldos
+function renderCierreSteps() {
+  const box = document.getElementById("cierreSteps");
+  if (!ESCENARIO_ACTIVA()) { box.innerHTML = ""; box.style.display = "none"; return; }
+  box.style.display = "";
   const E = ESCENARIO, d = f => f.split("-").reverse().slice(0,2).join("/");
-  const pre = E.saldoBase + E.ingresos.total, tras = pre - E.devolucionCaucion, fin = tras - E.sueldos;
+  const FECHA_HASTA = "2026-10-05";
+  const devolucion = DEVOLVER_CAUCION ? E.devolucionCaucion : 0;
+  const pre = E.saldoBase + E.ingresosTotal, tras = pre - devolucion, fin = tras - E.sueldos;
+  const devolStep = DEVOLVER_CAUCION
+    ? `<div class="step debt"><div class="k">${d(E.fechaCierre)} · Devolución caución</div><div class="v">-${fmtExact(E.devolucionCaucion)}</div><div class="n">capital + interés</div></div>`
+    : `<div class="step debt"><div class="k">${d(E.fechaCierre)} · Devolución caución</div><div class="v">no se devuelve</div><div class="n">sigue como deuda, corriendo interés</div></div>`;
   document.getElementById("cierreSteps").innerHTML = `
-    <h2>Cierre ${d(E.ingresos.hasta)} → ${d(E.fechaCierre)}</h2>
+    <h2>Cierre ${d(FECHA_HASTA)} → ${d(E.fechaCierre)}</h2>
     <div class="exec-sub">Del saldo que tenés que juntar antes de sueldos a cómo queda la cuenta</div>
     <div class="steps">
-      <div class="step ok"><div class="k">${d(E.ingresos.hasta)} · Saldo en cuenta</div><div class="v">${fmtExact(pre)}</div><div class="n">${fmtExact(E.saldoBase)} al ${d(E.fechaBase)} + ${fmtExact(E.ingresos.total)} de cobros</div></div>
-      <div class="step debt"><div class="k">${d(E.fechaCierre)} · Devolución caución</div><div class="v">-${fmtExact(E.devolucionCaucion)}</div><div class="n">capital + interés</div></div>
+      <div class="step ok"><div class="k">${d(FECHA_HASTA)} · Saldo en cuenta</div><div class="v">${fmtExact(pre)}</div><div class="n">${fmtExact(E.saldoBase)} al ${d(E.fechaBase)} + ${fmtExact(E.ingresosTotal)} de cobros</div></div>
+      ${devolStep}
       <div class="step ok"><div class="k">Saldo antes de sueldos</div><div class="v">${fmtExact(tras)}</div></div>
       <div class="step pay"><div class="k">Sueldos</div><div class="v">-${fmtExact(E.sueldos)}</div></div>
       <div class="step bad"><div class="k">La cuenta queda en</div><div class="v">${fmtExact(fin)}</div><div class="n">usa el ${fmtPct(Math.abs(fin)/OVERDRAFT_LIMIT*100)} del descubierto de ${fmtExact(OVERDRAFT_LIMIT)}</div></div>
     </div>`;
-})();
+}
+renderCierreSteps();
+
+function renderCauToggle() {
+  const chk = document.getElementById("chkDevolverCaucion");
+  chk.checked = DEVOLVER_CAUCION;
+  const sub = document.getElementById("cauToggleSub");
+  const fdate = CAUCION_DEVOLUCION.date.split("-").reverse().slice(0,2).join("/");
+  sub.textContent = DEVOLVER_CAUCION
+    ? `Tildado: el ${fdate} sale de la caja ${fmtExact(CAUCION_DEVOLUCION.amount)} por la devolución de la caución (tal como está en los datos cargados).`
+    : `Destildado: esa salida de plata se saca del gráfico. Desde el ${fdate} y hasta fin de año, todos los saldos mejoran en ${fmtExact(CAUCION_DEVOLUCION.amount)}.`;
+}
+renderCauToggle();
+
+function renderPctClave() {
+  document.getElementById("pctClaveLimite").textContent = fmtExact(OVERDRAFT_LIMIT);
+  const soloAgoDic = new Set(["AGOSTO","SEPTIEMBRE","OCTUBRE","NOVIEMBRE","DICIEMBRE"]);
+  const rows = getPostSueldosRows().filter(ps => soloAgoDic.has(ps.label));
+  document.getElementById("pctClaveGrid").innerHTML = rows.map(ps => {
+    if (!ps.row) return `<div class="pct-tile na"><div class="m">${ps.label}</div><div class="p">s/d</div><div class="d">sin datos</div></div>`;
+    const v = ps.row.value;
+    const pct = v < 0 ? Math.abs(v)/OVERDRAFT_LIMIT*100 : 0;
+    const band = pct===0 ? "ok" : pct<40 ? "ok" : pct<70 ? "warn" : "crit";
+    const dLabel = ps.date ? ps.date.split("-").reverse().slice(0,2).join("/") : "";
+    return `<div class="pct-tile ${band}"><div class="m">${ps.label}</div><div class="p">${fmtPct(pct)}</div><div class="d">${dLabel} · ${fmtMoney(v)}</div></div>`;
+  }).join("");
+}
+renderPctClave();
+
+function rerenderAll() {
+  BASE_DATA = buildBaseData();
+  DATA = buildData();
+  draw();
+  buildExecSummary();
+  renderCierreSteps();
+  renderCauToggle();
+  renderPctClave();
+}
+
+document.getElementById("chkDevolverCaucion").addEventListener("change", e => {
+  DEVOLVER_CAUCION = e.target.checked;
+  saveDevolverCaucion();
+  rerenderAll();
+});
 </script>
 <script>
 // Pestañas
@@ -696,35 +884,38 @@ document.querySelectorAll(".tab-btn").forEach(b => b.addEventListener("click", (
 // Seguimiento de cobranza (datos del PDF)
 (() => {
   const COBROS = [
-    {n:"BAGLEY ARGENTINA S.A.", m:100596043.81, f:"2026-10-05"},
-    {n:"BANCO MACRO SA", m:8005307.51, f:"2026-09-25"},
-    {n:"CARTOCOR SOCIEDAD ANONIMA", m:108448882.34, f:"2026-10-05"},
-    {n:"CELULOSA MOLDEADA S.A.", m:11555854.33, f:"2026-10-01"},
-    {n:"EMBOTELLADORA DEL ATLANTICO S.A.", m:208883755.68, f:"2026-09-22"},
-    {n:"EMP. PROV. ENERGIA SANTA FE", m:92307226.90, f:"2026-09-24"},
-    {n:"FALABELLA S.A", m:29431612.35, f:"2026-09-24"},
-    {n:"INSTITUTO NACIONAL DE TECNOLOGIA AGROPECUARIA", m:8532994.56, f:"2026-09-25"},
-    {n:"IRSA INVERSIONES Y REPRESENTACIONES S.A.", m:272666624.50, f:"2026-10-01"},
-    {n:"ROGIRO ACEROS SA", m:15876896.23, f:"2026-10-01"},
-    {n:"SIPAR ACEROS S.A", m:183535441.99, f:"2026-10-01"},
-    {n:"SOHIPREN S. A.", m:16195395.61, f:"2026-10-01"},
-    {n:"NUEVO PUERTO SANTA FE S.A", m:42646448.79, f:"2026-09-24"},
-    {n:"ARCOR SAIC", m:213472149.78, f:"2026-10-01"},
-    {n:"CLUB EL PINAR SOC CIVIL", m:29195968.31, f:"2026-10-02"},
-    {n:"METRO ROSARIO S.A", m:1063148.48, f:"2026-10-01"},
-    {n:"ASOCIACION CIVIL LAS TEJAS DEL SUR", m:31965250.00, f:"2026-10-01"},
-    {n:"FRANCISCO PESADO CASTRO S.A", m:2916469.27, f:"2026-10-01"},
-    {n:"DISTRIBUIDORA DE GAS DEL CENTRO S.A.", m:40570445.29, f:"2026-09-25"},
-    {n:"DISTRIBUIDORA DE GAS CUYANA SA", m:79329084.37, f:"2026-09-25"},
-    {n:"TUBOS TRANS ELECTRIC SA", m:59452433.91, f:"2026-10-01"},
-    {n:"SOCIEDAD ADMINISTRADORA DE SIETE SOLES S.A", m:237645235.00, f:null, nota:"1 PAGO DE 20M por 9 Días"},
-    {n:"DABRA SA", m:7761218.40, f:"2026-09-24"},
-    {n:"CLUB UNIVERSITARIO DE ROSARIO", m:938684.08, f:"2026-09-21"},
-    {n:"SWIFT ARGENTINA S.A", m:33115603.31, f:"2026-09-30"},
-    {n:"INGRECOR S.A", m:12760142.30, f:"2026-10-01"},
-    {n:"SEMAC CONSTRUCCIONES SA", m:14457817.15, f:"2026-10-01"},
-    {n:"CONDOMINIO RIOJA 1640", m:26313242.41, f:"2026-09-21"},
-    {n:"CONSORCIO PROPIETARIOS BARRIO PRIVADOS DOS LA", m:35257282.08, f:"2026-10-01"}
+    {n:"BAGLEY ARGENTINA S.A.", m:0.00, f:"2026-10-05"},
+    {n:"BANCO MACRO SA", m:0.00, f:"2026-10-05"},
+    {n:"CARTOCOR SOCIEDAD ANONIMA", m:0.00, f:"2026-10-05"},
+    {n:"EMBOTELLADORA DEL ATLANTICO S.A.", m:0.00, f:"2026-09-22"},
+    {n:"EMP. PROV. ENERGIA SANTA FE", m:0.00, f:"2026-09-24"},
+    {n:"EMP. PROV. ENERGIA SANTA FE (para sueldos)", m:0.00, f:"2026-10-05"},
+    {n:"FALABELLA S.A", m:0.00, f:"2026-09-24"},
+    {n:"INSTITUTO NACIONAL DE TECNOLOGIA AGROPECUARIA", m:0.00, f:"2026-09-25"},
+    {n:"IRSA INVERSIONES Y REPRESENTACIONES S.A.", m:0.00, f:"2026-10-01"},
+    {n:"ROGIRO ACEROS SA", m:0.00, f:"2026-10-01"},
+    {n:"SIPAR ACEROS S.A", m:0.00, f:"2026-10-01"},
+    {n:"SOHIPREN S. A.", m:0.00, f:"2026-10-01"},
+    {n:"NUEVO PUERTO SANTA FE S.A", m:0.00, f:"2026-09-24"},
+    {n:"ARCOR SAIC", m:0.00, f:"2026-10-01"},
+    {n:"CLUB EL PINAR SOC CIVIL", m:0.00, f:"2026-10-01"},
+    {n:"METRO ROSARIO S.A", m:0.00, f:"2026-10-01"},
+    {n:"ASOCIACION CIVIL LAS TEJAS DEL SUR", m:0.00, f:"2026-10-01"},
+    {n:"FRANCISCO PESADO CASTRO S.A", m:0.00, f:"2026-10-01"},
+    {n:"DISTRIBUIDORA DE GAS DEL CENTRO S.A.", m:0.00, f:"2026-09-25"},
+    {n:"DISTRIBUIDORA DE GAS CUYANA SA", m:0.00, f:"2026-09-25"},
+    {n:"TUBOS TRANS ELECTRIC SA", m:0.00, f:"2026-10-01"},
+    {n:"SOCIEDAD ADMINISTRADORA DE SIETE SOLES S.A", m:0.00, f:null, nota:"20M por día hábil, 24/09 al 05/10"},
+    {n:"DABRA SA", m:0.00, f:"2026-09-24"},
+    {n:"CLUB UNIVERSITARIO DE ROSARIO", m:0.00, f:"2026-09-21"},
+    {n:"SWIFT ARGENTINA S.A", m:0.00, f:"2026-09-30"},
+    {n:"INGRECOR S.A", m:0.00, f:"2026-10-01"},
+    {n:"CONDOMINIO RIOJA 1640", m:0.00, f:"2026-09-21"},
+    {n:"CONSORCIO PROPIETARIOS BARRIO PRIVADOS DOS LA", m:0.00, f:"2026-10-01"},
+    {n:"JOCKEY", m:0.00, f:"2026-10-01"},
+    {n:"EL PASO", m:0.00, f:"2026-10-01"},
+    {n:"NACION", m:0.00, f:"2026-10-01"},
+    {n:"EPE", m:0.00, f:"2026-10-01"}
   ].map((c,i) => ({...c, id:i}));
 
   const KEY = "cobranza_checks_v1";
@@ -736,9 +927,6 @@ document.querySelectorAll(".tab-btn").forEach(b => b.addEventListener("click", (
 
   // A revisar: sin fecha asignada todavía (no suman a los totales de arriba)
   const REVISAR = [
-    {id:"r0", n:"El Paso", m:5000000},
-    {id:"r1", n:"Jockey", m:110347062},
-    {id:"r2", n:"Macro", m:145000000},
     {id:"r3", n:"Litoral Gas", m:null},
     {id:"r4", n:"Cenco", m:null}
   ];
