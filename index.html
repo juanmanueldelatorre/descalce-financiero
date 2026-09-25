@@ -198,7 +198,31 @@
   }
   .tab-btn:hover { color:var(--text); }
   .tab-btn.active { background:#16345a; color:var(--text); border-color:rgba(255,255,255,.22); }
+  .tab-btn.new-tab { border-color:rgba(56,189,248,.5); color:#bae6fd; }
+  .tab-btn.new-tab.active { background:#164469; color:#fff; }
   [hidden] { display:none !important; }
+  /* Portada y accesos rápidos */
+  .home { padding:14px 0 28px; }
+  .home-kicker { color:#81a9d5; font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; margin-bottom:10px; }
+  .home h1 { font-size:clamp(23px,3vw,36px); letter-spacing:-.02em; text-transform:none; margin-bottom:8px; }
+  .home-intro { color:var(--muted); font-size:14px; line-height:1.55; margin:0 0 24px; }
+  .home-hero { padding:30px; border:1px solid rgba(96,165,250,.35); border-radius:20px; background:linear-gradient(115deg,#102b4a,#102239 65%,#0c1d30); box-shadow:0 18px 42px rgba(0,0,0,.18); }
+  .home-hero .eyebrow { color:#93c5fd; font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
+  .home-hero h2 { font-size:clamp(25px,3vw,38px); margin:10px 0; letter-spacing:.01em; }
+  .home-hero p { color:#b4c6de; font-size:14px; line-height:1.55; max-width:600px; margin:0 0 20px; }
+  .home-open { display:inline-flex; align-items:center; justify-content:center; min-height:44px; border:0; border-radius:10px; background:#e8f2ff; color:#102239; padding:10px 18px; font:inherit; font-size:13px; font-weight:800; cursor:pointer; }
+  .home-open:hover, .home-open:focus-visible { background:#fff; outline:2px solid #60a5fa; outline-offset:2px; }
+  .home-section-title { font-size:14px; text-transform:uppercase; letter-spacing:.06em; color:#b8c9df; margin:28px 0 12px; }
+  .home-links { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+  .home-link { width:100%; min-height:132px; display:flex; flex-direction:column; align-items:flex-start; text-align:left; gap:8px; padding:20px; background:var(--card); color:var(--text); border:1px solid var(--card-border); border-radius:14px; font:inherit; cursor:pointer; }
+  .home-link:hover, .home-link:focus-visible { border-color:#60a5fa; background:#132942; outline:none; }
+  .home-link strong { font-size:16px; }
+  .home-link span { color:var(--muted); font-size:12.5px; line-height:1.45; }
+  .home-link em { margin-top:auto; color:#93c5fd; font-style:normal; font-size:12px; font-weight:800; }
+  .caucion-note { display:flex; align-items:center; justify-content:space-between; gap:16px; margin:0 0 18px; padding:15px 18px; border:1px solid rgba(251,146,60,.38); border-radius:12px; background:rgba(154,52,18,.12); }
+  .caucion-note .label { display:block; color:#fdba74; font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
+  .caucion-note p { margin:4px 0 0; color:#cbd8e9; font-size:12px; line-height:1.4; }
+  .caucion-note strong { color:#fed7aa; font-size:20px; font-variant-numeric:tabular-nums; white-space:nowrap; }
 
   /* Seguimiento de cobranza */
   .cob-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-bottom:16px; }
@@ -256,80 +280,261 @@
   .pct-tile.na { background:rgba(255,255,255,.03); border-color:var(--card-border); color:var(--muted); }
   .pct-tile.na .p { font-size:15px; font-weight:600; opacity:.7; }
   .cob-note { color:var(--muted); font-size:12px; margin-top:10px; }
+
+  /* Patrón de cobranzas (ingresos por cliente) */
+  .patron-card { background:var(--card); border:1px solid var(--card-border); border-radius:14px; padding:20px 22px; margin-top:28px; }
+  .patron-card h2 { font-size:15px; margin:0 0 4px; }
+  .patron-insights { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin:16px 0; }
+  .patron-tile { background:rgba(255,255,255,.03); border:1px solid var(--card-border); border-radius:10px; padding:12px 14px; }
+  .patron-tile .k { color:var(--muted); font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; }
+  .patron-tile .v { font-size:17px; font-weight:800; margin-top:4px; }
+  .patron-tile .v.bad { color:#f87171; }
+  .patron-tile .v.good { color:#4ade80; }
+  .patron-tile .d { font-size:11px; color:var(--muted); margin-top:2px; }
+  .patron-chart-wrap { background:rgba(255,255,255,.02); border:1px solid var(--card-border); border-radius:10px; padding:10px 6px; margin:14px 0 20px; overflow-x:auto; }
+  .patron-chart-wrap svg { display:block; }
+  .sd-chart-wrap { background:#e9f0f7; border-color:#b9c8d9; }
+  .sd-chart-wrap svg { cursor:crosshair; }
+  .sd-controls { display:flex; align-items:center; flex-wrap:wrap; gap:10px 16px; margin:0 0 14px; }
+  .sd-project-btn { min-height:44px; padding:10px 16px; border:1px solid #60a5fa; border-radius:10px; background:#153b62; color:#eaf5ff; font:inherit; font-size:12px; font-weight:800; letter-spacing:.03em; cursor:pointer; }
+  .sd-project-btn:hover, .sd-project-btn:focus-visible { background:#1b527e; outline:2px solid #93c5fd; outline-offset:2px; }
+  .sd-project-btn[aria-pressed="true"] { background:#f1f7ff; color:#123554; }
+  .sd-mode { color:var(--muted); font-size:12px; line-height:1.4; }
+  .sd-source-note { color:#a9bdd7; font-size:11px; line-height:1.45; margin:0 0 10px; }
+  .patron-table { width:100%; border-collapse:separate; border-spacing:0; font-size:12px; white-space:nowrap; }
+  .patron-table th, .patron-table td { padding:9px 11px; border-bottom:1px solid var(--card-border); border-right:1px solid rgba(255,255,255,.04); text-align:right; }
+  .patron-table th:first-child, .patron-table td:first-child { text-align:left; position:sticky; left:0; background:#111d33; z-index:2; min-width:230px; white-space:normal; font-weight:600; border-right:1px solid var(--card-border); }
+  .patron-table thead th { background:#16233c; color:#a8b6cc; font-size:10.5px; text-transform:uppercase; letter-spacing:.04em; font-weight:800; position:sticky; top:0; z-index:3; border-bottom:2px solid var(--card-border); }
+  .patron-table thead th:first-child { z-index:4; }
+  .patron-table tbody tr.odd td { background:rgba(255,255,255,.018); }
+  .patron-table tbody tr.odd td:first-child { background:#132038; }
+  .patron-table td.total { font-weight:800; color:#93c5fd; border-left:2px solid var(--card-border); }
+  .patron-table th:nth-last-child(2) { border-left:2px solid var(--card-border); }
+  .patron-table td.zerocell { color:#fca5a5; background:rgba(127,29,29,.22); font-weight:700; }
+  .patron-table tbody tr td.zerocell { background:rgba(127,29,29,.28) !important; }
+  .patron-table tbody tr td.low-income { color:#fde68a; background:rgba(180,83,9,.32) !important; font-weight:800; }
+  .low-income .low-pct { display:inline-block; margin-left:4px; color:#fbbf24; font-size:10px; font-weight:700; }
+  .income-legend { display:flex; flex-wrap:wrap; gap:12px; align-items:center; color:var(--muted); font-size:12px; margin:4px 0 10px; line-height:1.4; }
+  .income-legend i { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:5px; }
+  .patron-table td.zeros-flag { font-weight:800; }
+  .patron-table tbody tr:hover td { background:rgba(59,130,246,.10); }
+  .patron-table tbody tr:hover td:first-child { background:#1c2f4d; }
+  .patron-table tfoot tr.avg-row td { background:#1e2a44; color:#fde68a; font-weight:800; border-top:2px solid var(--card-border); border-bottom:none; }
+  .patron-table tfoot tr.avg-row td:first-child { background:#22314f; color:#fde68a; }
+  .patron-table tfoot tr.avg-row td.total { color:#fde68a; }
+  .patron-table tfoot tr.total-row td { background:#193452; color:#dbeafe; font-weight:800; border-top:2px solid rgba(147,197,253,.3); }
+  .patron-table tfoot tr.total-row td:first-child { background:#1b395a; color:#dbeafe; }
+  .patron-table td.spike { color:#fdba74; background:rgba(194,65,12,.28); font-weight:800; }
+  .patron-table td.spike-flag { font-weight:800; }
+  .patron-note { color:var(--muted); font-size:12px; margin-top:10px; }
+  .patron-badge { display:inline-block; font-size:9.5px; font-weight:800; padding:1px 6px; border-radius:4px; margin-left:6px; vertical-align:middle; }
+  .patron-badge.inactivo { background:#7f1d1d; color:#fecaca; }
+  /* Comparativo de ingresos y egresos */
+  .ie-legend { display:flex; flex-wrap:wrap; gap:12px 20px; color:var(--muted); font-size:12px; margin:16px 0 8px; }
+  .ie-legend span { display:inline-flex; align-items:center; }
+  .ie-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:18px 0; }
+  .ie-summary .patron-tile .v { font-variant-numeric:tabular-nums; }
+  .ie-patterns { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:16px; }
+  .ie-pattern { background:rgba(255,255,255,.035); border:1px solid var(--card-border); border-radius:10px; padding:14px; line-height:1.5; font-size:13px; }
+  .ie-pattern strong { display:block; color:#c8dafa; margin-bottom:5px; }
+  .ie-pattern p { margin:0; color:var(--muted); }
+  .ie-table { width:100%; min-width:640px; border-collapse:collapse; font-size:12.5px; font-variant-numeric:tabular-nums; }
+  .ie-table th, .ie-table td { padding:11px; text-align:right; border-bottom:1px solid var(--card-border); white-space:nowrap; }
+  .ie-table th:first-child, .ie-table td:first-child { text-align:left; }
+  .ie-table th { color:var(--muted); text-transform:uppercase; font-size:11px; background:rgba(255,255,255,.035); }
+  .ie-table tbody tr:last-child td { border-bottom:0; }
+  /* ===== Mobile ===== */
+  @media (max-width:640px) {
+    .page { padding:10px; }
+    h1 { font-size:17px; }
+    .sub { font-size:11.5px; margin-bottom:14px; }
+    .tabs { flex-wrap:wrap; gap:6px; margin-bottom:14px; }
+    .tab-btn { padding:7px 12px; font-size:11.5px; }
+    .chart-head { flex-direction:column; align-items:flex-start; gap:10px; padding:12px 12px 6px; }
+    .legend { flex-wrap:wrap; gap:8px 12px; font-size:10.5px; }
+    .cau-card, .pct-clave-card, .patron-card, .sueldo-idx-card, .exec-summary { padding:14px 14px; margin-bottom:14px; }
+    .cau-card { flex-direction:column; align-items:flex-start; gap:8px; }
+    .pct-clave-card h2, .patron-card h2, .exec-summary h2 { font-size:14px; }
+    .exec-sub { font-size:11.5px; }
+    .pct-clave-grid { grid-template-columns:repeat(auto-fit,minmax(100px,1fr)); gap:8px; }
+    .pct-tile { padding:10px 10px 8px; }
+    .pct-tile .p { font-size:19px; }
+    .patron-insights { grid-template-columns:1fr 1fr; gap:8px; }
+    .patron-tile { padding:10px 12px; }
+    .patron-tile .v { font-size:14px; }
+    .steps { grid-template-columns:1fr 1fr; }
+    .cob-cards { grid-template-columns:1fr 1fr; }
+    .patron-table th:first-child, .patron-table td:first-child { min-width:150px; }
+    .patron-table th, .patron-table td { padding:7px 8px; font-size:11px; }
+    .exec-table th, .exec-table td { padding:8px 8px; font-size:11.5px; }
+    .cob-table th, .cob-table td { padding:7px 8px; font-size:11.5px; }
+    .tooltip { max-width:220px; font-size:11px; }
+  }
+  @media (max-width:380px) {
+    .patron-insights { grid-template-columns:1fr; }
+    .cob-cards { grid-template-columns:1fr; }
+  }
+  /* Vista móvil: navegación cómoda y desplazamiento contenido en cada gráfico/tabla. */
+  .scroll-hint { display:none; }
+  @media (max-width:700px) {
+    html, body { max-width:100%; overflow-x:hidden; }
+    .page { width:100%; min-width:0; padding:12px; }
+    .page > div, .chart-card, .patron-card, .exec-table-wrap { min-width:0; max-width:100%; }
+    h1 { font-size:18px; line-height:1.25; }
+    .tabs { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-bottom:18px; }
+    .tab-btn { min-height:44px; padding:8px 6px; font-size:12px; line-height:1.15; text-align:center; }
+    .chart-head { padding:12px; }
+    .legend { white-space:normal; line-height:1.35; }
+    .legend span { display:inline-flex; align-items:baseline; }
+    .chart-scroll, .patron-chart-wrap, .exec-table-wrap {
+      max-width:100%; overflow-x:auto; overscroll-behavior-x:contain;
+      -webkit-overflow-scrolling:touch;
+    }
+    .scroll-hint { display:block; margin:8px 2px; color:#a9bdd7; font-size:12px; line-height:1.3; }
+    .scroll-hint::before { content:"⇆ "; font-size:16px; vertical-align:-1px; }
+    .patron-card { margin-top:14px; padding:14px 12px; }
+    .patron-insights { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .patron-tile, .pct-tile, .step { min-width:0; overflow-wrap:anywhere; }
+    .patron-tile .v, .step .v { overflow-wrap:anywhere; }
+    .patron-table th:first-child, .patron-table td:first-child { min-width:132px; max-width:155px; }
+    .patron-table th:not(:first-child), .patron-table td:not(:first-child) { min-width:70px; }
+    .exec-table { min-width:580px; }
+    .tooltip { max-width:min(290px,calc(100vw - 24px)); transform:none; }
+    .tooltip.touch-visible { left:12px !important; top:auto !important; bottom:14px; width:calc(100vw - 24px); box-shadow:0 8px 35px rgba(0,0,0,.8); }
+    .sub, .exec-sub, .patron-note { line-height:1.45; }
+    .ie-summary { grid-template-columns:1fr 1fr; gap:8px; }
+    .ie-summary .patron-tile:last-child { grid-column:1 / -1; }
+    .ie-patterns { grid-template-columns:1fr; }
+    .ie-legend { font-size:11px; }
+    .home { padding-top:4px; }
+    .home-intro { margin-bottom:16px; }
+    .home-hero { padding:20px; }
+    .home-hero p { font-size:13px; }
+    .home-links { grid-template-columns:1fr; gap:9px; }
+    .home-link { min-height:105px; padding:16px; }
+    .caucion-note { display:block; padding:14px; }
+    .caucion-note strong { display:block; margin-top:10px; font-size:18px; }
+  }
+  @media (max-width:390px) {
+    .patron-insights { grid-template-columns:1fr; }
+    .tab-btn { font-size:11.5px; }
+  }
 </style>
 </head>
 <body>
 <div class="page">
-  <nav class="tabs">
-    <button class="tab-btn active" data-tab="flujo">Evolución de fondos</button>
-    <button class="tab-btn" data-tab="cobranza">Seguimiento de cobranza</button>
+  <nav class="tabs" aria-label="Hojas del informe">
+    <button class="tab-btn active" data-tab="inicio">Inicio</button>
+    <button class="tab-btn" data-tab="ingresoegreso">Ingreso/Egreso</button>
+    <button class="tab-btn" data-tab="analizar">Ingresos</button>
+    <button class="tab-btn" data-tab="egresos">Egresos</button>
+    <button class="tab-btn" data-tab="saldodiario">DISPONIBILIDADES</button>
   </nav>
-  <div id="tab-flujo">
-  <h1>Evolución de fondos</h1>
-
-  <div class="chart-card">
-    <div class="chart-head">
-      <div></div>
-      <div class="legend">
-        <span><i class="dot" style="background:var(--neg)"></i>Caja en déficit</span>
-        <span><i class="dot" style="background:var(--pos)"></i>Caja positiva</span>
-        <span><i class="dot" style="background:#16a34a; opacity:.4;"></i>Caja sin la deuda de la caución</span>
-        <span><i class="dot" style="background:#7c3aed"></i>Egresos clave</span>
+  <div id="tab-inicio" class="home">
+    <div class="home-kicker">Informe financiero · 2026</div>
+    <h1>Panel de análisis</h1>
+    <p class="home-intro">Elegí una hoja para consultar los saldos, los movimientos mensuales y los patrones de ingresos y egresos.</p>
+    <section class="home-hero" aria-labelledby="homeDisponibilidades">
+      <div>
+        <span class="eyebrow">Acceso principal</span>
+        <h2 id="homeDisponibilidades">DISPONIBILIDADES</h2>
+        <p>Seguimiento diario del saldo, días en rojo, picos y resumen mensual. Es la vista principal para revisar la posición de caja.</p>
+        <button class="home-open" type="button" data-go="saldodiario">Abrir disponibilidades →</button>
       </div>
-    </div>
-    <div class="chart-scroll" id="chartScroll">
-      <svg id="chart" height="560"></svg>
+    </section>
+    <h2 class="home-section-title">Otras hojas</h2>
+    <div class="home-links">
+      <button class="home-link" type="button" data-go="ingresoegreso"><strong>Ingreso/Egreso</strong><span>Comparación mensual, balance y patrones del período.</span><em>Ver hoja →</em></button>
+      <button class="home-link" type="button" data-go="analizar"><strong>Ingresos</strong><span>Cobranza por cliente, promedios y meses por debajo de lo habitual.</span><em>Ver hoja →</em></button>
+      <button class="home-link" type="button" data-go="egresos"><strong>Egresos</strong><span>Gastos por rubro y meses con sobresaltos.</span><em>Ver hoja →</em></button>
     </div>
   </div>
+  <div id="tab-analizar" hidden>
+    <h1>Ingresos</h1>
+    <div class="sub">Ingresos mensuales por cliente, enero a diciembre</div>
 
-  <section class="cau-card">
-    <label class="cau-toggle">
-      <input type="checkbox" id="chkDevolverCaucion" checked>
-      <span>DEVOLVER CAUCIÓN</span>
-    </label>
-    <div class="cau-toggle-sub" id="cauToggleSub"></div>
-  </section>
-
-  <section class="pct-clave-card">
-    <h2>% del descubierto necesario al pagar sueldos</h2>
-    <div class="exec-sub">El número que importa: cuánto del límite de <span id="pctClaveLimite"></span> tenés que usar ese día, mes a mes</div>
-    <div class="pct-clave-grid" id="pctClaveGrid"></div>
-  </section>
-
-  <section class="exec-summary" id="cierreSteps"></section>
-
-
-  <section class="exec-summary" id="execSummary"></section>
+    <section class="patron-card">
+      <h2>Patrón de Cobranzas — Ingresos por cliente</h2>
+      <div class="patron-insights" id="patronInsights"></div>
+      <p class="scroll-hint">Deslizá para recorrer los meses.</p>
+      <div class="patron-chart-wrap">
+        <svg id="patronChart" height="220"></svg>
+      </div>
+      <div class="income-legend"><span><i style="background:#b45309"></i>Ingreso bajo: más de 40% por debajo del promedio mensual de ese cliente</span><span><i style="background:#7f1d1d"></i>Mes sin cobro: $0</span><span id="lowIncomeCount"></span></div>
+      <div class="exec-table-wrap">
+        <table class="patron-table" id="patronTable"></table>
+      </div>
+      <div class="patron-note">Las celdas en rojo son meses en $0 (el cliente no pagó ese mes) · ordenado por total anual, de mayor a menor · saqué de esta tabla a AGRICULTORES FEDERADOS, ELECTRÓNICA MEGATONE y ACCIÓN MERCANTIL por estar inactivos todo el año · "MAX SEGUR" cobra muy poco y de forma muy irregular (9 de 12 meses en $0) — vale la pena revisarlo aparte.</div>
+      </section>
   </div>
 
-  <div id="tab-cobranza" hidden>
-    <h1>Seguimiento de cobranza</h1>
-    <div class="sub">Tildá cada cobro cuando entra · las marcas quedan guardadas en este navegador</div>
-    <div class="cob-cards">
-      <div class="cob-card"><div class="k">Total a cobrar</div><div class="v" id="cobTotal"></div></div>
-      <div class="cob-card"><div class="k">Ya entró</div><div class="v ok" id="cobOk"></div></div>
-      <div class="cob-card"><div class="k">Pendiente</div><div class="v warn" id="cobPend"></div></div>
-      <div class="cob-card"><div class="k">Cobros tildados</div><div class="v" id="cobCount"></div><div class="cob-bar"><i id="cobProg"></i></div></div>
-    </div>
-    <div class="cob-filters" id="cobFilters">
-      <button data-f="all" class="active">Todos</button>
-      <button data-f="pend">Pendientes</button>
-      <button data-f="ok">Cobrados</button>
-    </div>
-    <div class="cob-wrap">
-      <table class="cob-table">
-        <thead><tr><th class="chk">Entró</th><th>Cliente</th><th class="num">Monto</th><th>Fecha de cobro</th></tr></thead>
-        <tbody id="cobBody"></tbody>
-      </table>
-    </div>
-    <div class="cob-note" id="cobNote"></div>
+  <div id="tab-egresos" hidden>
+    <h1>Egresos</h1>
+    <div class="sub">Egresos mensuales por rubro, enero a diciembre</div>
+
+    <section class="patron-card">
+      <h2>Patrón de Egresos — Sobresaltos</h2>
+      <div class="exec-sub">Enero a diciembre · la otra mitad del descalce: rubros que en un mes puntual se disparan muy por encima de lo que gastan habitualmente</div>
+      <div class="patron-insights" id="egrInsights"></div>
+      <p class="scroll-hint">Deslizá para recorrer los meses.</p>
+      <div class="patron-chart-wrap">
+        <svg id="egrChart" height="220"></svg>
+      </div>
+      <div class="exec-table-wrap">
+        <table class="patron-table" id="egrTable"></table>
+      </div>
+      <div class="patron-note">Las celdas en naranja son sobresaltos: el rubro gastó ese mes 40% o más por encima de su propio promedio anual (y al menos $20 M de diferencia) · ordenado por total anual, de mayor a menor.</div>
+    </section>
+  </div>
+
+  <div id="tab-ingresoegreso" hidden>
+    <h1>Ingreso / Egreso</h1>
+    <div class="sub">Comparación mensual de ingresos cobrados y egresos cargados · enero a diciembre 2026</div>
+    <section class="patron-card">
+      <h2>Balance mensual</h2>
+      <div class="exec-sub">Dos barras por mes; la diferencia es ingresos menos egresos. Valores expresados en millones de pesos.</div>
+      <div class="ie-summary" id="ieSummary"></div>
+      <div class="ie-legend"><span><i class="dot" style="background:#38bdf8"></i>Ingresos</span><span><i class="dot" style="background:#fb923c"></i>Egresos</span><span><i class="dot" style="background:#f87171"></i>Mes con déficit</span></div>
+      <p class="scroll-hint">Deslizá para recorrer los meses. Tocá una barra para ver el detalle.</p>
+      <div class="patron-chart-wrap" id="ieChartWrap"><svg id="ieChart" role="img" aria-label="Ingresos y egresos por mes" height="330"></svg></div>
+      <div class="patron-note">Los valores provienen de las pestañas Ingresos y Egresos de este archivo. Octubre, noviembre y diciembre son meses futuros y se presentan como proyección.</div>
+      <h2>Detalle por mes</h2>
+      <div class="exec-table-wrap"><table class="ie-table" id="ieTable"></table></div>
+      <h2>Patrones observados</h2>
+      <div class="ie-patterns" id="iePatterns"></div>
+    </section>
+  </div>
+
+  <div id="tab-saldodiario" hidden>
+    <h1>DISPONIBILIDADES</h1>
+    <div class="sub">Enero a septiembre 2026, día por día · buscando patrones detrás del descalce</div>
+    <aside class="caucion-note" aria-label="Caución adeudada">
+      <div><span class="label">Caución adeudada</span><p>Se suma al análisis de disponibilidades la deuda de la caución.</p></div>
+      <strong>$567.501.477,78</strong>
+    </aside>
+
+    <section class="patron-card">
+      <div class="sd-controls">
+        <button class="sd-project-btn" id="sdProjectBtn" type="button" aria-pressed="false">PROYECTAR A DICIEMBRE</button>
+        <span class="sd-mode" id="sdMode">Datos cargados hasta el 25/09/2026</span>
+      </div>
+      <p class="sd-source-note" id="sdSourceNote" hidden><strong>Devolución de la caución: 05/10/2026 · $567.501.477,78.</strong> Los saldos proyectados se muestran según el PDF adjunto. Desde el 25/09/2026 se usa el saldo de ese documento; al volver se recupera el dato actual.</p>
+      <p class="scroll-hint">Deslizá para recorrer los días. Tocá el gráfico para ver fecha y saldo.</p>
+      <div class="patron-chart-wrap sd-chart-wrap">
+        <svg id="sdChart" height="560" role="img" aria-label="Disponibilidades diarias de enero a septiembre de 2026"></svg>
+      </div>
+    </section>
+
   </div>
 </div>
 <div class="tooltip" id="tooltip"></div>
 
 <script>
-const RAW_DATA = [{"label":"ABR 26","rows":[{"date":"2026-04-01","label":"1/4","value":1128575518},{"date":"2026-04-02","label":"2/4","value":1128575518},{"date":"2026-04-03","label":"3/4","value":1128575518},{"date":"2026-04-06","label":"6/4","value":1368246721},{"date":"2026-04-07","label":"7/4","value":1695080848},{"date":"2026-04-08","label":"8/4","value":13411832},{"date":"2026-04-09","label":"9/4","value":-112344281},{"date":"2026-04-10","label":"10/4","value":-79796344},{"date":"2026-04-13","label":"13/4","value":-347615761},{"date":"2026-04-14","label":"14/4","value":62098487},{"date":"2026-04-15","label":"15/4","value":98313275},{"date":"2026-04-16","label":"16/4","value":112303219},{"date":"2026-04-17","label":"17/4","value":163409281},{"date":"2026-04-20","label":"20/4","value":290844871},{"date":"2026-04-21","label":"21/4","value":424208253},{"date":"2026-04-22","label":"22/4","value":456062957},{"date":"2026-04-23","label":"23/4","value":516675590},{"date":"2026-04-24","label":"24/4","value":332416860},{"date":"2026-04-27","label":"27/4","value":461046416},{"date":"2026-04-28","label":"28/4","value":684541966},{"date":"2026-04-29","label":"29/4","value":743636063},{"date":"2026-04-30","label":"30/4","value":817266255}]},{"label":"MAY 26","rows":[{"date":"2026-05-01","label":"1/5","value":817266255},{"date":"2026-05-04","label":"4/5","value":822708301},{"date":"2026-05-05","label":"5/5","value":1592923485},{"date":"2026-05-06","label":"6/5","value":1644441337},{"date":"2026-05-07","label":"7/5","value":-186705081},{"date":"2026-05-08","label":"8/5","value":-69262300},{"date":"2026-05-11","label":"11/5","value":143152401},{"date":"2026-05-12","label":"12/5","value":222089575},{"date":"2026-05-13","label":"13/5","value":-141419546},{"date":"2026-05-14","label":"14/5","value":-99176831},{"date":"2026-05-15","label":"15/5","value":-110015143},{"date":"2026-05-18","label":"18/5","value":430102835},{"date":"2026-05-19","label":"19/5","value":562476184},{"date":"2026-05-20","label":"20/5","value":553917886},{"date":"2026-05-21","label":"21/5","value":590908776},{"date":"2026-05-22","label":"22/5","value":572219896},{"date":"2026-05-25","label":"25/5","value":572219896},{"date":"2026-05-26","label":"26/5","value":911958869},{"date":"2026-05-27","label":"27/5","value":1039893729},{"date":"2026-05-28","label":"28/5","value":1114350359},{"date":"2026-05-29","label":"29/5","value":1175304167}]},{"label":"JUN 26","rows":[{"date":"2026-06-01","label":"1/6","value":1418154715},{"date":"2026-06-02","label":"2/6","value":1745369027},{"date":"2026-06-03","label":"3/6","value":2198384394},{"date":"2026-06-04","label":"4/6","value":230549692},{"date":"2026-06-05","label":"5/6","value":230051283},{"date":"2026-06-08","label":"8/6","value":160231503},{"date":"2026-06-09","label":"9/6","value":253486106},{"date":"2026-06-10","label":"10/6","value":211819776},{"date":"2026-06-11","label":"11/6","value":-332161309},{"date":"2026-06-12","label":"12/6","value":12807486},{"date":"2026-06-15","label":"15/6","value":12807486},{"date":"2026-06-16","label":"16/6","value":201149494},{"date":"2026-06-17","label":"17/6","value":338233745},{"date":"2026-06-18","label":"18/6","value":330702009},{"date":"2026-06-19","label":"19/6","value":350129955},{"date":"2026-06-22","label":"22/6","value":379153544},{"date":"2026-06-23","label":"23/6","value":709359030},{"date":"2026-06-24","label":"24/6","value":849091437},{"date":"2026-06-25","label":"25/6","value":977462435},{"date":"2026-06-26","label":"26/6","value":1049246420},{"date":"2026-06-29","label":"29/6","value":886317408},{"date":"2026-06-30","label":"30/6","value":172142095}]},{"label":"JUL 26","rows":[{"date":"2026-07-01","label":"1/7","value":318665063},{"date":"2026-07-02","label":"2/7","value":421742053},{"date":"2026-07-03","label":"3/7","value":609140016},{"date":"2026-07-06","label":"6/7","value":-645706654},{"date":"2026-07-07","label":"7/7","value":-451591909},{"date":"2026-07-08","label":"8/7","value":-565739733},{"date":"2026-07-09","label":"9/7","value":-565739733},{"date":"2026-07-10","label":"10/7","value":-565739733},{"date":"2026-07-13","label":"13/7","value":-572382568},{"date":"2026-07-14","label":"14/7","value":-230826346},{"date":"2026-07-15","label":"15/7","value":-1160234167},{"date":"2026-07-16","label":"16/7","value":-1127862512},{"date":"2026-07-17","label":"17/7","value":-1043443220},{"date":"2026-07-20","label":"20/7","value":-849789376},{"date":"2026-07-21","label":"21/7","value":-795860757},{"date":"2026-07-22","label":"22/7","value":-455259253},{"date":"2026-07-23","label":"23/7","value":-277242953},{"date":"2026-07-24","label":"24/7","value":-155561627},{"date":"2026-07-27","label":"27/7","value":18083671},{"date":"2026-07-28","label":"28/7","value":64603712},{"date":"2026-07-29","label":"29/7","value":67948469},{"date":"2026-07-30","label":"30/7","value":226593814},{"date":"2026-07-31","label":"31/7","value":265578179}]},{"label":"AGO 26","rows":[{"date":"2026-08-03","label":"3/8","value":360419015},{"date":"2026-08-04","label":"4/8","value":734819713},{"date":"2026-08-05","label":"5/8","value":1038213967},{"date":"2026-08-06","label":"6/8","value":-758750296},{"date":"2026-08-07","label":"7/8","value":-697907037},{"date":"2026-08-10","label":"10/8","value":-515170012},{"date":"2026-08-11","label":"11/8","value":-621250652},{"date":"2026-08-12","label":"12/8","value":-678285529},{"date":"2026-08-13","label":"13/8","value":-581358441},{"date":"2026-08-14","label":"14/8","value":-69238409},{"date":"2026-08-17","label":"17/8","value":-69238409},{"date":"2026-08-18","label":"18/8","value":-9922975},{"date":"2026-08-19","label":"19/8","value":220400971},{"date":"2026-08-20","label":"20/8","value":195077395},{"date":"2026-08-21","label":"21/8","value":162389716},{"date":"2026-08-24","label":"24/8","value":-35480613},{"date":"2026-08-25","label":"25/8","value":64607777},{"date":"2026-08-26","label":"26/8","value":53046380},{"date":"2026-08-27","label":"27/8","value":62015411},{"date":"2026-08-28","label":"28/8","value":128056610},{"date":"2026-08-31","label":"31/8","value":476701313}]},{"label":"SEP 26","rows":[{"date":"2026-09-01","label":"1/9","value":686846743},{"date":"2026-09-02","label":"2/9","value":1131140303},{"date":"2026-09-03","label":"3/9","value":1110951515},{"date":"2026-09-04","label":"4/9","value":-793109261},{"date":"2026-09-07","label":"7/9","value":-559273161},{"date":"2026-09-08","label":"8/9","value":-644865177},{"date":"2026-09-09","label":"9/9","value":-632089483},{"date":"2026-09-10","label":"10/9","value":-608761575},{"date":"2026-09-11","label":"11/9","value":-1218449834},{"date":"2026-09-14","label":"14/9","value":-614002277},{"date":"2026-09-15","label":"15/9","value":-519467031},{"date":"2026-09-16","label":"16/9","value":-521142989},{"date":"2026-09-17","label":"17/9","value":-449272981},{"date":"2026-09-18","label":"18/9","value":-447743463},{"date":"2026-09-21","label":"21/9","value":-441200948},{"date":"2026-09-22","label":"22/9","value":-263202598},{"date":"2026-09-23","label":"23/9","value":-213562182},{"date":"2026-09-24","label":"24/9","value":-398444438},{"date":"2026-09-25","label":"25/9","value":-189299274},{"date":"2026-09-28","label":"28/9","value":173084032},{"date":"2026-09-29","label":"29/9","value":355349993},{"date":"2026-09-30","label":"30/9","value":453457970}]},{"label":"OCT 26","rows":[{"date":"2026-10-01","label":"1/10","value":781716481},{"date":"2026-10-02","label":"2/10","value":877052576},{"date":"2026-10-05","label":"5/10","value":-1545634570},{"date":"2026-10-06","label":"6/10","value":-1573412870},{"date":"2026-10-07","label":"7/10","value":-1453243803},{"date":"2026-10-08","label":"8/10","value":-1445906555},{"date":"2026-10-09","label":"9/10","value":-1424516030},{"date":"2026-10-12","label":"12/10","value":-1027262127},{"date":"2026-10-13","label":"13/10","value":-1152810128},{"date":"2026-10-14","label":"14/10","value":-970530268},{"date":"2026-10-15","label":"15/10","value":-924130162},{"date":"2026-10-16","label":"16/10","value":-685098616},{"date":"2026-10-19","label":"19/10","value":-536593536},{"date":"2026-10-20","label":"20/10","value":-408936837},{"date":"2026-10-21","label":"21/10","value":-237584412},{"date":"2026-10-22","label":"22/10","value":87186530},{"date":"2026-10-23","label":"23/10","value":-16407849},{"date":"2026-10-26","label":"26/10","value":2821851},{"date":"2026-10-27","label":"27/10","value":16082380},{"date":"2026-10-28","label":"28/10","value":88792311},{"date":"2026-10-29","label":"29/10","value":88792311},{"date":"2026-10-30","label":"30/10","value":117999607}]},{"label":"NOV 26","rows":[{"date":"2026-11-02","label":"2/11","value":136265172},{"date":"2026-11-03","label":"3/11","value":393239962},{"date":"2026-11-04","label":"4/11","value":604171466},{"date":"2026-11-05","label":"5/11","value":-1429807131},{"date":"2026-11-06","label":"6/11","value":-1464061431},{"date":"2026-11-09","label":"9/11","value":-1570056299},{"date":"2026-11-10","label":"10/11","value":-1384580363},{"date":"2026-11-11","label":"11/11","value":-1951771906},{"date":"2026-11-12","label":"12/11","value":-1434523706},{"date":"2026-11-13","label":"13/11","value":-1440534978},{"date":"2026-11-16","label":"16/11","value":-1161455732},{"date":"2026-11-17","label":"17/11","value":-1045279282},{"date":"2026-11-18","label":"18/11","value":-880159148},{"date":"2026-11-19","label":"19/11","value":-948877848},{"date":"2026-11-20","label":"20/11","value":-641815689},{"date":"2026-11-23","label":"23/11","value":-311476374},{"date":"2026-11-24","label":"24/11","value":-296488464},{"date":"2026-11-25","label":"25/11","value":-220216115},{"date":"2026-11-26","label":"26/11","value":-115777942},{"date":"2026-11-27","label":"27/11","value":21929336},{"date":"2026-11-30","label":"30/11","value":22615577}]},{"label":"DIC 26","rows":[{"date":"2026-12-01","label":"1/12","value":356327604},{"date":"2026-12-02","label":"2/12","value":395411586},{"date":"2026-12-03","label":"3/12","value":420357175},{"date":"2026-12-04","label":"4/12","value":-1430419725},{"date":"2026-12-07","label":"7/12","value":-1543708025},{"date":"2026-12-08","label":"8/12","value":-1571486325},{"date":"2026-12-09","label":"9/12","value":-1468470397},{"date":"2026-12-10","label":"10/12","value":-1266649519},{"date":"2026-12-11","label":"11/12","value":-1938633065},{"date":"2026-12-14","label":"14/12","value":-1206906000},{"date":"2026-12-15","label":"15/12","value":-1086258413},{"date":"2026-12-16","label":"16/12","value":-880874168},{"date":"2026-12-17","label":"17/12","value":-880689299},{"date":"2026-12-18","label":"18/12","value":-1470732995},{"date":"2026-12-21","label":"21/12","value":-1108701045},{"date":"2026-12-22","label":"22/12","value":-951158236},{"date":"2026-12-23","label":"23/12","value":-875393161},{"date":"2026-12-24","label":"24/12","value":-987502819},{"date":"2026-12-25","label":"25/12","value":-889705951},{"date":"2026-12-28","label":"28/12","value":-778454467},{"date":"2026-12-29","label":"29/12","value":-778982684},{"date":"2026-12-30","label":"30/12","value":-771967186},{"date":"2026-12-31","label":"31/12","value":-771967186}]},{"label":"ENE 27","rows":[{"date":"2027-01-01","label":"1/1","value":-781071486}]}]
-// Caución: entra a caja pero es DEUDA (capital + interés diario). Los saldos del gráfico van netos de esa deuda.
+const RAW_DATA = [{"label":"ENE 26","rows":[{"date":"2026-01-01","label":"1/1","value":493557445.0},{"date":"2026-01-02","label":"2/1","value":767407311.0},{"date":"2026-01-05","label":"5/1","value":1293466017.0},{"date":"2026-01-06","label":"6/1","value":1357895375.0},{"date":"2026-01-07","label":"7/1","value":-333628599.0},{"date":"2026-01-08","label":"8/1","value":-330445191.0},{"date":"2026-01-09","label":"9/1","value":-327210214.0},{"date":"2026-01-12","label":"12/1","value":-318155041.0},{"date":"2026-01-13","label":"13/1","value":-827249611.0},{"date":"2026-01-14","label":"14/1","value":-822112330.0},{"date":"2026-01-15","label":"15/1","value":-488991368.0},{"date":"2026-01-16","label":"16/1","value":-425072595.0},{"date":"2026-01-19","label":"19/1","value":20657804.0},{"date":"2026-01-20","label":"20/1","value":-38763660.0},{"date":"2026-01-21","label":"21/1","value":60494250.0},{"date":"2026-01-22","label":"22/1","value":181808529.0},{"date":"2026-01-23","label":"23/1","value":362744169.0},{"date":"2026-01-26","label":"26/1","value":355959217.0},{"date":"2026-01-27","label":"27/1","value":409818308.0},{"date":"2026-01-28","label":"28/1","value":462735947.0},{"date":"2026-01-29","label":"29/1","value":494957559.0},{"date":"2026-01-30","label":"30/1","value":523796304.0}]},{"label":"FEB 26","rows":[{"date":"2026-02-02","label":"2/2","value":1286552776.0},{"date":"2026-02-03","label":"3/2","value":1360665879.0},{"date":"2026-02-04","label":"4/2","value":-489652200.0},{"date":"2026-02-05","label":"5/2","value":-459446818.0},{"date":"2026-02-06","label":"6/2","value":-335785419.0},{"date":"2026-02-09","label":"9/2","value":-59243509.0},{"date":"2026-02-10","label":"10/2","value":-337386477.0},{"date":"2026-02-11","label":"11/2","value":-141492417.0},{"date":"2026-02-12","label":"12/2","value":-84539037.0},{"date":"2026-02-13","label":"13/2","value":-84539037.0},{"date":"2026-02-16","label":"16/2","value":-84539037.0},{"date":"2026-02-17","label":"17/2","value":-161633128.0},{"date":"2026-02-18","label":"18/2","value":-6373007.0},{"date":"2026-02-19","label":"19/2","value":-65624965.0},{"date":"2026-02-20","label":"20/2","value":155812373.0},{"date":"2026-02-23","label":"23/2","value":449150215.0},{"date":"2026-02-24","label":"24/2","value":554375651.0},{"date":"2026-02-25","label":"25/2","value":633269638.0},{"date":"2026-02-26","label":"26/2","value":637073917.0},{"date":"2026-02-27","label":"27/2","value":958059765.0}]},{"label":"MAR 26","rows":[{"date":"2026-03-02","label":"2/3","value":1262647855.0},{"date":"2026-03-03","label":"3/3","value":1707457441.0},{"date":"2026-03-04","label":"4/3","value":-216250932.0},{"date":"2026-03-05","label":"5/3","value":-145901776.0},{"date":"2026-03-06","label":"6/3","value":-37132771.0},{"date":"2026-03-09","label":"9/3","value":114534363.0},{"date":"2026-03-10","label":"10/3","value":-318787105.0},{"date":"2026-03-11","label":"11/3","value":-6713161.0},{"date":"2026-03-12","label":"12/3","value":-17373944.0},{"date":"2026-03-13","label":"13/3","value":-59135021.0},{"date":"2026-03-16","label":"16/3","value":35197085.0},{"date":"2026-03-17","label":"17/3","value":72452424.0},{"date":"2026-03-18","label":"18/3","value":175555499.0},{"date":"2026-03-19","label":"19/3","value":223255914.0},{"date":"2026-03-20","label":"20/3","value":224729609.0},{"date":"2026-03-23","label":"23/3","value":224729609.0},{"date":"2026-03-24","label":"24/3","value":500428550.0},{"date":"2026-03-25","label":"25/3","value":634736108.0},{"date":"2026-03-26","label":"26/3","value":626772699.0},{"date":"2026-03-27","label":"27/3","value":676079554.0},{"date":"2026-03-30","label":"30/3","value":1086552501.0},{"date":"2026-03-31","label":"31/3","value":1086552501}]},{"label":"ABR 26","rows":[{"date":"2026-04-01","label":"1/4","value":1128575518.0},{"date":"2026-04-02","label":"2/4","value":1128575518.0},{"date":"2026-04-03","label":"3/4","value":1128575518.0},{"date":"2026-04-06","label":"6/4","value":1368246721.0},{"date":"2026-04-07","label":"7/4","value":1691531171.0},{"date":"2026-04-08","label":"8/4","value":13411832.0},{"date":"2026-04-09","label":"9/4","value":-112344281.0},{"date":"2026-04-10","label":"10/4","value":-79796344.0},{"date":"2026-04-13","label":"13/4","value":-347615761.0},{"date":"2026-04-14","label":"14/4","value":62098487.0},{"date":"2026-04-15","label":"15/4","value":98313275.0},{"date":"2026-04-16","label":"16/4","value":112303219.0},{"date":"2026-04-17","label":"17/4","value":163409281.0},{"date":"2026-04-20","label":"20/4","value":290844871.0},{"date":"2026-04-21","label":"21/4","value":424208253.0},{"date":"2026-04-22","label":"22/4","value":456062957.0},{"date":"2026-04-23","label":"23/4","value":516675590.0},{"date":"2026-04-24","label":"24/4","value":328015553.0},{"date":"2026-04-27","label":"27/4","value":461046416.0},{"date":"2026-04-28","label":"28/4","value":684541966.0},{"date":"2026-04-29","label":"29/4","value":743636063.0},{"date":"2026-04-30","label":"30/4","value":817266255.0}]},{"label":"MAY 26","rows":[{"date":"2026-05-01","label":"1/5","value":822708301.0},{"date":"2026-05-04","label":"4/5","value":822708301.0},{"date":"2026-05-05","label":"5/5","value":1592923485.0},{"date":"2026-05-06","label":"6/5","value":1644441337.0},{"date":"2026-05-07","label":"7/5","value":-187305081.0},{"date":"2026-05-08","label":"8/5","value":-69862300.0},{"date":"2026-05-11","label":"11/5","value":141952401.0},{"date":"2026-05-12","label":"12/5","value":220889575.0},{"date":"2026-05-13","label":"13/5","value":-142619546.0},{"date":"2026-05-14","label":"14/5","value":-100376831.0},{"date":"2026-05-15","label":"15/5","value":-111815143.0},{"date":"2026-05-18","label":"18/5","value":428302835.0},{"date":"2026-05-19","label":"19/5","value":560286184.0},{"date":"2026-05-20","label":"20/5","value":551547886.0},{"date":"2026-05-21","label":"21/5","value":588538777.0},{"date":"2026-05-22","label":"22/5","value":569849896.0},{"date":"2026-05-25","label":"25/5","value":569849896.0},{"date":"2026-05-26","label":"26/5","value":909588869.0},{"date":"2026-05-27","label":"27/5","value":1036923729.0},{"date":"2026-05-28","label":"28/5","value":1110990358.0},{"date":"2026-05-29","label":"29/5","value":1171764167.0}]},{"label":"JUN 26","rows":[{"date":"2026-06-01","label":"1/6","value":1418154714.0},{"date":"2026-06-02","label":"2/6","value":1745369027.0},{"date":"2026-06-03","label":"3/6","value":2198384394.0},{"date":"2026-06-04","label":"4/6","value":230549692.0},{"date":"2026-06-05","label":"5/6","value":227051283.0},{"date":"2026-06-08","label":"8/6","value":159031503.0},{"date":"2026-06-09","label":"9/6","value":252286106.0},{"date":"2026-06-10","label":"10/6","value":210619777.0},{"date":"2026-06-11","label":"11/6","value":-333361309.0},{"date":"2026-06-12","label":"12/6","value":11607486.0},{"date":"2026-06-15","label":"15/6","value":11607486.0},{"date":"2026-06-16","label":"16/6","value":201149494.0},{"date":"2026-06-17","label":"17/6","value":338233745.0},{"date":"2026-06-18","label":"18/6","value":330702010.0},{"date":"2026-06-19","label":"19/6","value":350129955.0},{"date":"2026-06-22","label":"22/6","value":379153544.0},{"date":"2026-06-23","label":"23/6","value":709359030.0},{"date":"2026-06-24","label":"24/6","value":849091437.0},{"date":"2026-06-25","label":"25/6","value":977462435.0},{"date":"2026-06-26","label":"26/6","value":1049246420.0},{"date":"2026-06-29","label":"29/6","value":886317408.0},{"date":"2026-06-30","label":"30/6","value":172142095.0}]},{"label":"JUL 26","rows":[{"date":"2026-07-01","label":"1/7","value":318665063.0},{"date":"2026-07-02","label":"2/7","value":421742053.0},{"date":"2026-07-03","label":"3/7","value":609140016.0},{"date":"2026-07-06","label":"6/7","value":-645473463.0},{"date":"2026-07-07","label":"7/7","value":-451379785.0},{"date":"2026-07-08","label":"8/7","value":-565629305.0},{"date":"2026-07-09","label":"9/7","value":-565629305.0},{"date":"2026-07-10","label":"10/7","value":-565629305.0},{"date":"2026-07-13","label":"13/7","value":-572382568.0},{"date":"2026-07-14","label":"14/7","value":-230826347.0},{"date":"2026-07-15","label":"15/7","value":-1160234167.0},{"date":"2026-07-16","label":"16/7","value":-1127862512.0},{"date":"2026-07-17","label":"17/7","value":-1043443221.0},{"date":"2026-07-20","label":"20/7","value":-849789376.0},{"date":"2026-07-21","label":"21/7","value":-795860757.0},{"date":"2026-07-22","label":"22/7","value":-455259253.0},{"date":"2026-07-23","label":"23/7","value":-277242953.0},{"date":"2026-07-24","label":"24/7","value":-155561627.0},{"date":"2026-07-27","label":"27/7","value":18083671.0},{"date":"2026-07-28","label":"28/7","value":64603712.0},{"date":"2026-07-29","label":"29/7","value":67948469.0},{"date":"2026-07-30","label":"30/7","value":226593814.0},{"date":"2026-07-31","label":"31/7","value":265578179.0}]},{"label":"AGO 26","rows":[{"date":"2026-08-03","label":"3/8","value":360419015.0},{"date":"2026-08-04","label":"4/8","value":734819713.0},{"date":"2026-08-05","label":"5/8","value":1038213968.0},{"date":"2026-08-06","label":"6/8","value":-758750296.0},{"date":"2026-08-07","label":"7/8","value":-697907037.0},{"date":"2026-08-10","label":"10/8","value":-515170013.0},{"date":"2026-08-11","label":"11/8","value":-621250652.0},{"date":"2026-08-12","label":"12/8","value":-678285528.0},{"date":"2026-08-13","label":"13/8","value":-581358440.0},{"date":"2026-08-14","label":"14/8","value":-69238409.0},{"date":"2026-08-17","label":"17/8","value":-69238409.0},{"date":"2026-08-18","label":"18/8","value":-9922975.0},{"date":"2026-08-19","label":"19/8","value":220400971.0},{"date":"2026-08-20","label":"20/8","value":195077395.0},{"date":"2026-08-21","label":"21/8","value":162389716.0},{"date":"2026-08-24","label":"24/8","value":-35480613.0},{"date":"2026-08-25","label":"25/8","value":64607777.0},{"date":"2026-08-26","label":"26/8","value":53046381.0},{"date":"2026-08-27","label":"27/8","value":62015411.0},{"date":"2026-08-28","label":"28/8","value":128056610.0},{"date":"2026-08-31","label":"31/8","value":476701314.0}]},{"label":"SEP 26","rows":[{"date":"2026-09-01","label":"1/9","value":686846743.0},{"date":"2026-09-02","label":"2/9","value":1131140303.57},{"date":"2026-09-03","label":"3/9","value":1110951515.0},{"date":"2026-09-04","label":"4/9","value":-793109261.0},{"date":"2026-09-07","label":"7/9","value":-559273161.0},{"date":"2026-09-08","label":"8/9","value":-644865177.0},{"date":"2026-09-09","label":"9/9","value":-632089484.0},{"date":"2026-09-10","label":"10/9","value":-608761575.0},{"date":"2026-09-11","label":"11/9","value":-1218449834.0},{"date":"2026-09-14","label":"14/9","value":-614002278.0},{"date":"2026-09-15","label":"15/9","value":-519467032.0},{"date":"2026-09-16","label":"16/9","value":-521142990.0},{"date":"2026-09-17","label":"17/9","value":-449272982.0},{"date":"2026-09-18","label":"18/9","value":-447743463.0},{"date":"2026-09-21","label":"21/9","value":-441200948.0},{"date":"2026-09-22","label":"22/9","value":-263202598.0},{"date":"2026-09-23","label":"23/9","value":-263202598},{"date":"2026-09-24","label":"24/9","value":-263202598},{"date":"2026-09-25","label":"25/9","value":-263202598}]}]
+// La caución de $550 M se excluye una sola vez del saldo acumulado desde su ingreso.
+const EXCLUSION_CAUCION = { fecha: "2026-08-18", importe: 550000000 };
+const saldoSinCaucion = (fecha, saldo) => saldo - (fecha >= EXCLUSION_CAUCION.fecha ? EXCLUSION_CAUCION.importe : 0);
+// Se conservan las funciones del escenario previo, con deuda adicional en cero.
 const CAUCION = {
   start: "2026-08-18",          // fecha de ingreso de los fondos
   principal: 0,         // capital recibido
@@ -406,7 +611,7 @@ const ESCENARIO_ACTIVA = () => !!(ESCENARIO.saldoBase || ESCENARIO.ingresosTotal
 // La devolución de la caución ya está adentro de los datos reales cargados, el 05/10.
 // Tildado = tal cual está el dato cargado (con esa salida de plata). Destildado = se la suma de vuelta
 // desde el 05/10 hasta fin de año, como si nunca se hubiera devuelto.
-const CAUCION_DEVOLUCION = { date: "2026-10-05", amount: 566044000 };
+const CAUCION_DEVOLUCION = { date: "2026-10-05", amount: 0 };
 function buildBaseData() {
   const E = ESCENARIO;
   const flat = RAW_DATA.flatMap(m => m.rows);
@@ -435,7 +640,7 @@ function buildBaseData() {
   if (!DEVOLVER_CAUCION) {
     flat.forEach(r => { if (r.date >= CAUCION_DEVOLUCION.date) cash[r.date] += CAUCION_DEVOLUCION.amount; });
   }
-  return RAW_DATA.map(m => ({...m, rows: m.rows.map(r => ({...r, value: cash[r.date], clients: INFLOW_BY_DATE[r.date] || []}))}));
+  return RAW_DATA.map(m => ({...m, rows: m.rows.map(r => ({...r, value: saldoSinCaucion(r.date, cash[r.date]), clients: INFLOW_BY_DATE[r.date] || []}))}));
 }
 let BASE_DATA = buildBaseData();
 function buildData() {
@@ -453,8 +658,6 @@ const showNeg = true;
 const showPos = true;
 const showPeaks = true;
 const INFLOWS = [
-  {date:"2026-08-18", label:"CAUCIÓN $550 M (DEUDA)"},
-  {date:"2026-10-05", label:"DEVOLUCIÓN CAUCIÓN"}
 ];
 const HIGHLIGHTS = [
   {date:"2026-07-06", label:"SUELDOS"},
@@ -484,9 +687,6 @@ const HIGHLIGHTS = [
   {date:"2026-12-24", label:"IVA"}
 ];
 
-const svg = document.getElementById("chart");
-const tip = document.getElementById("tooltip");
-
 const fmtMoney = (n) => {
   const sign = n < 0 ? "-" : n > 0 ? "+" : "";
   const abs = Math.abs(n);
@@ -497,196 +697,14 @@ const fmtExact = (n) => (n<0?"-":"") + "$" + Math.abs(n).toLocaleString("es-AR")
 const OVERDRAFT_LIMIT = 2420000000;
 const fmtPct = v => v.toFixed(2).replace(".", ",") + "%";
 
-function draw() {
-  const selected = DATA;
-  const rows = [];
-  const monthBounds = [];
-  selected.forEach(m => {
-    const start = rows.length;
-    m.rows.forEach(r => rows.push({...r, month:m.label}));
-    monthBounds.push({label:m.label, start, end:rows.length-1, key:m.key, rows:m.rows});
-  });
-
-  const margin = {top:54,right:24,bottom:65,left:78};
-  const barW = Math.max(5, rows.length < 80 ? 14 : rows.length < 180 ? 8 : 5);
-  const gap = Math.max(1.5, barW*0.30);
-  const innerW = Math.max(1150, rows.length*(barW+gap) + 160);
-  const width = innerW;
-  const height = 560;
-  svg.setAttribute("width", width);
-  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
-
-  const vals = rows.map(r=>r.value);
-  const maxAbs = Math.max(...vals.map(v=>Math.abs(v)), 1);
-  const topVal = Math.max(...vals, ...rows.map(r=>r.cash), 0);
-  const botVal = Math.min(...vals, ...rows.map(r=>r.cash), 0);
-  const topPad = Math.max(topVal*1.3, maxAbs*.15);
-  const botPad = Math.min(botVal*1.15, -maxAbs*.15);
-  const yMin = Math.min(Math.floor(botPad/250000000)*250000000, -Math.ceil(OVERDRAFT_LIMIT*1.1/250000000)*250000000);
-  const yMax = Math.ceil(topPad/250000000)*250000000;
-
-  const y = v => margin.top + (yMax-v)/(yMax-yMin)*(height-margin.top-margin.bottom);
-  const zeroY = y(0);
-  const x = i => margin.left + i*(barW+gap);
-
-  let out = "";
-  out += `<rect x="0" y="0" width="${width}" height="${height}" fill="#f1f3f5"/>`;
-
-  const ticks = 6;
-  for(let i=0;i<=ticks;i++) {
-    const tv = yMin + (yMax-yMin)*i/ticks;
-    const yy = y(tv);
-    out += `<line x1="${margin.left}" y1="${yy}" x2="${width-margin.right}" y2="${yy}" stroke="#e5e7eb" stroke-width="1"/>`;
-    const label = tv===0 ? "0" : (tv/1e6).toLocaleString("es-AR",{maximumFractionDigits:0});
-    out += `<text x="${margin.left-10}" y="${yy+4}" text-anchor="end" font-size="11" fill="#6b7280">${label}</text>`;
-  }
-  out += `<text x="18" y="${height/2}" transform="rotate(-90 18 ${height/2})" font-size="11" fill="#6b7280">ARS millones</text>`;
-  out += `<line x1="${margin.left}" y1="${zeroY}" x2="${width-margin.right}" y2="${zeroY}" stroke="#94a3b8" stroke-width="1.2"/>`;
-
-  const limitY = y(-OVERDRAFT_LIMIT);
-  out += `<line x1="${margin.left}" y1="${limitY}" x2="${width-margin.right}" y2="${limitY}" stroke="#991b1b" stroke-width="1.5" stroke-dasharray="6 4"/>`;
-  out += `<text x="${width-margin.right-6}" y="${limitY-6}" text-anchor="end" font-size="11" font-weight="700" fill="#991b1b">Límite descubierto: ${fmtMoney(-OVERDRAFT_LIMIT)}</text>`;
-
-  monthBounds.forEach((m, idx) => {
-    const sx = x(m.start) - gap/2;
-    const ex = x(m.end) + barW + gap/2;
-    const bandClass = idx % 2 === 0 ? "month-band-even" : "month-band-odd";
-    out += `<rect x="${sx}" y="${margin.top-12}" width="${Math.max(1,ex-sx)}" height="${height-margin.top-margin.bottom+20}" class="${bandClass}"/>`;
-    if(idx>0) out += `<line x1="${sx}" y1="${margin.top-12}" x2="${sx}" y2="${height-margin.bottom+8}" class="month-divider"/>`;
-    out += `<text x="${(sx+ex)/2}" y="27" text-anchor="middle" font-size="12" font-weight="800" fill="#111827">${m.label}</text>`;
-  });
-
-  rows.forEach((r,i) => {
-    // La caución es deuda desde que entra: el valor ya viene neto de esa deuda y se dibuja como una barra más del flujo.
-    // Atrás, del mismo grosor, va la barra de "sin la deuda de la caución" (la caja real), en un tono más tenue.
-    if (r.debt > 0) {
-      const cashNeg = r.cash < 0;
-      const yc = y(r.cash);
-      const hc = Math.max(1, Math.abs(zeroY-yc));
-      const byc = cashNeg ? zeroY : yc;
-      const fillGhost = cashNeg ? "#dc2626" : "#16a34a";
-      out += `<rect data-i="${i}" x="${x(i)}" y="${byc}" width="${barW}" height="${hc}" rx="1" fill="${fillGhost}" opacity=".38"/>`;
-    }
-    const netNeg = r.value < 0;
-    const visible = netNeg ? showNeg : showPos;
-    if (!visible) return;
-    const yv = y(r.value);
-    const hv = Math.max(1, Math.abs(zeroY-yv));
-    const byv = netNeg ? zeroY : yv;
-    const fill = netNeg ? "#dc2626" : "#16a34a";
-    out += `<rect class="bar" data-i="${i}" x="${x(i)}" y="${byv}" width="${barW}" height="${hv}" rx="1" fill="${fill}" opacity=".96"/>`;
-  });
-
-  if (showPeaks) {
-    monthBounds.forEach(m => {
-      const mr = rows.slice(m.start, m.end + 1);
-      if (!mr.length) return;
-
-      let localMax = mr[0], localMin = mr[0];
-      mr.forEach(r => {
-        if (r.value > localMax.value) localMax = r;
-        if (r.value < localMin.value) localMin = r;
-      });
-
-      const maxIndex = rows.indexOf(localMax);
-      const minIndex = rows.indexOf(localMin);
-
-      const _rows = rows;
-      const preIdx = _rows.findIndex(r => r.date === "2026-10-05");
-      const isPre = maxIndex === preIdx;
-      if (showPos && localMax.value > 0) {
-        const yy = y(localMax.value);
-        const xx = x(maxIndex) + barW/2;
-        out += `<circle cx="${xx}" cy="${yy}" r="4" fill="#16a34a" stroke="#ffffff" stroke-width="2"/>`;
-        const yl = y(Math.max(localMax.cash, localMax.value));
-        if (isPre) {
-          out += `<text x="${xx-14}" y="${yl-20}" text-anchor="end" fill="#15803d" class="peak-label">${localMax.label} · en cuenta</text>`;
-          out += `<text x="${xx-14}" y="${yl-8}" text-anchor="end" fill="#15803d" font-weight="800" class="peak-label">${fmtExact(localMax.cash)}</text>`;
-        } else {
-        out += `<text x="${xx}" y="${Math.max(42, yl-22)}" text-anchor="middle" fill="#15803d" class="peak-label">${localMax.label}</text>`;
-        out += `<text x="${xx}" y="${Math.max(54, yl-10)}" text-anchor="middle" fill="#15803d" class="peak-label">${fmtMoney(localMax.value)}</text>`;
-        }
-      }
-
-      if (showNeg && localMin.value < 0) {
-        const yy = y(localMin.value);
-        const xx = x(minIndex) + barW/2;
-        const pctUsed = fmtPct(Math.abs(localMin.value) / OVERDRAFT_LIMIT * 100);
-        out += `<circle cx="${xx}" cy="${yy}" r="4" fill="#dc2626" stroke="#ffffff" stroke-width="2"/>`;
-        out += `<text x="${xx}" y="${Math.min(height-margin.bottom-30, yy+18)}" text-anchor="middle" fill="#b91c1c" class="peak-label">${localMin.label}</text>`;
-        out += `<text x="${xx}" y="${Math.min(height-margin.bottom-18, yy+31)}" text-anchor="middle" fill="#b91c1c" class="peak-label">${fmtMoney(localMin.value)}</text>`;
-        out += `<text x="${xx}" y="${Math.min(height-margin.bottom-6, yy+44)}" text-anchor="middle" fill="#991b1b" font-weight="800" class="peak-label">${pctUsed} del límite</text>`;
-      }
-    });
-  }
-
-  const highlightGroups = {};
-  HIGHLIGHTS.forEach(h => {
-    if (!highlightGroups[h.date]) highlightGroups[h.date] = [];
-    highlightGroups[h.date].push(h.label);
-  });
-  Object.keys(highlightGroups).forEach(date => {
-    const idx = rows.findIndex(r => r.date === date);
-    if (idx < 0) return;
-    const xx = x(idx) + barW/2;
-    const topY = margin.top + 4;
-    const bottomY = height - margin.bottom + 8;
-    out += `<line x1="${xx}" y1="${topY}" x2="${xx}" y2="${bottomY}" stroke="#7c3aed" stroke-width="1.3" stroke-dasharray="3 3" opacity=".85"/>`;
-    out += `<circle cx="${xx}" cy="${topY}" r="3" fill="#7c3aed" stroke="#ffffff" stroke-width="1.2"/>`;
-    highlightGroups[date].forEach((label, i) => {
-      const ly = topY + 14 + i*14;
-      out += `<text x="${xx}" y="${ly}" text-anchor="middle" font-size="10" font-weight="800" fill="#6d28d9" class="peak-label">${label}</text>`;
-    });
-  });
-
-  const inflowGroups = {};
-  getInflows().forEach(h => {
-    if (!inflowGroups[h.date]) inflowGroups[h.date] = [];
-    inflowGroups[h.date].push(h.label);
-  });
-  Object.keys(inflowGroups).forEach(date => {
-    const idx = rows.findIndex(r => r.date === date);
-    if (idx < 0) return;
-    const xx = x(idx) + barW/2;
-    const topY = margin.top + 4;
-    const bottomY = height - margin.bottom + 8;
-    out += `<line x1="${xx}" y1="${topY}" x2="${xx}" y2="${bottomY}" stroke="#ea580c" stroke-width="1.6" stroke-dasharray="2 3" opacity=".9"/>`;
-    out += `<circle cx="${xx}" cy="${topY}" r="3.5" fill="#ea580c" stroke="#ffffff" stroke-width="1.2"/>`;
-    const already = (highlightGroups[date] || []).length;
-    inflowGroups[date].forEach((label, i) => {
-      const ly = topY + 14 + (i + already)*14;
-      out += `<text x="${xx}" y="${ly}" text-anchor="middle" font-size="10" font-weight="800" fill="#c2410c" class="peak-label">${label}</text>`;
-    });
-  });
-
-  const every = Math.max(1, Math.ceil(rows.length / 24));
-  rows.forEach((r,i) => {
-    if(i % every !== 0 && i !== rows.length-1) return;
-    out += `<text x="${x(i)+barW/2}" y="${height-margin.bottom+22}" text-anchor="end" transform="rotate(-55 ${x(i)+barW/2} ${height-margin.bottom+22})" font-size="9" fill="#6b7280">${r.label}</text>`;
-  });
-
-  svg.innerHTML = out;
-
-  svg.querySelectorAll(".bar").forEach(el => {
-    el.addEventListener("mousemove", ev => {
-      const r = rows[+el.dataset.i];
-      tip.style.opacity = 1;
-      tip.style.left = ev.clientX + "px";
-      tip.style.top = ev.clientY + "px";
-      const pctLine = r.value < 0 ? `<br>${fmtPct(Math.abs(r.value)/OVERDRAFT_LIMIT*100)} del límite de descubierto` : "";
-      const cauLine = r.debt > 0 ? `<br><span style="color:#8aa0bd">Caja: ${fmtExact(r.cash)}<br>Deuda caución: -${fmtExact(r.debt)}</span><br><strong>Neto: ${fmtExact(r.value)}</strong>` : `<br>${fmtExact(r.value)}`;
-      tip.innerHTML = `<strong>${r.month} · ${r.label}</strong>${cauLine}${pctLine}`;
-      el.setAttribute("opacity","0.72");
-    });
-    el.addEventListener("mouseleave", () => {
-      tip.style.opacity = 0;
-      el.setAttribute("opacity","0.96");
-    });
-  });
-}
-
-draw();
-
+// % que representa el saldo en cuenta (antes de pagar) sobre el pago de sueldo de ese mes.
+const SALDO_SOBRE_SUELDO = [
+  {label:"AGOSTO", pct:0},
+  {label:"SEPTIEMBRE", pct:0},
+  {label:"OCTUBRE", pct:0},
+  {label:"NOVIEMBRE", pct:0},
+  {label:"DICIEMBRE", pct:0}
+];
 const POST_SUELDOS_DATES = [
   {label:"ENERO", date:null}, {label:"FEBRERO", date:null}, {label:"MARZO", date:null},
   {label:"ABRIL", date:"2026-04-06"}, {label:"MAYO", date:"2026-05-07"}, {label:"JUNIO", date:"2026-06-04"},
@@ -802,13 +820,38 @@ function buildExecSummary() {
         </tbody>
       </table>
     </div>
+
+    <h2 style="margin-top:28px;">Saldo de la cuenta sobre pago de sueldo</h2>
+    <div class="exec-sub">Qué % del pago de sueldo de ese mes representa el saldo que tenés en cuenta antes de pagarlo</div>
+    <div class="exec-table-wrap">
+      <table class="exec-table">
+        <thead>
+          <tr>
+            <th>Mes</th>
+            <th>Saldo en cuenta</th>
+            <th>%</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${SALDO_SOBRE_SUELDO.map(r => {
+            const ps = postSueldosRows.find(p => p.label === r.label);
+            const v = ps && ps.row ? ps.row.value : null;
+            return `<tr class="${r.pct>=60?'crit':''}">
+              <td><strong>${r.label}</strong></td>
+              <td class="${v!=null ? (v<0?'neg-c':'pos-c') : 'muted-c'}">${v!=null ? fmtMoney(v) : '—'}</td>
+              <td class="${r.pct>=60?'neg-c':''}">${fmtPct(r.pct)}</td>
+            </tr>`;
+          }).join("")}
+        </tbody>
+      </table>
+    </div>
   `;
 }
-buildExecSummary();
 
 // Detalle del cierre: día anterior a sueldos → (devolución de la caución) → sueldos
 function renderCierreSteps() {
   const box = document.getElementById("cierreSteps");
+  if (!box) return;
   if (!ESCENARIO_ACTIVA()) { box.innerHTML = ""; box.style.display = "none"; return; }
   box.style.display = "";
   const E = ESCENARIO, d = f => f.split("-").reverse().slice(0,2).join("/");
@@ -829,10 +872,10 @@ function renderCierreSteps() {
       <div class="step bad"><div class="k">La cuenta queda en</div><div class="v">${fmtExact(fin)}</div><div class="n">usa el ${fmtPct(Math.abs(fin)/OVERDRAFT_LIMIT*100)} del descubierto de ${fmtExact(OVERDRAFT_LIMIT)}</div></div>
     </div>`;
 }
-renderCierreSteps();
 
 function renderCauToggle() {
   const chk = document.getElementById("chkDevolverCaucion");
+  if (!chk) return;
   chk.checked = DEVOLVER_CAUCION;
   const sub = document.getElementById("cauToggleSub");
   const fdate = CAUCION_DEVOLUCION.date.split("-").reverse().slice(0,2).join("/");
@@ -840,13 +883,13 @@ function renderCauToggle() {
     ? `Tildado: el ${fdate} sale de la caja ${fmtExact(CAUCION_DEVOLUCION.amount)} por la devolución de la caución (tal como está en los datos cargados).`
     : `Destildado: esa salida de plata se saca del gráfico. Desde el ${fdate} y hasta fin de año, todos los saldos mejoran en ${fmtExact(CAUCION_DEVOLUCION.amount)}.`;
 }
-renderCauToggle();
 
 function renderPctClave() {
-  document.getElementById("pctClaveLimite").textContent = fmtExact(OVERDRAFT_LIMIT);
+  const grid = document.getElementById("pctClaveGrid");
+  if (!grid) return;
   const soloAgoDic = new Set(["AGOSTO","SEPTIEMBRE","OCTUBRE","NOVIEMBRE","DICIEMBRE"]);
   const rows = getPostSueldosRows().filter(ps => soloAgoDic.has(ps.label));
-  document.getElementById("pctClaveGrid").innerHTML = rows.map(ps => {
+  grid.innerHTML = rows.map(ps => {
     if (!ps.row) return `<div class="pct-tile na"><div class="m">${ps.label}</div><div class="p">s/d</div><div class="d">sin datos</div></div>`;
     const v = ps.row.value;
     const pct = v < 0 ? Math.abs(v)/OVERDRAFT_LIMIT*100 : 0;
@@ -855,131 +898,406 @@ function renderPctClave() {
     return `<div class="pct-tile ${band}"><div class="m">${ps.label}</div><div class="p">${fmtPct(pct)}</div><div class="d">${dLabel} · ${fmtMoney(v)}</div></div>`;
   }).join("");
 }
-renderPctClave();
 
 function rerenderAll() {
   BASE_DATA = buildBaseData();
   DATA = buildData();
-  draw();
-  buildExecSummary();
-  renderCierreSteps();
-  renderCauToggle();
-  renderPctClave();
 }
-
-document.getElementById("chkDevolverCaucion").addEventListener("change", e => {
-  DEVOLVER_CAUCION = e.target.checked;
-  saveDevolverCaucion();
-  rerenderAll();
-});
 </script>
 <script>
 // Pestañas
-document.querySelectorAll(".tab-btn").forEach(b => b.addEventListener("click", () => {
-  document.querySelectorAll(".tab-btn").forEach(x => x.classList.toggle("active", x === b));
-  document.getElementById("tab-flujo").hidden = b.dataset.tab !== "flujo";
-  document.getElementById("tab-cobranza").hidden = b.dataset.tab !== "cobranza";
-}));
+const pageNames = ["inicio", "ingresoegreso", "analizar", "egresos", "saldodiario"];
+function openPage(name) {
+  if (!pageNames.includes(name)) return;
+  document.querySelectorAll(".tab-btn").forEach(b => {
+    const active = b.dataset.tab === name;
+    b.classList.toggle("active", active);
+    b.setAttribute("aria-current", active ? "page" : "false");
+  });
+  pageNames.forEach(key => { document.getElementById("tab-" + key).hidden = key !== name; });
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+document.querySelectorAll(".tab-btn").forEach(b => b.addEventListener("click", () => openPage(b.dataset.tab)));
+document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => openPage(b.dataset.go)));
 
-// Seguimiento de cobranza (datos del PDF)
+document.querySelectorAll(".exec-table-wrap").forEach(wrap => {
+  const hint = document.createElement("p");
+  hint.className = "scroll-hint";
+  hint.textContent = "Deslizá la tabla hacia los costados para ver todas las columnas.";
+  wrap.before(hint);
+});
+
+// Patrón de cobranzas: ingresos reales por cliente, enero a diciembre.
 (() => {
-  const COBROS = [
-    {n:"BAGLEY ARGENTINA S.A.", m:0.00, f:"2026-10-05"},
-    {n:"BANCO MACRO SA", m:0.00, f:"2026-10-05"},
-    {n:"CARTOCOR SOCIEDAD ANONIMA", m:0.00, f:"2026-10-05"},
-    {n:"EMBOTELLADORA DEL ATLANTICO S.A.", m:0.00, f:"2026-09-22"},
-    {n:"EMP. PROV. ENERGIA SANTA FE", m:0.00, f:"2026-09-24"},
-    {n:"EMP. PROV. ENERGIA SANTA FE (para sueldos)", m:0.00, f:"2026-10-05"},
-    {n:"FALABELLA S.A", m:0.00, f:"2026-09-24"},
-    {n:"INSTITUTO NACIONAL DE TECNOLOGIA AGROPECUARIA", m:0.00, f:"2026-09-25"},
-    {n:"IRSA INVERSIONES Y REPRESENTACIONES S.A.", m:0.00, f:"2026-10-01"},
-    {n:"ROGIRO ACEROS SA", m:0.00, f:"2026-10-01"},
-    {n:"SIPAR ACEROS S.A", m:0.00, f:"2026-10-01"},
-    {n:"SOHIPREN S. A.", m:0.00, f:"2026-10-01"},
-    {n:"NUEVO PUERTO SANTA FE S.A", m:0.00, f:"2026-09-24"},
-    {n:"ARCOR SAIC", m:0.00, f:"2026-10-01"},
-    {n:"CLUB EL PINAR SOC CIVIL", m:0.00, f:"2026-10-01"},
-    {n:"METRO ROSARIO S.A", m:0.00, f:"2026-10-01"},
-    {n:"ASOCIACION CIVIL LAS TEJAS DEL SUR", m:0.00, f:"2026-10-01"},
-    {n:"FRANCISCO PESADO CASTRO S.A", m:0.00, f:"2026-10-01"},
-    {n:"DISTRIBUIDORA DE GAS DEL CENTRO S.A.", m:0.00, f:"2026-09-25"},
-    {n:"DISTRIBUIDORA DE GAS CUYANA SA", m:0.00, f:"2026-09-25"},
-    {n:"TUBOS TRANS ELECTRIC SA", m:0.00, f:"2026-10-01"},
-    {n:"SOCIEDAD ADMINISTRADORA DE SIETE SOLES S.A", m:0.00, f:null, nota:"20M por día hábil, 24/09 al 05/10"},
-    {n:"DABRA SA", m:0.00, f:"2026-09-24"},
-    {n:"CLUB UNIVERSITARIO DE ROSARIO", m:0.00, f:"2026-09-21"},
-    {n:"SWIFT ARGENTINA S.A", m:0.00, f:"2026-09-30"},
-    {n:"INGRECOR S.A", m:0.00, f:"2026-10-01"},
-    {n:"CONDOMINIO RIOJA 1640", m:0.00, f:"2026-09-21"},
-    {n:"CONSORCIO PROPIETARIOS BARRIO PRIVADOS DOS LA", m:0.00, f:"2026-10-01"},
-    {n:"JOCKEY", m:0.00, f:"2026-10-01"},
-    {n:"EL PASO", m:0.00, f:"2026-10-01"},
-    {n:"NACION", m:0.00, f:"2026-10-01"},
-    {n:"EPE", m:0.00, f:"2026-10-01"}
-  ].map((c,i) => ({...c, id:i}));
+  const MESES = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"];
+  const CLIENTES_INGRESOS = [{n:"CENCOSUD S.A.",v:[661190586.77,684839998.84,578657188.03,394819167.54,795647409.1,807219518.41,709507102.42,713980090.15,727200000.0,729601080.0,742587980.0,755954563.0]},{n:"EMP. PROV. ENERGIA SANTA FE",v:[426800587.83,474355724.39,468552613.93,459377458.54,493939602.22,483743753.88,961069783.89,222401734.51,541666275.0,558374258.0,571216866.0,581384526.0]},{n:"SOCIEDAD ADMINISTRADORA DE SIETE SOLES S.A",v:[230637854.23,195022964.62,200786210.24,288586554.57,223348142.75,199895089.43,335606695.52,243211400.57,335449141.0,281784472.0,286800235.0,291962640.0]},{n:"EMBOTELLADORA DEL ATLANTICO S.A.",v:[364379384.05,222558819.88,180656183.91,121298504.74,312873753.08,268304679.35,286782713.86,208898439.42,220349145.0,417069877.0,264955963.0,269725171.0]},{n:"IRSA INVERSIONES Y REPRESENTACIONES S.A.",v:[165291827.01,164960064.08,363857944.91,160544961.22,182053058.97,175340272.58,204486905.47,204396684.78,0.0,419322651.0,215819420.0,219704169.0]},{n:"BANCO MACRO SA",v:[143697011.96,150543037.15,130259862.04,182454367.96,145656834.41,80195876.29,56959351.34,164310766.76,155220746.0,140737013.0,143242132.0,145820490.0]},{n:"SIPAR ACEROS S.A",v:[97979840.36,102501814.39,124250785.85,113753754.55,127676665.61,144118822.33,130970968.41,112557189.48,142046062.0,144958007.0,148292041.0,150931639.0]},{n:"ARCOR SAIC",v:[161176801.48,277265666.82,143392828.9,228402027.5,269990844.13,143515433.42,241094527.55,51102682.21,101713998.0,335837840.0,173523946.0,176612672.0]},{n:"CONSORCIO DE PROPIETARIOS LOTEO JOCKEY CLUB CBA SO",v:[93975670.0,94742694.15,90705299.82,100995914.0,98715411.6,100332180.49,100510089.47,107940052.44,110347062.0,112885044.0,114894398.0,116962497.0]},{n:"ASOCIACION CIVIL LAS TEJAS DEL SUR",v:[25866794.45,54666119.7,80868610.94,50644782.45,56739840.79,66657855.14,58057923.47,58314491.8,62535995.0,63974323.0,65113066.0,66285101.0]},{n:"COMPLEJO R. EL PASO CONSORCIO",v:[72920080.05,73785359.11,67478916.71,74880476.37,73621136.37,76727522.11,87328181.14,100624326.6,101709709.0,104049032.0,105901105.0,107807325.0]},{n:"LITORAL GAS",v:[0.0,52713655.66,54733222.48,49852531.07,59543592.13,53894737.4,112790636.19,0.0,60379103.0,61767822.0,62867289.0,63998901.0]},{n:"DISTRIBUIDORA DE GAS CUYANA SA",v:[50965589.62,53106164.45,53939890.97,49108257.15,54977442.69,54001083.18,57903471.22,58143479.91,117478901.0,60700136.0,61780598.0,62892649.0]},{n:"NUEVO PUERTO S.A",v:[29860409.24,30667061.91,33661830.45,29284360.52,33333615.95,31016326.13,33454394.39,36520079.23,35871589.0,72568224.0,37349835.0,38022132.0]},{n:"BAGLEY ARGENTINA S.A.",v:[38869634.81,82934184.4,47341046.34,44369011.48,86309421.13,40611811.42,43698066.99,0.0,17411335.0,124654596.0,49059591.0,49942663.0]},{n:"TUBOS TRANS ELECTRIC SA",v:[62205399.91,64030265.06,56434930.07,51732824.0,53712297.32,56099838.46,49646572.75,46810847.31,48579686.0,49575570.0,50715808.0,51618549.0]},{n:"SUPERMERCADOS MAYORISTAS MAKRO S.A",v:[42198276.53,0.0,0.0,51738595.98,0.0,57635733.78,30544635.33,32975887.54,36373953.0,37210554.0,37872901.0,38554614.0]},{n:"BANCO NACION ARGENTINA",v:[78949392.62,84683030.35,103623009.35,95575042.2,96399493.89,87236015.02,94802568.08,23733622.32,26019304.0,38000000.0,38000000.0,38000000.0]},{n:"CARTOCOR SOCIEDAD ANONIMA",v:[23610761.62,46665558.01,101409799.2,49018423.34,107936444.92,24610508.68,90338591.23,0.0,0.0,198922984.0,59334000.0,60390145.0]},{n:"MERCOBEEF",v:[43803548.76,90302450.44,93916309.63,90849860.38,91677904.99,44503751.71,91303824.66,93392802.43,0.0,47547880.0,48641482.0,49507300.0]},{n:"SOBRERO Y CAGNOLO S.A.",v:[13169170.46,30784049.0,12213504.27,27702265.14,7500000.0,28957704.8,30000000.0,31959456.5,0.0,33364762.0,33958655.0,34569910.0]},{n:"BARRANCAS DEL SUR BARRIO PRIVADO",v:[0.0,26847077.4,29632290.52,28536313.44,29960598.62,37574630.9,29328264.0,35786748.42,32404176.0,32350843.0,32926688.0,33519369.0]},{n:"CONDOMINIO RIOJA 1640",v:[21603687.87,22337907.22,15938204.65,23304154.12,12817519.34,23309428.67,24737216.77,25766776.2,20046227.0,26784510.0,27261274.0,27751977.0]},{n:"FIDEICOMISO ESTEROS DE SANTA FE",v:[18719802.69,19021174.62,17450262.6,11961396.65,8933608.25,9780974.92,9079276.92,0.0,0.0,14929535.0,29789157.0,15468796.0]},{n:"CLUB EL PINAR SOC CIVIL",v:[49228540.93,52117710.42,52671866.67,52002778.29,12000000.0,32398391.75,32798691.28,29697792.27,54466042.0,23255880.0,23669835.0,24095892.0]},{n:"KILBEL S.A.",v:[16199722.95,17114986.21,15935388.05,13838835.66,20702571.82,19860751.32,21668104.41,23350672.79,23487529.0,24027742.0,24455436.0,24895633.0]},{n:"PASEO DEL SIGLO",v:[9578621.01,19614223.13,15617124.01,21695989.14,14363309.71,12132254.0,20184492.42,18511996.52,23175217.0,22637533.0,21106661.0,21486581.0]},{n:"FALABELLA S.A",v:[18692622.66,18993556.64,17091420.13,19240161.74,19282060.17,0.0,19944747.31,20108306.96,19714417.0,20581289.0,20947636.0,21324693.0]},{n:"COMPLEJO RESIDENCIAL LA TATENGUITA",v:[21837894.14,23071556.39,20263479.64,22596944.51,22122868.45,26384276.49,23114810.84,24800121.53,25634369.0,26223959.0,26690745.0,27171179.0]},{n:"BARRIO PRIVADO DOS LAGUNAS",v:[21500000.0,30633292.32,10000000.0,31291583.52,30585009.6,62603540.64,32160024.0,34488194.4,40410000.0,62168860.0,63381598.0,64518291.0]},{n:"FIDEICOMISO DE ADMINISTRACION VIDA BARRIO CERRADO",v:[15486755.01,16202447.83,14123844.36,16057219.24,16041221.7,0.0,35110478.86,16148557.78,17909920.0,18321848.0,18647977.0,18983640.0]},{n:"CONSORCIO PROPIETARIOS EDIFICIO TUCUMAN RIO",v:[13445674.2,6075634.18,23436612.27,13233826.81,5000000.0,17160694.47,15089429.49,0.0,16253312.0,34161662.0,17582523.0,17899008.0]},{n:"CONDOMINIO PARQUE INDUSTRIAL ROSARIO OESTE",v:[13698543.51,12014335.4,29262393.12,21191647.69,9869694.39,7754665.28,26663135.05,2679508.11,17580604.0,27551046.0,23321738.0,23741530.0]},{n:"CENTRO MEDICO IPAM S.A.",v:[7113599.3,12150000.0,7043144.86,6894254.27,0.0,17573942.9,16416293.79,3000000.0,10500000.0,20331764.0,16050044.0,16338945.0]},{n:"VITOPEL SOCIEDAD ANONIMA",v:[10674456.86,11556735.2,21959350.81,11506507.64,11697560.58,20956296.5,13167352.55,0.0,18848192.0,21273608.0,13960651.0,14211943.0]},{n:"DISTRIBUIDORA DE GAS DEL CENTRO S.A.",v:[50639234.26,26726201.59,26330941.67,25361887.61,29281270.28,28000000.0,0.0,61717753.76,31134150.0,31850235.0,32417170.0,33000679.0]},{n:"INPLA S.A.",v:[7703522.36,8531036.24,8846825.53,7686908.62,8929129.71,8784705.1,2696224.73,3092784.36,0.0,0.0,0.0,0.0]},{n:"SOHIPREN S. A.",v:[13105507.88,13620873.97,13838789.2,11506502.45,14373762.48,13972730.0,20070016.42,14022754.47,15452698.0,15808110.0,16089494.0,16379105.0]},{n:"LAS ALMENAS S.A.",v:[13802230.42,14217781.23,23218172.66,14519191.58,14284214.77,14451686.88,6606158.96,0.0,0.0,0.0,0.0,0.0]},{n:"ROGIRO ACEROS SA",v:[13260605.12,13474083.35,12351116.5,26114725.31,13463949.25,14094943.75,28250826.66,15182016.9,30675265.0,31863414.0,16705755.0,17003117.0]},{n:"INGRECOR",v:[0.0,19405969.62,19541646.91,8777543.06,9503100.68,21916749.26,11987187.77,0.0,8621475.0,18405646.0,9510007.0,9679285.0]},{n:"SNA E ARGENTINA S.R.L",v:[4807266.95,4952260.92,6690014.8,19038956.21,7885699.36,4440211.74,4435900.92,7741182.23,9936461.0,13498411.0,13808875.0,14054673.0]},{n:"GANI SOCIEDAD ANONIMA",v:[13083654.69,13817230.83,13976333.99,12989830.22,14365911.67,14049030.38,14448162.21,15018734.52,15829447.0,16153950.0,16525491.0,16819645.0]},{n:"SEMAC (BRAYCO)",v:[9681015.62,20604989.19,9959860.12,9966376.55,0.0,20355802.06,6273636.68,15837023.27,9763900.0,12096815.0,10193233.0,10374673.0]},{n:"EDIFICIO JARDINES DEL SUR CONDOMINIO PRIVADO",v:[12607392.48,12810370.56,11752319.04,13085665.44,9037188.88,20179837.2,13448829.6,14422432.56,14744049.0,15083162.0,15351642.0,15627972.0]},{n:"CONSORCIO DE PROP. EDIF. CELESTINO X",v:[13389954.0,13605528.0,12481801.92,13897905.12,8584081.6,14220771.36,14283612.0,16038252.69,6938649.0,16281170.0,16570975.0,16869252.0]},{n:"FIDEICOMISO DE ADMINISTRACIÓN VIDA CLUB DE CAMPO",v:[19026890.72,19641925.4,18334575.91,21119244.58,20176980.47,21224288.2,21659655.2,23028217.97,23838264.0,8503574.0,8654938.0,8810727.0]},{n:"GRUPO HABITACIONAL EMPLEADOS DE COMERCIO",v:[13292616.55,13221389.22,0.0,11898647.8,11650524.47,12153917.11,11294640.25,13096784.78,13366852.0,13365269.0,13672670.0,13916044.0]},{n:"FIDEICOMISO VIDA MULTIESPACIO",v:[7119595.06,7217403.61,6781258.75,0.0,15452051.55,7675484.49,7687350.96,8159192.34,8312389.0,8312389.0,8460350.0,8612636.0]},{n:"RADIO Y TELEVISION ARGENTINA S.E.",v:[14273381.6,0.0,16947313.9,8524000.0,16943069.1,8580009.73,9344217.74,0.0,18090405.0,18778804.0,9702814.0,9875524.0]},{n:"SINDICATO OBREROS DE RECOLECCION Y BARRIDO",v:[5646798.14,3180215.65,8266256.81,6671023.0,27434198.0,7155005.94,8207884.44,8180428.81,7484817.0,8691890.0,8846606.0,9005845.0]},{n:"DABRA",v:[11313017.64,11729785.33,17519620.26,5093370.35,6379042.83,12180471.39,8000022.27,0.0,8452824.0,17450613.0,8981583.0,9143252.0]},{n:"CELULOSA MOLDEADA S.A.",v:[10790009.16,14726848.12,0.0,10714812.32,15000000.0,0.0,9883749.83,1069045.81,12233553.0,12560074.0,12783643.0,13013748.0]},{n:"CONSORCIO SARGENTO CABRAL 591",v:[4668287.0,2334143.5,0.0,2334143.5,2334143.5,4668287.0,4747413.9,2413270.4,2436680.0,2492723.0,2537094.0,2582762.0]},{n:"LIDERMA S.A",v:[0.0,0.0,3975677.99,1678352.65,2179118.5,1949263.08,1974739.74,2142936.11,2303565.0,2350788.0,2404856.0,2447662.0]},{n:"METRO ROSARIO S.A",v:[6097119.0,8097119.0,8383826.07,172226.26,990442.85,2611205.47,314008.31,284386.25,290216.0,296891.0,302176.0,307615.0]},{n:"MAX SEGUR",v:[25956649.65,0.0,25956649.65,52521211.77,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}];
 
-  const KEY = "cobranza_checks_v1";
-  let mem = [];
-  const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || "[]"); } catch(e) { return mem; } };
-  const save = arr => { mem = arr; try { localStorage.setItem(KEY, JSON.stringify(arr)); } catch(e) {} };
-  let checked = new Set(load());
-  let filter = "all";
+  const totales = MESES.map((_,i) => CLIENTES_INGRESOS.reduce((t,c) => t + c.v[i], 0));
+  window.ieIngresos = totales;
+  const conTotal = CLIENTES_INGRESOS.map(c => ({...c, total: c.v.reduce((a,b)=>a+b,0), ceros: c.v.filter(x=>x===0).length}))
+    .sort((a,b) => b.total - a.total);
 
-  // A revisar: sin fecha asignada todavía (no suman a los totales de arriba)
-  const REVISAR = [
-    {id:"r3", n:"Litoral Gas", m:null},
-    {id:"r4", n:"Cenco", m:null}
-  ];
-  const FKEY = "cobranza_fechas_v1";
-  const loadF = () => { try { return JSON.parse(localStorage.getItem(FKEY) || "{}"); } catch(e) { return {}; } };
-  let fechas = loadF();
-  const saveF = () => { try { localStorage.setItem(FKEY, JSON.stringify(fechas)); } catch(e) {} };
+  const fmtM = n => "$" + (n/1e6).toLocaleString("es-AR", {maximumFractionDigits:1}) + " M";
+  const fmtMM = n => "$" + (n/1e9).toLocaleString("es-AR", {maximumFractionDigits:2}) + " MM";
+  const fmtCell = n => n === 0 ? "$0" : (Math.abs(n) >= 1e9 ? fmtMM(n) : fmtM(n));
 
-  const money = new Intl.NumberFormat("es-AR", {style:"currency", currency:"ARS"});
-  const fdate = f => f.split("-").reverse().join("/");
-  const sorted = [...COBROS].sort((a,b) => (a.f || "9999").localeCompare(b.f || "9999") || a.id - b.id);
+  // Insights: mes más flojo / más fuerte, clientes inactivos todo el año
+  const minIdx = totales.indexOf(Math.min(...totales));
+  const maxIdx = totales.indexOf(Math.max(...totales));
+  const inactivos = conTotal.filter(c => c.ceros === 12);
+  const irregulares = conTotal.filter(c => c.ceros >= 3 && c.ceros < 12).length;
 
-  const body = document.getElementById("cobBody");
-  function render() {
-    const total = COBROS.reduce((t,c) => t + c.m, 0);
-    const ok = COBROS.filter(c => checked.has(c.id)).reduce((t,c) => t + c.m, 0);
-    document.getElementById("cobTotal").textContent = money.format(total);
-    document.getElementById("cobOk").textContent = money.format(ok);
-    document.getElementById("cobPend").textContent = money.format(total - ok);
-    document.getElementById("cobCount").textContent = `${checked.size} de ${COBROS.length}`;
-    document.getElementById("cobProg").style.width = (ok/total*100).toFixed(1) + "%";
-    const list = sorted.filter(c => filter === "all" || (filter === "ok") === checked.has(c.id));
-    body.innerHTML = list.map(c => `<tr class="${checked.has(c.id) ? "done" : ""}">
-      <td class="chk"><input type="checkbox" data-id="${c.id}" ${checked.has(c.id) ? "checked" : ""} aria-label="Cobrado: ${c.n}"></td>
-      <td class="name">${c.n}</td>
-      <td class="num">${money.format(c.m)}</td>
-      <td>${c.f ? fdate(c.f) : c.nota}</td></tr>`).join("")
-      + (() => {
-        const conMonto = REVISAR.filter(r => r.m != null);
-        const sub = conMonto.reduce((t,r) => t + r.m, 0);
-        return `<tr class="rev-head"><td colspan="4">A revisar · asignar fecha</td></tr>`
-          + REVISAR.map(r => `<tr class="rev"><td class="chk"></td><td class="name">${r.n}</td>
-            <td class="num">${r.m != null ? money.format(r.m) : `<span class="sinmonto">sin monto</span>`}</td>
-            <td><input type="date" data-rev="${r.id}" value="${fechas[r.id] || ""}" aria-label="Fecha de cobro de ${r.n}"></td></tr>`).join("")
-          + `<tr class="rev-sum"><td></td><td>Subtotal a revisar (${conMonto.length} con monto)</td><td class="num">${money.format(sub)}</td><td></td></tr>`;
-      })();
+  document.getElementById("patronInsights").innerHTML = `
+    <div class="patron-tile"><div class="k">Mes más flojo de cobranza</div><div class="v bad">${MESES[minIdx]} · ${fmtMM(totales[minIdx])}</div><div class="d">el mes que menos entra en todo el año</div></div>
+    <div class="patron-tile"><div class="k">Mes más fuerte</div><div class="v good">${MESES[maxIdx]} · ${fmtMM(totales[maxIdx])}</div><div class="d">${((totales[maxIdx]/totales[minIdx]-1)*100).toFixed(0)}% más que el mes más flojo</div></div>
+    <div class="patron-tile"><div class="k">Promedio mensual (todos los clientes)</div><div class="v">${fmtMM(totales.reduce((a,b)=>a+b,0)/12)}</div><div class="d">${conTotal.length} clientes activos</div></div>
+    <div class="patron-tile"><div class="k">Clientes con cobranza irregular</div><div class="v">${irregulares}</div><div class="d">3 meses o más en $0</div></div>
+  `;
+
+  // Gráfico: total mensual de cobranza, todos los clientes
+  const svg = document.getElementById("patronChart");
+  const W = 1100, H = 220, ML = 60, MR = 14, MT = 14, MB = 28;
+  const maxT = Math.max(...totales);
+  const bw = (W-ML-MR) / MESES.length * 0.62;
+  const xC = i => ML + (W-ML-MR) * (i+0.5)/MESES.length;
+  const yFor = v => MT + (H-MT-MB) * (1 - v/maxT);
+  let out = `<rect x="0" y="0" width="${W}" height="${H}" fill="transparent"/>`;
+  for (let g=0; g<=4; g++) {
+    const gy = MT + (H-MT-MB)*g/4;
+    out += `<line x1="${ML}" y1="${gy}" x2="${W-MR}" y2="${gy}" stroke="rgba(255,255,255,.06)" stroke-width="1"/>`;
+    out += `<text x="${ML-8}" y="${gy+4}" text-anchor="end" font-size="10" fill="#6b7280">${fmtM(maxT*(1-g/4))}</text>`;
   }
-  body.addEventListener("change", e => {
-    if (e.target.dataset.rev) { fechas[e.target.dataset.rev] = e.target.value; saveF(); return; }
-    const id = +e.target.dataset.id;
-    if (Number.isNaN(id)) return;
-    e.target.checked ? checked.add(id) : checked.delete(id);
-    save([...checked]);
-    render();
+  totales.forEach((v,i) => {
+    const bx = xC(i) - bw/2;
+    const by = yFor(v);
+    const isMin = i===minIdx, isMax = i===maxIdx;
+    const fill = isMin ? "#dc2626" : isMax ? "#16a34a" : "#3b82f6";
+    out += `<rect x="${bx}" y="${by}" width="${bw}" height="${H-MB-by}" rx="2" fill="${fill}" opacity="${isMin||isMax?0.95:0.75}"/>`;
+    out += `<text x="${xC(i)}" y="${H-MB+16}" text-anchor="middle" font-size="10.5" font-weight="700" fill="${isMin?'#f87171':isMax?'#4ade80':'#9ca3af'}">${MESES[i]}</text>`;
+    out += `<text x="${xC(i)}" y="${by-6}" text-anchor="middle" font-size="9.5" fill="#9ca3af">${(v/1e9).toFixed(2)}</text>`;
   });
-  document.getElementById("cobFilters").addEventListener("click", e => {
-    const f = e.target.dataset.f; if (!f) return;
-    filter = f;
-    document.querySelectorAll("#cobFilters button").forEach(b => b.classList.toggle("active", b === e.target));
-    render();
-  });
-  render();
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.setAttribute("width", W);
+  svg.innerHTML = out;
+
+  // Tabla: ingreso mensual por cliente, total, promedio mensual y resumen al pie.
+  const n = conTotal.length;
+  const promedios = MESES.map((_,i) => totales[i]/n);
+  const promedioTotal = promedios.reduce((a,b)=>a+b,0);
+  const totalAnual = totales.reduce((a,b)=>a+b,0);
+  let ingresosBajos = 0;
+  const thead = `<thead><tr><th>Cliente</th>${MESES.map(m=>`<th>${m}</th>`).join("")}<th>Total anual</th><th>Promedio<br>por mes</th><th>Meses<br>en $0</th></tr></thead>`;
+  const tbody = conTotal.map((c,i) => `<tr class="${i%2?'odd':''}">
+      <td>${c.n}</td>
+      ${c.v.map(x => {
+        const promedio = c.total/12;
+        const bajo = promedio>0 && x>0 && x<.6*promedio;
+        if (bajo) ingresosBajos++;
+        const pct = bajo ? Math.round((1-x/promedio)*100) : 0;
+        return `<td class="${x===0?'zerocell':bajo?'low-income':''}"${bajo?` title="${pct}% por debajo de su promedio mensual (${fmtCell(promedio)})"`:''}>${fmtCell(x)}${bajo?`<span class="low-pct">↓${pct}%</span>`:''}</td>`;
+      }).join("")}
+      <td class="total">${fmtMM(c.total)}</td>
+      <td>${fmtCell(c.total/12)}</td>
+      <td class="zeros-flag" style="color:${c.ceros>=3?'#f87171':'var(--muted)'}">${c.ceros}</td>
+    </tr>`).join("");
+  const tfoot = `<tfoot><tr class="total-row">
+      <td>TOTAL INGRESOS</td>
+      ${totales.map(v => `<td>${fmtCell(v)}</td>`).join("")}
+      <td class="total">${fmtMM(totalAnual)}</td>
+      <td>${fmtCell(totalAnual/12)}</td>
+      <td></td>
+    </tr><tr class="avg-row">
+      <td>PROMEDIO POR CLIENTE</td>
+      ${promedios.map(v => `<td>${fmtCell(v)}</td>`).join("")}
+      <td class="total">${fmtMM(promedioTotal)}</td>
+      <td>${fmtCell(promedioTotal/12)}</td>
+      <td></td>
+    </tr></tfoot>`;
+  document.getElementById("patronTable").innerHTML = thead + `<tbody>${tbody}</tbody>` + tfoot;
+  document.getElementById("lowIncomeCount").textContent = `${ingresosBajos} ingresos bajos marcados`;
 })();
+
+// Patrón de egresos: sobresaltos por rubro, enero a diciembre.
+(() => {
+  const MESES = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"];
+  const EGRESOS = [{n:"SUELDOS",v:[1948942420.99,1976629087.0,1954725337.0,1886949906.0,1928124804.0,1965947681.37,2623608206.3,2017075584.0,2035296925.0,2066158057.0,2166866238.0,3052687671.0]},{n:"Adicionales de sueldo/Adelantos cordoba/ HONORARIOS",v:[111898343.0,81444876.0,92514602.0,104136854.82,104403553.37,108007814.92,108017298.0,95865648.0,97000000.0,97000000.0,97000000.0,97000000.0]},{n:"Cajas Regionales",v:[30604380.45,34096340.13,28278508.66,35505782.68,25000000.0,34201905.24,42036717.8,32026204.6,34046111.0,35000000.0,35000000.0,35000000.0]},{n:"Ajustes de sueldos / KM",v:[5071865.92,787400.0,4516159.0,15833236.49,11677643.08,0.0,16709407.0,16948034.0,0.0,5000000.0,5000000.0,5000000.0]},{n:"931",v:[954236843.19,578041522.66,573267089.06,567788759.69,601429654.01,565489097.92,951927766.4,584096166.6,657962488.0,657962488.0,657962488.0,657962488.0]},{n:"Planes AFIP 931/ IVA",v:[5416089.21,7592944.5,7592944.5,7592944.5,7592944.5,9516106.18,9603337.2,9464879.0,5925075.0,5886846.0,5861233.0,5835619.0]},{n:"IVA",v:[0.0,182811953.77,174588773.85,263391245.59,71142736.3,90083851.07,203575271.1,148623697.6,221500000.0,221500000.0,221500000.0,221500000.0]},{n:"IIBB - DREI - SIPRIB - SICORE",v:[120274806.67,85967538.63,46840334.21,50893569.32,6626017.68,46496868.51,106616024.7,102655095.1,43130586.0,77000000.0,77000000.0,77000000.0]},{n:"SINDICATOS",v:[50408849.08,39349425.98,39487818.02,39028072.66,6000000.0,38455934.63,51056672.4,51615759.8,50780631.0,36000000.0,36000000.0,36000000.0]},{n:"Agente percepción y retención ARBA",v:[28886414.6,20624165.4,21621632.0,18127259.4,22355990.4,20885987.3,28115983.2,31679378.1,22480793.0,22000000.0,22000000.0,22000000.0]},{n:"Plan Rentas CBA",v:[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},{n:"Moratoria Municipalidad de CBA",v:[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},{n:"Compras-PAGOS PROVEEDORES TRANSFERENCIAS",v:[160510616.19,125456743.44,166726452.27,217465373.68,106438257.01,126780156.84,157117886.3,112416804.9,154317581.0,155000000.0,155000000.0,155000000.0]},{n:"Grandes proveedores",v:[35000000.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},{n:"Alquileres",v:[24368564.7,29274368.2,24093276.13,7765131.61,9000000.0,30672159.65,31743818.1,34323333.7,32032053.0,31000000.0,31000000.0,31000000.0]},{n:"Débitos",v:[43040238.7,55113680.28,46067522.1,51819897.28,57837893.14,64536552.36,70264702.2,55550595.1,3000000.0,49000000.0,49000000.0,49000000.0]},{n:"Compras-PAGOS PROVEEDORES CHEQUES",v:[48549786.58,67032520.71,85884073.58,98635308.65,106621251.77,80528348.97,118502338.0,90592094.6,3193875.0,0.0,0.0,0.0]},{n:"Egresos TRANSFERENCIAS",v:[20388324.47,25542607.8,45436848.65,46117638.34,45936456.59,43196306.1,129719448.1,77890828.0,78715102.0,45000000.0,45000000.0,45000000.0]},{n:"Mutual",v:[28580000.0,28100000.0,23450000.0,46825000.0,22050000.0,45050000.0,26100000.0,18350000.0,64800000.0,25000000.0,25000000.0,25000000.0]},{n:"Transf. ORIGEN",v:[60000000.0,150000000.0,50000000.0,0.0,0.0,0.0,300000000.0,0.0,0.0,0.0,0.0,0.0]},{n:"COMPRA BS DE USO",v:[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},{n:"Caja",v:[6382896.78,6448669.0,9670488.0,0.0,161000.0,189300.0,0.0,50000.0,100000.0,1000000.0,1000000.0,1000000.0]},{n:"Prestamos Bancarios",v:[2558355.17,2550632.26,1791772.51,2556793.35,2556793.35,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},{n:"Intereses sobre saldos deudores",v:[0.0,2050695.91,0.0,1420301.72,0.0,171688.28,36325.0,5917567.6,0.0,0.0,0.0,0.0]},{n:"Retiro de Socios/Anticipo de Sueldos",v:[20000000.0,20000000.0,20000000.0,50000000.0,0.0,30000000.0,28500000.0,30000000.0,30000000.0,36000000.0,36000000.0,36000000.0]},{n:"Embargos",v:[31017869.29,27746172.38,27799501.75,24323711.59,25000000.0,31556275.84,48649028.9,31611468.4,33477359.0,25000000.0,25000000.0,25000000.0]},{n:"RETIRO CAPITAL EXCEDENTE",v:[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,566044000.0,0.0,0.0]},{n:"INV DOLARES",v:[25821000.0,31392000.0,26276500.0,0.0,0.0,36623000.0,0.0,0.0,0.0,0.0,0.0,0.0]},{n:"INVERSIONES",v:[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},{n:"Retenciones SIRCREB e Imp a los deb y creditos",v:[150108825.42,161452394.82,149032562.17,160228373.29,152293164.08,146862721.72,184331629.0,135299539.8,142199868.0,189128272.0,162332071.0,171843309.0]},{n:"Liquidaciones Finales/AJUSTES",v:[0.0,0.0,20511789.0,0.0,0.0,0.0,0.0,0.0,0.0,10000000.0,10000000.0,10000000.0]},{n:"GASTOS VARIOS",v:[-63998717.0,12321093.0,-63747062.0,-16297810.0,41209684.0,88137796.0,-117497482.0,-360732226.0,-34490433.0,0.0,0.0,0.0]}];
+
+  const totales = MESES.map((_,i) => EGRESOS.reduce((t,c) => t + c.v[i], 0));
+  window.ieEgresos = totales;
+  const fmtM = n => "$" + (n/1e6).toLocaleString("es-AR", {maximumFractionDigits:1}) + " M";
+  const fmtMM = n => "$" + (n/1e9).toLocaleString("es-AR", {maximumFractionDigits:2}) + " MM";
+  const fmtCell = n => Math.abs(n) >= 1e9 ? fmtMM(n) : fmtM(n);
+
+  // Sobresaltos: valor >= 1.4x el promedio del rubro, y al menos $20M de diferencia absoluta.
+  const UMBRAL = 1.4, PISO = 20e6;
+  const conTotal = EGRESOS.map(c => {
+    const avg = c.v.reduce((a,b)=>a+b,0)/12;
+    const spikes = c.v.map(v => avg>0 && v>=UMBRAL*avg && (v-avg)>=PISO);
+    return {...c, total: c.v.reduce((a,b)=>a+b,0), avg, spikes, nSpikes: spikes.filter(Boolean).length};
+  }).sort((a,b) => b.total - a.total);
+
+  // El sobresalto más grande de todos (mayor múltiplo sobre su propio promedio)
+  let peor = null;
+  conTotal.forEach(c => c.v.forEach((v,i) => {
+    if (c.spikes[i]) {
+      const ratio = v/c.avg;
+      if (!peor || ratio > peor.ratio) peor = {n:c.n, mes:MESES[i], v, avg:c.avg, ratio};
+    }
+  }));
+  const totalSpikes = conTotal.reduce((t,c)=>t+c.nSpikes, 0);
+  const maxIdx = totales.indexOf(Math.max(...totales));
+  const minIdx = totales.indexOf(Math.min(...totales));
+
+  document.getElementById("egrInsights").innerHTML = `
+    <div class="patron-tile"><div class="k">Mes de mayor egreso total</div><div class="v bad">${MESES[maxIdx]} · ${fmtMM(totales[maxIdx])}</div><div class="d">${((totales[maxIdx]/totales[minIdx]-1)*100).toFixed(0)}% más que ${MESES[minIdx]}, el más bajo</div></div>
+    <div class="patron-tile"><div class="k">Sobresalto más grande</div><div class="v bad">${peor ? fmtExactShort(peor.v) : "—"}</div><div class="d">${peor ? `${peor.n} en ${peor.mes} · ${peor.ratio.toFixed(1)}x su propio promedio` : ""}</div></div>
+    <div class="patron-tile"><div class="k">SUELDOS en diciembre</div><div class="v bad">+${(( (EGRESOS.find(c=>c.n==="SUELDOS").v[11]) / (EGRESOS.find(c=>c.n==="SUELDOS").v.reduce((a,b)=>a+b,0)/12) - 1)*100).toFixed(0)}%</div><div class="d">contra el promedio del año de ese mismo rubro</div></div>
+    <div class="patron-tile"><div class="k">Sobresaltos detectados</div><div class="v">${totalSpikes}</div><div class="d">en ${conTotal.filter(c=>c.nSpikes>0).length} rubros distintos</div></div>
+  `;
+  function fmtExactShort(n) { return "$" + Math.abs(n).toLocaleString("es-AR", {maximumFractionDigits:0}); }
+
+  // Gráfico: total mensual de egresos
+  const svg = document.getElementById("egrChart");
+  const W = 1100, H = 220, ML = 60, MR = 14, MT = 14, MB = 28;
+  const maxT = Math.max(...totales);
+  const bw = (W-ML-MR) / MESES.length * 0.62;
+  const xC = i => ML + (W-ML-MR) * (i+0.5)/MESES.length;
+  const yFor = v => MT + (H-MT-MB) * (1 - v/maxT);
+  let out = `<rect x="0" y="0" width="${W}" height="${H}" fill="transparent"/>`;
+  for (let g=0; g<=4; g++) {
+    const gy = MT + (H-MT-MB)*g/4;
+    out += `<line x1="${ML}" y1="${gy}" x2="${W-MR}" y2="${gy}" stroke="rgba(255,255,255,.06)" stroke-width="1"/>`;
+    out += `<text x="${ML-8}" y="${gy+4}" text-anchor="end" font-size="10" fill="#6b7280">${fmtM(maxT*(1-g/4))}</text>`;
+  }
+  totales.forEach((v,i) => {
+    const bx = xC(i) - bw/2;
+    const by = yFor(v);
+    const isMax = i===maxIdx, isMin = i===minIdx;
+    const fill = isMax ? "#ea580c" : isMin ? "#16a34a" : "#3b82f6";
+    out += `<rect x="${bx}" y="${by}" width="${bw}" height="${H-MB-by}" rx="2" fill="${fill}" opacity="${isMax||isMin?0.95:0.75}"/>`;
+    out += `<text x="${xC(i)}" y="${H-MB+16}" text-anchor="middle" font-size="10.5" font-weight="700" fill="${isMax?'#fb923c':isMin?'#4ade80':'#9ca3af'}">${MESES[i]}</text>`;
+    out += `<text x="${xC(i)}" y="${by-6}" text-anchor="middle" font-size="9.5" fill="#9ca3af">${(v/1e9).toFixed(2)}</text>`;
+  });
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.setAttribute("width", W);
+  svg.innerHTML = out;
+
+  // Tabla: rubro x mes, con total y cantidad de sobresaltos, + fila de promedio mensual al pie
+  const n = conTotal.length;
+  const promedios = MESES.map((_,i) => totales[i]/n);
+  const promedioTotal = promedios.reduce((a,b)=>a+b,0);
+  const thead = `<thead><tr><th>Rubro</th>${MESES.map(m=>`<th>${m}</th>`).join("")}<th>Total</th><th>Sobre-<br>saltos</th></tr></thead>`;
+  const tbody = conTotal.map((c,i) => `<tr class="${i%2?'odd':''}">
+      <td>${c.n}</td>
+      ${c.v.map((x,j) => `<td class="${c.spikes[j]?'spike':''}">${fmtCell(x)}</td>`).join("")}
+      <td class="total">${fmtMM(c.total)}</td>
+      <td class="spike-flag" style="color:${c.nSpikes>=1?'#fdba74':'var(--muted)'}">${c.nSpikes}</td>
+    </tr>`).join("");
+  const tfoot = `<tfoot><tr class="avg-row">
+      <td>PROMEDIO MENSUAL</td>
+      ${promedios.map(v => `<td>${fmtCell(v)}</td>`).join("")}
+      <td class="total">${fmtMM(promedioTotal)}</td>
+      <td></td>
+    </tr></tfoot>`;
+  document.getElementById("egrTable").innerHTML = thead + `<tbody>${tbody}</tbody>` + tfoot;
+})();
+
+// Saldo del banco por día: enero a septiembre 2026, buscando patrones.
+(() => {
+  const LIMITE = 2420000000;
+  const DATA_SD = BASE_DATA; // mismos saldos ajustados que alimentan la evolución de fondos
+  const flat = DATA_SD.flatMap(m => m.rows);
+
+  const fmtM = n => (n<0?"-":"") + "$" + (Math.abs(n)/1e6).toLocaleString("es-AR", {maximumFractionDigits:1}) + " M";
+  const fmtMM = n => (n<0?"-":"") + "$" + (Math.abs(n)/1e9).toLocaleString("es-AR", {maximumFractionDigits:2}) + " MM";
+  const fmtMoneySD = n => Math.abs(n) >= 1e9 ? fmtMM(n) : fmtM(n);
+  const fmtPctSD = v => v.toFixed(1).replace(".", ",") + "%";
+
+
+  // Los valores proyectados se toman literalmente del renglón CASH FLOW del PDF adjunto.
+  const PDF_PROJECTION = [["2026-09-25",-189299274],["2026-09-28",173084032],["2026-09-29",355349993],["2026-09-30",453457970],["2026-10-01",781716481],["2026-10-02",877052576],["2026-10-05",-1545634570],["2026-10-06",-1573412870],["2026-10-07",-1453243803],["2026-10-08",-1445906555],["2026-10-09",-1424516030],["2026-10-12",-1027262127],["2026-10-13",-1152810128],["2026-10-14",-970530268],["2026-10-15",-924130162],["2026-10-16",-685098616],["2026-10-19",-536593536],["2026-10-20",-408936837],["2026-10-21",-237584412],["2026-10-22",87186530],["2026-10-23",-16407849],["2026-10-26",2821851],["2026-10-27",16082380],["2026-10-28",88792311],["2026-10-29",88792311],["2026-10-30",117999607],["2026-11-02",136265172],["2026-11-03",393239962],["2026-11-04",604171466],["2026-11-05",-1429807131],["2026-11-06",-1464061431],["2026-11-09",-1570056299],["2026-11-10",-1384580363],["2026-11-11",-1951771906],["2026-11-12",-1434523706],["2026-11-13",-1440534978],["2026-11-16",-1161455732],["2026-11-17",-1045279282],["2026-11-18",-880159148],["2026-11-19",-948877848],["2026-11-20",-641815689],["2026-11-23",-311476374],["2026-11-24",-296488464],["2026-11-25",-220216115],["2026-11-26",-115777942],["2026-11-27",21929336],["2026-11-30",22615577],["2026-12-01",356327604],["2026-12-02",395411586],["2026-12-03",420357175],["2026-12-04",-1430419725],["2026-12-07",-1543708025],["2026-12-08",-1571486325],["2026-12-09",-1468470397],["2026-12-10",-1266649519],["2026-12-11",-1938633065],["2026-12-14",-1206906000],["2026-12-15",-1086258413],["2026-12-16",-880874168],["2026-12-17",-880689299],["2026-12-18",-1470732995],["2026-12-21",-1108701045],["2026-12-22",-951158236],["2026-12-23",-875393161],["2026-12-24",-987502819],["2026-12-25",-889705951],["2026-12-28",-778454467],["2026-12-29",-778982684],["2026-12-30",-771967186],["2026-12-31",-771967186]].map(([date,value]) => ({date,value,projected:true}));
+  const PROJECTION_START = PDF_PROJECTION[0].date;
+  const monthNames = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"];
+  const historicalRows = flat;
+  const svg = document.getElementById("sdChart");
+  const wrap = svg.parentElement;
+  const tip = document.getElementById("tooltip");
+  const button = document.getElementById("sdProjectBtn");
+  const modeLabel = document.getElementById("sdMode");
+  const sourceNote = document.getElementById("sdSourceNote");
+  const H = 560, ML = 70, MR = 20, MT = 48, MB = 38;
+  let projectedMode = false, currentRows = historicalRows, currentW = 1600;
+
+  function renderAvailability() {
+    currentRows = projectedMode
+      ? historicalRows.filter(r => r.date < PROJECTION_START).concat(PDF_PROJECTION)
+      : historicalRows;
+    currentW = projectedMode ? 1900 : 1600;
+    const W = currentW, rows = currentRows;
+    const vals = rows.map(r => r.value);
+    const topVal = Math.max(...vals, 0), botVal = Math.min(...vals, 0);
+    const maxAbs = Math.max(Math.abs(topVal), Math.abs(botVal));
+    const topPad = Math.max(topVal*1.15, maxAbs*.1);
+    const botPad = Math.min(botVal*1.15, -maxAbs*.1);
+    const span = topPad - botPad;
+    const y = v => MT + (H-MT-MB) * (1 - (v-botPad)/span);
+    const zeroY = y(0);
+    const barW = Math.max(1.2, (W-ML-MR)/rows.length * .68);
+    const x = i => ML + (W-ML-MR) * (i/rows.length);
+    const firstProjected = rows.findIndex(r => r.projected);
+    let out = `<rect x="0" y="0" width="${W}" height="${H}" fill="#e9f0f7"/>`;
+    if (firstProjected >= 0) out += `<rect x="${x(firstProjected)}" y="${MT-16}" width="${W-MR-x(firstProjected)}" height="${H-MB-MT+16}" fill="#dceafe"/>`;
+    for (let g=0; g<=4; g++) {
+      const gv = botPad + span*g/4, gy = y(gv);
+      out += `<line x1="${ML}" y1="${gy}" x2="${W-MR}" y2="${gy}" stroke="#cbd5e1"/>`;
+      out += `<text x="${ML-8}" y="${gy+4}" text-anchor="end" font-size="10" fill="#475569">${fmtM(gv)}</text>`;
+    }
+    out += `<line x1="${ML}" y1="${zeroY}" x2="${W-MR}" y2="${zeroY}" stroke="#64748b" stroke-width="1.3"/>`;
+    const months = [];
+    rows.forEach((row,i) => {
+      const key = row.date.slice(0,7);
+      if (months.length && months[months.length-1].key === key) months[months.length-1].end = i;
+      else months.push({key,start:i,end:i,label:monthNames[Number(row.date.slice(5,7))-1]+" "+row.date.slice(2,4)});
+    });
+    months.forEach((m,mi) => {
+      const mx0 = x(m.start);
+      if (mi>0) out += `<line x1="${mx0}" y1="${MT-14}" x2="${mx0}" y2="${H-MB}" stroke="#94a3b8" stroke-dasharray="3 3"/>`;
+      out += `<text x="${x((m.start+m.end+1)/2)}" y="${MT-20}" text-anchor="middle" font-size="11" font-weight="800" fill="#334155">${m.label}</text>`;
+    });
+    rows.forEach((r,i) => {
+      const neg = r.value < 0, by = neg ? zeroY : y(r.value);
+      const bh = Math.max(.8, Math.abs(zeroY-y(r.value)));
+      const fill = r.projected ? (neg ? "#c2410c" : "#2563eb") : (neg ? "#dc2626" : "#16a34a");
+      out += `<rect x="${x(i)}" y="${by}" width="${barW}" height="${bh}" fill="${fill}" opacity=".9"/>`;
+    });
+    months.forEach(m => {
+      const rr = rows.slice(m.start,m.end+1);
+      const min = rr.reduce((a,b)=>b.value<a.value?b:a), max = rr.reduce((a,b)=>b.value>a.value?b:a);
+      const iMin = rows.indexOf(min), iMax = rows.indexOf(max);
+      out += `<text x="${x(iMin)+barW/2}" y="${y(min.value)+14}" text-anchor="middle" font-size="9" fill="#b91c1c">${fmtM(min.value)}</text>`;
+      out += `<text x="${x(iMax)+barW/2}" y="${y(max.value)-5}" text-anchor="middle" font-size="9" fill="#15803d">${fmtM(max.value)}</text>`;
+    });
+    if (firstProjected >= 0) {
+      const boundary = x(firstProjected);
+      out += `<line x1="${boundary}" y1="${MT-16}" x2="${boundary}" y2="${H-MB}" stroke="#1d4ed8" stroke-width="2" stroke-dasharray="5 4"/>`;
+      out += `<text x="${boundary+7}" y="${MT+7}" font-size="11" font-weight="800" fill="#1d4ed8">PROYECCIÓN</text>`;
+      const repaymentIndex = rows.findIndex(r => r.date === "2026-10-05");
+      if (repaymentIndex >= 0) {
+        const repaymentX = x(repaymentIndex) + barW/2;
+        out += `<line x1="${repaymentX}" y1="${MT+15}" x2="${repaymentX}" y2="${H-MB}" stroke="#0e7490" stroke-width="2" stroke-dasharray="4 3"/>`;
+        out += `<text x="${repaymentX+6}" y="${MT+29}" font-size="11" font-weight="800" fill="#0e7490">05/10 · DEVOLUCIÓN CAUCIÓN</text>`;
+      }
+    }
+    svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+    svg.setAttribute("width",W);
+    svg.setAttribute("aria-label",projectedMode ? "Disponibilidades diarias y proyección hasta diciembre de 2026" : "Disponibilidades diarias de enero a septiembre de 2026");
+    svg.innerHTML=out;
+    button.textContent = projectedMode ? "VOLVER A DATOS ACTUALES" : "PROYECTAR A DICIEMBRE";
+    button.setAttribute("aria-pressed", String(projectedMode));
+    modeLabel.textContent = projectedMode ? "Escenario proyectado hasta el 31/12/2026" : "Datos cargados hasta el 25/09/2026";
+    sourceNote.hidden = !projectedMode;
+    tip.classList.remove("touch-visible");
+    tip.style.opacity=0;
+    if (projectedMode && firstProjected >= 0) wrap.scrollLeft = Math.max(0,x(firstProjected)-wrap.clientWidth*.22);
+    else wrap.scrollLeft = 0;
+  }
+
+  function showDailyTip(ev) {
+    const rect=svg.getBoundingClientRect();
+    const px=(ev.clientX-rect.left)*currentW/rect.width;
+    const i=Math.max(0,Math.min(currentRows.length-1,Math.floor((px-ML)/(currentW-ML-MR)*currentRows.length)));
+    const row=currentRows[i];
+    const date=row.date.split("-").reverse().join("/");
+    const amount=(row.value<0?"−":"")+"$"+Math.abs(row.value).toLocaleString("es-AR",{maximumFractionDigits:2});
+    tip.innerHTML=`<strong>${row.projected?"Proyección · ":""}${date}</strong><br>Saldo: <strong style="color:${row.value<0?'#fca5a5':'#86efac'}">${amount}</strong>${row.projected && row.date === "2026-10-05" ? "<br>Devolución de caución: $567.501.477,78" : ""}`;
+    const touch=window.matchMedia("(max-width:700px)").matches;
+    tip.classList.toggle("touch-visible",touch);
+    tip.style.left=Math.min(ev.clientX,window.innerWidth-220)+"px";
+    tip.style.top=Math.min(ev.clientY,window.innerHeight-100)+"px";
+    tip.style.opacity=1;
+  }
+  button.addEventListener("click",()=>{ projectedMode=!projectedMode; renderAvailability(); });
+  svg.addEventListener("mousemove",ev=>{ if (!window.matchMedia("(max-width:700px)").matches) showDailyTip(ev); });
+  svg.addEventListener("mouseleave",()=>{ if (!tip.classList.contains("touch-visible")) tip.style.opacity=0; });
+  svg.addEventListener("click",showDailyTip);
+  renderAvailability();
+
+})();
+
+// Comparativo construido con los mismos totales de las pestañas Ingresos y Egresos.
+(() => {
+  const ingresos = window.ieIngresos, egresos = window.ieEgresos;
+  if (!ingresos || !egresos) return;
+  const meses = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+  const diferencia = ingresos.map((v,i) => v - egresos[i]);
+  const formato = n => (n < 0 ? "−" : "") + "$" + (Math.abs(n)/1e6).toLocaleString("es-AR", {maximumFractionDigits:1}) + " M";
+  const porcentaje = n => Math.abs(n).toLocaleString("es-AR", {maximumFractionDigits:1}) + "%";
+  const suma = a => a.reduce((x,y) => x+y,0);
+  const peor = diferencia.indexOf(Math.min(...diferencia));
+  const mejor = diferencia.indexOf(Math.max(...diferencia));
+  const deficit = diferencia.filter(x => x < 0).length;
+  const total = suma(diferencia);
+  document.getElementById("ieSummary").innerHTML = `
+    <div class="patron-tile"><div class="k">Balance del período</div><div class="v ${total<0?'bad':'good'}">${formato(total)}</div><div class="d">ingresos menos egresos acumulados</div></div>
+    <div class="patron-tile"><div class="k">Meses con déficit</div><div class="v bad">${deficit} de 12</div><div class="d">egresos superiores a ingresos</div></div>
+    <div class="patron-tile"><div class="k">Mayor descalce mensual</div><div class="v bad">${meses[peor]} · ${formato(diferencia[peor])}</div><div class="d">diferencia entre lo ingresado y lo egresado</div></div>`;
+
+  const W=1030, H=330, left=74, right=22, top=24, bottom=57;
+  const max=Math.max(...ingresos,...egresos)*1.14;
+  const baseline=H-bottom, usable=baseline-top, group=(W-left-right)/12, bw=Math.min(22,group*.29);
+  const y=v=>baseline-(v/max)*usable;
+  let out=`<rect width="${W}" height="${H}" fill="transparent"/>`;
+  for (let t=0;t<=4;t++) {
+    const v=max*t/4, yy=y(v);
+    out+=`<line x1="${left}" x2="${W-right}" y1="${yy}" y2="${yy}" stroke="rgba(255,255,255,.10)"/><text x="${left-9}" y="${yy+4}" text-anchor="end" fill="#9aacc4" font-size="11">${Math.round(v/1e6).toLocaleString('es-AR')}</text>`;
+  }
+  ingresos.forEach((v,i)=>{
+    const center=left+group*(i+.5), yi=y(v), ye=y(egresos[i]), bad=diferencia[i]<0;
+    out+=`<rect x="${center-bw-2}" y="${yi}" width="${bw}" height="${baseline-yi}" rx="3" fill="#38bdf8" data-month="${i}"/>`;
+    out+=`<rect x="${center+2}" y="${ye}" width="${bw}" height="${baseline-ye}" rx="3" fill="#fb923c" data-month="${i}"/>`;
+    out+=`<text x="${center}" y="${baseline+20}" text-anchor="middle" fill="#c9d6ea" font-size="12" font-weight="700">${meses[i]}</text>`;
+    out+=`<text x="${center}" y="${baseline+38}" text-anchor="middle" fill="${bad?'#fca5a5':'#86efac'}" font-size="10" font-weight="700">${bad?'−':'+'}${(Math.abs(diferencia[i])/1e6).toLocaleString('es-AR',{maximumFractionDigits:0})} M</text>`;
+  });
+  const svg=document.getElementById("ieChart");
+  svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+  svg.setAttribute("width",W);
+  svg.innerHTML=out;
+  const tip=document.getElementById("tooltip");
+  const show=(i,ev)=>{
+    tip.innerHTML=`<strong>${meses[i]} ${i>=9?'· proyección':''}</strong><br>Ingresos: ${formato(ingresos[i])}<br>Egresos: ${formato(egresos[i])}<br><strong style="color:${diferencia[i]<0?'#fca5a5':'#86efac'}">Diferencia: ${formato(diferencia[i])}</strong>`;
+    tip.classList.toggle("touch-visible",matchMedia("(max-width:700px)").matches);
+    tip.style.left=Math.min(ev.clientX,innerWidth-210)+"px";
+    tip.style.top=Math.min(ev.clientY,innerHeight-110)+"px";
+    tip.style.opacity=1;
+  };
+  svg.addEventListener("mousemove",ev=>{
+    const rect=svg.getBoundingClientRect(), x=(ev.clientX-rect.left)*W/rect.width;
+    const i=Math.max(0,Math.min(11,Math.floor((x-left)/group)));
+    show(i,ev);
+  });
+  svg.addEventListener("mouseleave",()=>{ if (!tip.classList.contains("touch-visible")) tip.style.opacity=0; });
+  svg.addEventListener("click",ev=>{
+    const rect=svg.getBoundingClientRect(), x=(ev.clientX-rect.left)*W/rect.width;
+    show(Math.max(0,Math.min(11,Math.floor((x-left)/group))),ev);
+  });
+  document.addEventListener("click",ev=>{
+    if (!ev.target.closest("#ieChart, #sdChart")) {tip.classList.remove("touch-visible");tip.style.opacity=0;}
+  });
+
+  document.getElementById("ieTable").innerHTML=`<thead><tr><th>Mes</th><th>Ingresos</th><th>Egresos</th><th>Diferencia</th><th>Estado</th></tr></thead><tbody>${meses.map((m,i)=>`<tr><td><strong>${m}${i>=9?' · proy.':''}</strong></td><td>${formato(ingresos[i])}</td><td>${formato(egresos[i])}</td><td class="${diferencia[i]<0?'neg-c':'pos-c'}">${formato(diferencia[i])}</td><td>${diferencia[i]<0?'Déficit':'Superávit'}</td></tr>`).join('')}</tbody>`;
+
+  const picoE=egresos.indexOf(Math.max(...egresos));
+  const saltoD=(egresos[11]/egresos[10]-1)*100;
+  const saltoI=(ingresos[11]/ingresos[10]-1)*100;
+  const bloques=[
+    ['Déficit recurrente',`En ${deficit} de los 12 meses cargados, los egresos superan a los ingresos. El saldo acumulado del período es ${formato(total)}.`],
+    ['Mayor presión de egresos',`${meses[picoE]} registra el mayor nivel de egresos (${formato(egresos[picoE])}); su diferencia mensual es ${formato(diferencia[picoE])}.`],
+    ['Mejor balance',`${meses[mejor]} muestra la mayor diferencia positiva: ${formato(diferencia[mejor])}. El mayor déficit ocurre en ${meses[peor]}: ${formato(diferencia[peor])}.`],
+    ['Cierre de año',`De noviembre a diciembre, los egresos ${saltoD>=0?'suben':'bajan'} ${porcentaje(saltoD)} y los ingresos ${saltoI>=0?'suben':'bajan'} ${porcentaje(saltoI)}. Diciembre presenta un balance de ${formato(diferencia[11])}.`]
+  ];
+  document.getElementById("iePatterns").innerHTML=bloques.map(([titulo,txt])=>`<div class="ie-pattern"><strong>${titulo}</strong><p>${txt}</p></div>`).join('');
+})();
+
 </script>
 </body>
 </html>
