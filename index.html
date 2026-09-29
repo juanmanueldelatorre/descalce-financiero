@@ -466,11 +466,34 @@
       </div>
       <div class="patron-note">Las celdas en rojo son meses en $0 (el cliente no pagó ese mes) · ordenado por total anual, de mayor a menor · saqué de esta tabla a AGRICULTORES FEDERADOS, ELECTRÓNICA MEGATONE y ACCIÓN MERCANTIL por estar inactivos todo el año · "MAX SEGUR" cobra muy poco y de forma muy irregular (9 de 12 meses en $0) — vale la pena revisarlo aparte.</div>
       </section>
+
+      <section class="patron-card">
+        <h2>Clientes dados de baja</h2>
+        <div class="exec-sub">Facturación anual perdida por cliente (monto con IVA) · esto ya no vuelve a entrar, es la otra cara del descalce</div>
+        <div class="patron-insights" id="bajaFactInsights"></div>
+        <div class="exec-table-wrap">
+          <table class="exec-table" id="bajaFactTable"></table>
+        </div>
+        <div class="patron-note" id="bajaFactNote"></div>
+      </section>
   </div>
 
   <div id="tab-egresos" hidden>
     <h1>Egresos</h1>
-    <div class="sub">Egresos mensuales por rubro, enero a diciembre</div>
+    <div class="sub">Egresos mensuales por rubro, enero a septiembre</div>
+
+    <section class="patron-card">
+      <h2>Clasificación de Egresos por Concepto</h2>
+      <div class="exec-sub">Los 32 rubros agrupados en las categorías más importantes, mes a mes</div>
+      <p class="scroll-hint">Deslizá para recorrer los meses.</p>
+      <div class="patron-chart-wrap">
+        <svg id="egrCatChart" height="360"></svg>
+      </div>
+      <div class="exec-table-wrap">
+        <table class="patron-table" id="egrCatTable"></table>
+      </div>
+      <div class="patron-note" id="egrCatNote"></div>
+    </section>
 
     <section class="patron-card">
       <h2>Patrón de Egresos — Sobresaltos</h2>
@@ -484,6 +507,16 @@
         <table class="patron-table" id="egrTable"></table>
       </div>
       <div class="patron-note">Las celdas en naranja son sobresaltos: el rubro gastó ese mes 40% o más por encima de su propio promedio anual (y al menos $20 M de diferencia) · ordenado por total anual, de mayor a menor.</div>
+    </section>
+
+    <section class="patron-card">
+      <h2>Indemnizaciones</h2>
+      <div class="exec-sub">SEGRUP y ORIGEN, mes a mes · este monto ya está incluido dentro del total de egresos de arriba, es un detalle informativo, no se suma de nuevo</div>
+      <div class="patron-insights" id="indemInsights"></div>
+      <div class="exec-table-wrap">
+        <table class="patron-table" id="indemTable"></table>
+      </div>
+      <div class="patron-note">Las tres bajas conocidas coinciden con los picos: UCC (1/3) con el salto de marzo, LIBERTAD (1/6) con el de junio, y EPE RAFAELA (1/9) todavía no tiene monto cargado — falta el dato de septiembre en adelante.</div>
     </section>
   </div>
 
@@ -1017,21 +1050,126 @@ document.querySelectorAll(".exec-table-wrap").forEach(wrap => {
   document.getElementById("lowIncomeCount").textContent = `${ingresosBajos} ingresos bajos marcados`;
 })();
 
+// Clientes dados de baja: facturación anual perdida (monto con IVA).
+(() => {
+  const fmtMI = n => "$" + Math.round(n).toLocaleString("es-AR");
+  const fmtMMI = n => "$" + (n/1e6).toLocaleString("es-AR", {maximumFractionDigits:1}) + " M";
+  const BAJAS_FACT = [
+    { n: "LIBERTAD", monto: 200000000, nota: "no está en la tabla de Ingresos cargada — no tengo su detalle mensual" },
+    { n: "NACION", monto: 94000000, nota: "en la tabla de arriba es BANCO NACION ARGENTINA: no llega a $0, pero cae fuerte desde agosto" },
+    { n: "LAS ALMENAS", monto: 6000000, nota: "coincide con la tabla de arriba: LAS ALMENAS S.A. está en $0 desde agosto" },
+    { n: "INPLA", monto: 7000000, nota: "coincide con la tabla de arriba: INPLA S.A. está en $0 desde septiembre" }
+  ];
+  const total = BAJAS_FACT.reduce((t,b) => t + b.monto, 0);
+  document.getElementById("bajaFactInsights").innerHTML = `
+    <div class="patron-tile"><div class="k">Facturación anual perdida</div><div class="v bad">${fmtMMI(total)}</div><div class="d">suma de las 4 bajas, con IVA</div></div>
+    <div class="patron-tile"><div class="k">Baja más grande</div><div class="v bad">LIBERTAD</div><div class="d">${fmtMMI(BAJAS_FACT[0].monto)} · 65% del total perdido</div></div>
+    <div class="patron-tile"><div class="k">Clientes dados de baja</div><div class="v">4</div><div class="d">LIBERTAD, NACION, LAS ALMENAS, INPLA</div></div>
+  `;
+  document.getElementById("bajaFactTable").innerHTML = `
+    <thead><tr><th>Cliente</th><th>Monto con IVA</th></tr></thead>
+    <tbody>
+      ${BAJAS_FACT.map(b => `<tr><td><strong>${b.n}</strong></td><td class="neg-c">${fmtMI(b.monto)}</td></tr>`).join("")}
+    </tbody>
+    <tfoot><tr class="avg-row"><td>TOTAL</td><td class="total">${fmtMI(total)}</td></tr></tfoot>`;
+  document.getElementById("bajaFactNote").innerHTML = BAJAS_FACT.map(b => `<div>${b.n}: ${b.nota}</div>`).join("");
+})();
+
 // Patrón de egresos: sobresaltos por rubro, enero a diciembre.
 (() => {
-  const MESES = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"];
+  const MESES = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP"];
   const EGRESOS = [{n:"SUELDOS",v:[1948942420.99,1976629087.0,1954725337.0,1886949906.0,1928124804.0,1965947681.37,2623608206.3,2017075584.0,2035296925.0,2066158057.0,2166866238.0,3052687671.0]},{n:"Adicionales de sueldo/Adelantos cordoba/ HONORARIOS",v:[111898343.0,81444876.0,92514602.0,104136854.82,104403553.37,108007814.92,108017298.0,95865648.0,97000000.0,97000000.0,97000000.0,97000000.0]},{n:"Cajas Regionales",v:[30604380.45,34096340.13,28278508.66,35505782.68,25000000.0,34201905.24,42036717.8,32026204.6,34046111.0,35000000.0,35000000.0,35000000.0]},{n:"Ajustes de sueldos / KM",v:[5071865.92,787400.0,4516159.0,15833236.49,11677643.08,0.0,16709407.0,16948034.0,0.0,5000000.0,5000000.0,5000000.0]},{n:"931",v:[954236843.19,578041522.66,573267089.06,567788759.69,601429654.01,565489097.92,951927766.4,584096166.6,657962488.0,657962488.0,657962488.0,657962488.0]},{n:"Planes AFIP 931/ IVA",v:[5416089.21,7592944.5,7592944.5,7592944.5,7592944.5,9516106.18,9603337.2,9464879.0,5925075.0,5886846.0,5861233.0,5835619.0]},{n:"IVA",v:[0.0,182811953.77,174588773.85,263391245.59,71142736.3,90083851.07,203575271.1,148623697.6,221500000.0,221500000.0,221500000.0,221500000.0]},{n:"IIBB - DREI - SIPRIB - SICORE",v:[120274806.67,85967538.63,46840334.21,50893569.32,6626017.68,46496868.51,106616024.7,102655095.1,43130586.0,77000000.0,77000000.0,77000000.0]},{n:"SINDICATOS",v:[50408849.08,39349425.98,39487818.02,39028072.66,6000000.0,38455934.63,51056672.4,51615759.8,50780631.0,36000000.0,36000000.0,36000000.0]},{n:"Agente percepción y retención ARBA",v:[28886414.6,20624165.4,21621632.0,18127259.4,22355990.4,20885987.3,28115983.2,31679378.1,22480793.0,22000000.0,22000000.0,22000000.0]},{n:"Plan Rentas CBA",v:[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},{n:"Moratoria Municipalidad de CBA",v:[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},{n:"Compras-PAGOS PROVEEDORES TRANSFERENCIAS",v:[160510616.19,125456743.44,166726452.27,217465373.68,106438257.01,126780156.84,157117886.3,112416804.9,154317581.0,155000000.0,155000000.0,155000000.0]},{n:"Grandes proveedores",v:[35000000.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},{n:"Alquileres",v:[24368564.7,29274368.2,24093276.13,7765131.61,9000000.0,30672159.65,31743818.1,34323333.7,32032053.0,31000000.0,31000000.0,31000000.0]},{n:"Débitos",v:[43040238.7,55113680.28,46067522.1,51819897.28,57837893.14,64536552.36,70264702.2,55550595.1,3000000.0,49000000.0,49000000.0,49000000.0]},{n:"Compras-PAGOS PROVEEDORES CHEQUES",v:[48549786.58,67032520.71,85884073.58,98635308.65,106621251.77,80528348.97,118502338.0,90592094.6,3193875.0,0.0,0.0,0.0]},{n:"Egresos TRANSFERENCIAS",v:[20388324.47,25542607.8,45436848.65,46117638.34,45936456.59,43196306.1,129719448.1,77890828.0,78715102.0,45000000.0,45000000.0,45000000.0]},{n:"Mutual",v:[28580000.0,28100000.0,23450000.0,46825000.0,22050000.0,45050000.0,26100000.0,18350000.0,64800000.0,25000000.0,25000000.0,25000000.0]},{n:"Transf. ORIGEN",v:[60000000.0,150000000.0,50000000.0,0.0,0.0,0.0,300000000.0,0.0,0.0,0.0,0.0,0.0]},{n:"COMPRA BS DE USO",v:[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},{n:"Caja",v:[6382896.78,6448669.0,9670488.0,0.0,161000.0,189300.0,0.0,50000.0,100000.0,1000000.0,1000000.0,1000000.0]},{n:"Prestamos Bancarios",v:[2558355.17,2550632.26,1791772.51,2556793.35,2556793.35,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},{n:"Intereses sobre saldos deudores",v:[0.0,2050695.91,0.0,1420301.72,0.0,171688.28,36325.0,5917567.6,0.0,0.0,0.0,0.0]},{n:"Retiro de Socios/Anticipo de Sueldos",v:[20000000.0,20000000.0,20000000.0,50000000.0,0.0,30000000.0,28500000.0,30000000.0,30000000.0,36000000.0,36000000.0,36000000.0]},{n:"Embargos",v:[31017869.29,27746172.38,27799501.75,24323711.59,25000000.0,31556275.84,48649028.9,31611468.4,33477359.0,25000000.0,25000000.0,25000000.0]},{n:"RETIRO CAPITAL EXCEDENTE",v:[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,566044000.0,0.0,0.0]},{n:"INV DOLARES",v:[25821000.0,31392000.0,26276500.0,0.0,0.0,36623000.0,0.0,0.0,0.0,0.0,0.0,0.0]},{n:"INVERSIONES",v:[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},{n:"Retenciones SIRCREB e Imp a los deb y creditos",v:[150108825.42,161452394.82,149032562.17,160228373.29,152293164.08,146862721.72,184331629.0,135299539.8,142199868.0,189128272.0,162332071.0,171843309.0]},{n:"Liquidaciones Finales/AJUSTES",v:[0.0,0.0,20511789.0,0.0,0.0,0.0,0.0,0.0,0.0,10000000.0,10000000.0,10000000.0]},{n:"GASTOS VARIOS",v:[-63998717.0,12321093.0,-63747062.0,-16297810.0,41209684.0,88137796.0,-117497482.0,-360732226.0,-34490433.0,0.0,0.0,0.0]}];
 
+  window.ieEgresos = Array.from({length:12}, (_,i) => EGRESOS.reduce((t,c) => t + c.v[i], 0));
   const totales = MESES.map((_,i) => EGRESOS.reduce((t,c) => t + c.v[i], 0));
-  window.ieEgresos = totales;
   const fmtM = n => "$" + (n/1e6).toLocaleString("es-AR", {maximumFractionDigits:1}) + " M";
   const fmtMM = n => "$" + (n/1e9).toLocaleString("es-AR", {maximumFractionDigits:2}) + " MM";
   const fmtCell = n => Math.abs(n) >= 1e9 ? fmtMM(n) : fmtM(n);
+  EGRESOS.forEach(c => { c.v = c.v.slice(0, 9); });
+
+  // Clasificación por concepto: agrupo los 32 rubros en las 6 categorías pedidas + un resto financiero/variable.
+  const CATEGORIAS = {
+    "SUELDOS": ["SUELDOS", "Adicionales de sueldo/Adelantos cordoba/ HONORARIOS", "Cajas Regionales", "Ajustes de sueldos / KM", "SINDICATOS", "Mutual", "Embargos"],
+    "INDEMNIZACIONES": ["Liquidaciones Finales/AJUSTES"],
+    "PROVEEDORES": ["Compras-PAGOS PROVEEDORES TRANSFERENCIAS", "Grandes proveedores", "Compras-PAGOS PROVEEDORES CHEQUES", "Egresos TRANSFERENCIAS"],
+    "IMPUESTOS": ["931", "Planes AFIP 931/ IVA", "IVA", "IIBB - DREI - SIPRIB - SICORE", "Agente percepción y retención ARBA", "Plan Rentas CBA", "Moratoria Municipalidad de CBA", "Retenciones SIRCREB e Imp a los deb y creditos"],
+    "SERVICIOS": ["Alquileres", "Débitos", "Intereses sobre saldos deudores", "Prestamos Bancarios"],
+    "RETIROS SOCIOS": ["Retiro de Socios/Anticipo de Sueldos", "RETIRO CAPITAL EXCEDENTE"],
+    "OTROS / FINANCIEROS": ["Transf. ORIGEN", "COMPRA BS DE USO", "Caja", "INV DOLARES", "INVERSIONES", "GASTOS VARIOS"]
+  };
+  const CAT_COLORS = { "SUELDOS":"#3b82f6", "INDEMNIZACIONES":"#a855f7", "PROVEEDORES":"#16a34a", "IMPUESTOS":"#ea580c", "SERVICIOS":"#06b6d4", "RETIROS SOCIOS":"#eab308", "OTROS / FINANCIEROS":"#6b7280" };
+  const catNames = Object.keys(CATEGORIAS);
+  const catTotals = {};
+  catNames.forEach(cat => {
+    catTotals[cat] = MESES.map((_,i) => CATEGORIAS[cat].reduce((t,rubro) => {
+      const r = EGRESOS.find(e => e.n === rubro);
+      return t + (r ? r.v[i] : 0);
+    }, 0));
+  });
+  const catCheckOK = MESES.every((_,i) => Math.abs(catNames.reduce((t,c)=>t+catTotals[c][i],0) - totales[i]) < 1);
+
+  const svgCat = document.getElementById("egrCatChart");
+  const WC=1300, HC=360, MLc=70, MRc=20, MTc=20, MBc=64, LEGH=30;
+  const maxTC = Math.max(...totales);
+  const bwc = (WC-MLc-MRc)/MESES.length*0.6;
+  const xCc = i => MLc + (WC-MLc-MRc)*(i+0.5)/MESES.length;
+  const yc = v => MTc + (HC-MTc-MBc-LEGH)*(1-v/maxTC);
+  let outc = `<rect x="0" y="0" width="${WC}" height="${HC}" fill="transparent"/>`;
+  for (let g=0; g<=4; g++) {
+    const gy = MTc + (HC-MTc-MBc-LEGH)*g/4;
+    outc += `<line x1="${MLc}" y1="${gy}" x2="${WC-MRc}" y2="${gy}" stroke="rgba(255,255,255,.06)"/>`;
+    outc += `<text x="${MLc-8}" y="${gy+4}" text-anchor="end" font-size="10" fill="#6b7280">${fmtM(maxTC*(1-g/4))}</text>`;
+  }
+  MESES.forEach((mes,i) => {
+    let acc = 0;
+    catNames.forEach(cat => {
+      const v = catTotals[cat][i];
+      if (v <= 0) return;
+      const y0 = yc(acc), y1 = yc(acc+v);
+      outc += `<rect x="${xCc(i)-bwc/2}" y="${y1}" width="${bwc}" height="${y0-y1}" fill="${CAT_COLORS[cat]}" opacity=".92"/>`;
+      acc += v;
+    });
+    outc += `<text x="${xCc(i)}" y="${HC-MBc+16}" text-anchor="middle" font-size="10.5" font-weight="700" fill="#9ca3af">${mes}</text>`;
+  });
+  let legX = MLc, legY = HC-20, legRow=0;
+  catNames.forEach(cat => {
+    const w = 13 + cat.length*5.6 + 22;
+    if (legX + w > WC-MRc) { legX = MLc; legY += 16; legRow++; }
+    outc += `<rect x="${legX}" y="${legY-9}" width="9" height="9" rx="2" fill="${CAT_COLORS[cat]}"/>`;
+    outc += `<text x="${legX+13}" y="${legY-0.5}" font-size="9.5" fill="#9ca3af">${cat}</text>`;
+    legX += w;
+  });
+  svgCat.setAttribute("viewBox", `0 0 ${WC} ${HC+legRow*16}`);
+  svgCat.setAttribute("width", WC);
+  svgCat.setAttribute("height", HC+legRow*16);
+  svgCat.innerHTML = outc;
+
+  const catRowsTotal = catNames.map(cat => catTotals[cat].reduce((a,b)=>a+b,0));
+  const totalGeneral = totales.reduce((a,b)=>a+b,0);
+  document.getElementById("egrCatTable").innerHTML = `
+    <thead><tr><th>Categoría</th>${MESES.map(m=>`<th>${m}</th>`).join("")}<th>Total</th><th>% del total</th></tr></thead>
+    <tbody>
+      ${catNames.map((cat,ci) => `<tr class="${ci%2?'odd':''}">
+        <td><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${CAT_COLORS[cat]};margin-right:7px;"></span>${cat}</td>
+        ${catTotals[cat].map(v => `<td class="${v<0?'neg-c':''}">${fmtCell(v)}</td>`).join("")}
+        <td class="total">${fmtMM(catRowsTotal[ci])}</td>
+        <td>${(catRowsTotal[ci]/totalGeneral*100).toFixed(1)}%</td>
+      </tr>`).join("")}
+    </tbody>
+    <tfoot><tr class="avg-row">
+      <td>TOTAL EGRESOS</td>
+      ${totales.map(v => `<td>${fmtCell(v)}</td>`).join("")}
+      <td class="total">${fmtMM(totalGeneral)}</td>
+      <td>100%</td>
+    </tr></tfoot>`;
+  document.getElementById("egrCatNote").textContent = catCheckOK
+    ? `Las 7 categorías suman exacto el total de egresos de cada mes (verificado) · "OTROS / FINANCIEROS" agrupa movimientos financieros y variables (inversiones, préstamos, caja, gastos varios) que no encajan en las 6 categorías pedidas · sueldos es ${(catRowsTotal[0]/totalGeneral*100).toFixed(0)}% del total del año.`
+    : "Ojo: la suma de categorías no cierra exacto contra el total general en algún mes — revisar el mapeo de rubros.";
 
   // Sobresaltos: valor >= 1.4x el promedio del rubro, y al menos $20M de diferencia absoluta.
   const UMBRAL = 1.4, PISO = 20e6;
   const conTotal = EGRESOS.map(c => {
-    const avg = c.v.reduce((a,b)=>a+b,0)/12;
+    const avg = c.v.reduce((a,b)=>a+b,0)/c.v.length;
     const spikes = c.v.map(v => avg>0 && v>=UMBRAL*avg && (v-avg)>=PISO);
     return {...c, total: c.v.reduce((a,b)=>a+b,0), avg, spikes, nSpikes: spikes.filter(Boolean).length};
   }).sort((a,b) => b.total - a.total);
@@ -1051,7 +1189,7 @@ document.querySelectorAll(".exec-table-wrap").forEach(wrap => {
   document.getElementById("egrInsights").innerHTML = `
     <div class="patron-tile"><div class="k">Mes de mayor egreso total</div><div class="v bad">${MESES[maxIdx]} · ${fmtMM(totales[maxIdx])}</div><div class="d">${((totales[maxIdx]/totales[minIdx]-1)*100).toFixed(0)}% más que ${MESES[minIdx]}, el más bajo</div></div>
     <div class="patron-tile"><div class="k">Sobresalto más grande</div><div class="v bad">${peor ? fmtExactShort(peor.v) : "—"}</div><div class="d">${peor ? `${peor.n} en ${peor.mes} · ${peor.ratio.toFixed(1)}x su propio promedio` : ""}</div></div>
-    <div class="patron-tile"><div class="k">SUELDOS en diciembre</div><div class="v bad">+${(( (EGRESOS.find(c=>c.n==="SUELDOS").v[11]) / (EGRESOS.find(c=>c.n==="SUELDOS").v.reduce((a,b)=>a+b,0)/12) - 1)*100).toFixed(0)}%</div><div class="d">contra el promedio del año de ese mismo rubro</div></div>
+    <div class="patron-tile"><div class="k">Mes con más SUELDOS</div><div class="v bad">${(() => { const s=EGRESOS.find(c=>c.n==="SUELDOS").v; const mi=s.indexOf(Math.max(...s)); return MESES[mi]; })()}</div><div class="d">${(() => { const s=EGRESOS.find(c=>c.n==="SUELDOS").v; const mi=s.indexOf(Math.max(...s)); const avgS=s.reduce((a,b)=>a+b,0)/s.length; return "+"+(((s[mi]/avgS)-1)*100).toFixed(0)+"% contra el promedio del rubro"; })()}</div></div>
     <div class="patron-tile"><div class="k">Sobresaltos detectados</div><div class="v">${totalSpikes}</div><div class="d">en ${conTotal.filter(c=>c.nSpikes>0).length} rubros distintos</div></div>
   `;
   function fmtExactShort(n) { return "$" + Math.abs(n).toLocaleString("es-AR", {maximumFractionDigits:0}); }
@@ -1100,6 +1238,35 @@ document.querySelectorAll(".exec-table-wrap").forEach(wrap => {
       <td></td>
     </tr></tfoot>`;
   document.getElementById("egrTable").innerHTML = thead + `<tbody>${tbody}</tbody>` + tfoot;
+})();
+
+// Indemnizaciones (SEGRUP + ORIGEN): detalle informativo, ya incluido en el total de egresos.
+(() => {
+  const MESES_I = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP"];
+  const SEGRUP = [11801856,10140091,41526110,19308501,22266298,42852163,22354922,25367541,null];
+  const ORIGEN = [420160,2731824,1487024,2111993,1680419,346427,1788990,1540653,null];
+  const BAJAS = { 2: "BAJA UCC (1/3)", 5: "BAJA LIBERTAD (1/6)", 8: "BAJA EPE RAFAELA (1/9)" };
+  const fmtMI = n => "$" + Math.round(n).toLocaleString("es-AR");
+  const fmtMMI = n => "$" + (n/1e6).toLocaleString("es-AR", {maximumFractionDigits:2}) + " M";
+
+  const sumConocido = SEGRUP.reduce((t,v,i) => t + (v||0) + (ORIGEN[i]||0), 0);
+  const mesPico = MESES_I[SEGRUP.map((v,i)=>(v||0)+(ORIGEN[i]||0)).reduce((best,v,i,arr)=>v>arr[best]?i:best,0)];
+
+  document.getElementById("indemInsights").innerHTML = `
+    <div class="patron-tile"><div class="k">Total indemnizado (ene-ago)</div><div class="v bad">${fmtMMI(sumConocido)}</div><div class="d">SEGRUP + ORIGEN, 8 meses con dato</div></div>
+    <div class="patron-tile"><div class="k">Mes con más indemnizaciones</div><div class="v">${mesPico}</div><div class="d">coincide con una baja</div></div>
+    <div class="patron-tile"><div class="k">Bajas conocidas</div><div class="v">3</div><div class="d">UCC, LIBERTAD, EPE RAFAELA</div></div>
+  `;
+
+  document.getElementById("indemTable").innerHTML = `
+    <thead><tr><th>Mes</th>${MESES_I.map((m,i)=>`<th>${m}${BAJAS[i] ? `<br><span style="color:#f87171;font-weight:800;text-transform:none;letter-spacing:0;">${BAJAS[i]}</span>` : ""}</th>`).join("")}</tr></thead>
+    <tbody>
+      <tr><td>SEGRUP</td>${SEGRUP.map(v => `<td>${v==null?'<span class="muted-c">s/d</span>':fmtMI(v)}</td>`).join("")}</tr>
+      <tr class="odd"><td>ORIGEN</td>${ORIGEN.map(v => `<td>${v==null?'<span class="muted-c">s/d</span>':fmtMI(v)}</td>`).join("")}</tr>
+    </tbody>
+    <tfoot><tr class="avg-row">
+      <td>TOTAL</td>${SEGRUP.map((v,i) => (v==null&&ORIGEN[i]==null) ? '<td class="muted-c">s/d</td>' : `<td class="total">${fmtMI((v||0)+(ORIGEN[i]||0))}</td>`).join("")}
+    </tr></tfoot>`;
 })();
 
 // Saldo del banco por día: enero a septiembre 2026, buscando patrones.
