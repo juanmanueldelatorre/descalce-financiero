@@ -80,6 +80,8 @@ section[hidden]{display:none}
 .lf-h strong{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums}
 .lf-lg{margin-left:auto;font-size:11px;color:#7d93b2;display:flex;align-items:center;gap:6px}.lf-lg i{display:inline-block;width:16px;border-top:2.5px solid #9fb2cc}.lf-lg i.d{border-top-style:dashed;margin-left:8px}
 .lf-lg i.o{border-top:2.5px solid #fb923c;margin-left:8px}
+.lf-ck{display:inline-flex;align-items:center;gap:6px;margin-left:14px;font-size:11.5px;font-weight:600;color:#9fd8e6;cursor:pointer;user-select:none;white-space:nowrap}.lf-ck[hidden]{display:none}.lf-ck input{accent-color:#22d3ee;width:14px;height:14px;margin:0;cursor:pointer}.lf-ck:hover{color:#cff4fb}
+.lf-lg i.c{border-top:3px solid #22d3ee;margin-left:8px;box-shadow:0 0 6px #22d3ee88}
 .lf-btn{all:unset;cursor:pointer;font-size:11.5px;font-weight:600;color:#cfe0f7;border:1px solid #2a4f7d;border-radius:8px;padding:5px 10px;white-space:nowrap}.lf-btn:hover{background:#0b2a4a}.lf-btn.on{background:#fb923c;border-color:#fb923c;color:#1a0d00}.lf-btn:focus-visible{outline:2px solid #3b8ff0}
 .lf-btn#dpOpen{margin-left:14px;border-color:#7a4a22;color:#fdba74}
 .dp{margin-top:14px;border:1px solid var(--line);border-left:3px solid #fb923c;border-radius:10px;padding:14px 16px;background:#06182b}
@@ -347,7 +349,7 @@ section[hidden]{display:none}
  <div class="head"><div><h1>Flujo de fondos</h1><p id="ffSub"></p></div>
   <div class="ctl"><select class="psel" id="ffR" aria-label="Período"><option value="1" selected>1 mes</option><option value="3">3 meses</option><option value="6">6 meses</option><option value="y" id="ffYr">Año</option><option value="all">Histórico</option><option value="c">Personalizado…</option></select><span class="rng" id="ffC2" hidden><label>Desde<input type="date" id="ffFrom"></label><label>Hasta<input type="date" id="ffTo"></label></span></div></div>
  <div id="ffK" hidden></div>
- <div class="lf"><div class="lf-h"><b>SEGRUP</b><span id="ffInfo"></span><span class="lf-lg"><i></i>real <i class="d"></i>proyectado <i class="o"></i>disponibilidad real</span><button type="button" class="lf-btn" id="dpOpen">Cargar disponibilidad</button><label class="lf-sw"><span class="a">FF</span><input type="checkbox" id="ffSw" role="switch" aria-label="Cambiar entre flujo de fondos e ingresos y egresos"><i></i><span class="b">I/E</span></label></div><div class="lf-c" id="ffMain"></div><div class="lf-tip" id="ffTip"></div></div>
+ <div class="lf"><div class="lf-h"><b>SEGRUP</b><span id="ffInfo"></span><span class="lf-lg"><i></i>real <i class="d"></i>proyectado <i class="o"></i>disponibilidad real<span id="ffNPL" style="display:none;align-items:center;gap:6px"><i class="c"></i>nueva proyección</span></span><label class="lf-ck" id="ffNPck" hidden><input type="checkbox" id="ffNP">Añadir nueva proyección</label><button type="button" class="lf-btn" id="dpOpen">Cargar disponibilidad</button><label class="lf-sw"><span class="a">FF</span><input type="checkbox" id="ffSw" role="switch" aria-label="Cambiar entre flujo de fondos e ingresos y egresos"><i></i><span class="b">I/E</span></label></div><div class="lf-c" id="ffMain"></div><div class="lf-tip" id="ffTip"></div></div>
  <div class="dp" id="dpPanel" hidden>
   <div class="dp-h"><div><h3>Disponibilidad real</h3><p>Saldo de bancos de cada día. Cargalo, descargá el HTML y subilo a GitHub: así todos ven la línea naranja.</p></div><button type="button" class="lf-btn" id="dpClose">Cerrar</button></div>
   <form class="dp-f" id="dpForm"><label>Fecha<input type="date" id="dpDate" required></label><label>Saldo ($)<input type="text" id="dpAmt" inputmode="decimal" placeholder="-464.968.571" required></label><button type="submit" class="lf-btn on">Guardar</button><span class="dp-msg" id="dpMsg"></span><button type="button" class="lf-btn dl" id="dpDl">Descargar HTML para GitHub</button></form>
@@ -985,6 +987,7 @@ function dpTable(){const K=Object.keys(DISP).sort().reverse(),pn=dpPending();$('
  $('dpTable').innerHTML=`<table><thead><tr><th>Fecha</th><th>Disponibilidad real</th><th>Flujo de fondos</th><th>Diferencia</th><th>Estado</th><th></th></tr></thead><tbody>${K.map(d=>{const f=dpFF(d),df=f==null?null:DISP[d]-f;return `<tr><td>${DOW[toD(d).getDay()]} ${dlY(d)}</td><td style="color:#fdba74">${PESOS(DISP[d])}</td><td>${f==null?'–':PESOS(f)}</td><td style="color:${df==null?'':df>=0?'#86efac':'#fca5a5'}">${df==null?'–':(df>=0?'+':'')+PESOS(df)}</td><td class="st">${DISP_BASE[d]===DISP[d]?'<span class="ok">publicado</span>':'<span class="pd">sin publicar</span>'}</td><td><button type="button" class="x" data-del="${d}" title="Borrar" aria-label="Borrar ${dlY(d)}">✕</button></td></tr>`}).join('')}</tbody></table>`}
 function dpPut(d,v){DP_LOC.set[d]=Math.round(v*100)/100;DP_LOC.del=DP_LOC.del.filter(x=>x!==d);dpBuild()}
 function dpRefresh(){dpSave();dpTable();ffChart()}
+let FF_NP=(()=>{try{return localStorage.getItem('segrup.np')==='1'}catch(_){return false}})();$('ffNP').checked=FF_NP;$('ffNP').onchange=e=>{FF_NP=e.target.checked;try{localStorage.setItem('segrup.np',FF_NP?'1':'0')}catch(_){}ffChart()};
 function ffChart(){const box=$('ffMain'),W=Math.max(320,box.clientWidth),H=box.clientHeight,tip=$('ffTip');
  const Y_=TODAY.slice(0,4),cf=$('ffFrom').value.replace(/-/g,''),ct=$('ffTo').value.replace(/-/g,''),from=FF_M==='c'?([cf,ct].sort()[0]||S12.days[0]):FF_M==='all'?S12.days[0]:FF_M==='y'?Y_+'0101':add(TODAY,-7),to=FF_M==='c'?([cf,ct].sort()[1]||S12.days.at(-1)):FF_M==='all'?S12.days.at(-1):FF_M==='y'?[S12.days.at(-1),Y_+'1231'].sort()[0]:toS(new Date(+TODAY.slice(0,4),+TODAY.slice(4,6)-1+FF_M,+TODAY.slice(6)));
  const ix=S12.days.map((d,i)=>[d,i]).filter(x=>x[0]>=from&&x[0]<=to).map(x=>x[1]);if(!ix.length)return;const a=ix[0],z=ix.at(-1)+1;
@@ -994,7 +997,11 @@ function ffChart(){const box=$('ffMain'),W=Math.max(320,box.clientWidth),H=box.c
  const val=i=>real[i]!=null&&i<=lastR?real[i]:proj[i];
  const VW=FF_V,L=50,R=60,T=26,B=40,gap=0,avail=H-T-B,HD=VW==='ff'?avail:0,HF=avail-HD,step=(W-L-R)/n,cx=i=>L+(i+.5)*step;
  const DPI=days.map((d,i)=>{const nx=days[i+1];const ks=Object.keys(DISP).filter(k=>k>=d&&(!nx||k<nx)).sort();return ks.length?DISP[ks.at(-1)]/1e6:null});
- const vs=days.map((d,i)=>val(i)).concat(VW==='ff'?DPI:[]).filter(v=>v!=null);let hi=Math.max(0,...vs),lo=Math.min(0,...vs);if(hi-lo<1){hi=1000;lo=-1000}const pd=(hi-lo)*.14;hi+=pd;lo-=pd;
+ /* nueva proyección: último saldo real cargado − proyectado ese día = diferencia; se suma fija a los 20 días hábiles siguientes */
+ const NP=(()=>{const k=Object.keys(DISP).sort().at(-1);if(!k)return null;const g0=S12.days.findIndex(x=>x>=k),pf=dpFF(k);if(g0<0||pf==null)return null;return{g0,g1:Math.min(S12.days.length-1,g0+20),D:(DISP[k]-pf)/1e6,k}})();
+ const NPV=days.map((d,i)=>{const g=a+i;return NP&&FF_NP&&VW==='ff'&&g>=NP.g0&&g<=NP.g1?M(S12.disp[g])+NP.D:null});
+ {const lg=$('ffNPL');if(lg)lg.style.display=NP&&FF_NP&&VW==='ff'?'inline-flex':'none';$('ffNPck').hidden=!(NP&&VW==='ff')}
+ const vs=days.map((d,i)=>val(i)).concat(VW==='ff'?DPI.concat(NPV):[]).filter(v=>v!=null);let hi=Math.max(0,...vs),lo=Math.min(0,...vs);if(hi-lo<1){hi=1000;lo=-1000}const pd=(hi-lo)*.14;hi+=pd;lo-=pd;
  const dy=v=>T+(hi-v)/(hi-lo)*HD,zy=dy(0);
  const fTop=T+HD+gap,fUp=Math.max(1,...inc)*1.15,fDn=Math.max(1,...egr)*1.15,fz=fTop+HF*fUp/(fUp+fDn),fy=v=>fz-v/(fUp+fDn)*HF;
  const ti=days.findIndex(d=>d>=TODAY),newM=i=>i===0||days[i-1].slice(4,6)!==days[i].slice(4,6);
@@ -1030,6 +1037,12 @@ function ffChart(){const box=$('ffMain'),W=Math.max(320,box.clientWidth),H=box.c
  {const O=DPI.map((v,i)=>v==null?null:[cx(i),dy(v),v,i]).filter(Boolean);
   if(O.length>1)s+=`<polyline points="${O.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')}" fill="none" stroke="#fb923c" stroke-width="2.4" stroke-linejoin="round"/>`;
   O.forEach((p,k)=>{s+=`<circle cx="${p[0]}" cy="${p[1]}" r="3.2" fill="#fb923c" stroke="#132a4b" stroke-width="1.2"/>`;if(k===O.length-1||O.length<=12)s+=`<text x="${p[0]}" y="${p[1]-9}" fill="#fdba74" font-size="10.5" font-weight="700" text-anchor="middle">${N0(p[2])}</text>`})}
+ {const C=NPV.map((v,i)=>v==null?null:[cx(i),dy(v),v,i]).filter(Boolean);
+  if(C.length){const pts=C.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+   if(C.length>1)s+=`<polyline points="${pts}" fill="none" stroke="#22d3ee" stroke-width="7" opacity=".16" stroke-linejoin="round" stroke-linecap="round"/><polyline points="${pts}" fill="none" stroke="#22d3ee" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round"/>`;
+   const e=C.at(-1),st=C[0];
+   if(NP.g0>=a)s+=`<text x="${st[0]+7}" y="${st[1]+(NP.D<0?19:-11)}" fill="#67e8f9" font-size="10.5" font-weight="700">Δ ${NP.D>=0?'+':''}${N0(NP.D)} M</text>`;
+   s+=`<circle cx="${e[0]}" cy="${e[1]}" r="3.8" fill="#22d3ee" stroke="#00111f" stroke-width="1.5"/>`+(NP.g1<=a+n-1?`<text x="${e[0]+7}" y="${e[1]+4}" fill="#67e8f9" font-size="12" font-weight="800">${N0(e[2])}</text>`:'')}}
  }
  // panel de ingresos / egresos
  if(VW==='ie'){ticks(-fDn,fUp,4).forEach(v=>{const yy=fy(v);if(yy<fTop||yy>fTop+HF)return;s+=`<line x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}" stroke="#1c3659" stroke-width="1"/><text x="${L-8}" y="${yy+3.5}" fill="#7d93b2" font-size="10.5" text-anchor="end">${N0(v)}</text>`});
@@ -1051,7 +1064,7 @@ function ffChart(){const box=$('ffMain'),W=Math.max(320,box.clientWidth),H=box.c
  svg.onmousemove=e=>{const r=svg.getBoundingClientRect(),x=(e.clientX-r.left)*W/r.width,i=Math.floor((x-L)/step);if(i<0||i>=n){tip.style.opacity=0;cur.setAttribute('opacity',0);return}
   const d=days[i],v=val(i),I=S12.allI.filter(m=>m.date===d).sort((p,q)=>q.amount-p.amount),E=S12.allE.filter(m=>m.date===d).sort((p,q)=>q.amount-p.amount);
   const mv=[...I.slice(0,4).map(m=>[m.client,m.amount,1]),...E.slice(0,4).map(m=>[m.concept,-m.amount,0])];
-  tip.innerHTML=`<div class="d">${DOW[toD(d).getDay()]} ${dl(d)} · ${i<=lastR&&real[i]!=null?'real':'proyectado'}${DATA.vtos&&DATA.vtos[d]?` · <span style="color:#fbbf24">${esc(DATA.vtos[d])}</span>`:''}</div><div class="r">Saldo <b style="color:${v<0?'#ff8a95':'#8af0b8'}">${PESOS(v*1e6)}</b></div><div class="r">Ingresos <b style="color:#8ce8bd">${PESOS(inc[i]*1e6)}</b></div><div class="r">Egresos <b style="color:#f0a0aa">${PESOS(-egr[i]*1e6)}</b></div>${DPI[i]!=null?`<div class="r" style="margin-top:4px;border-top:1px solid #1d3d66;padding-top:4px">Disp. real <b style="color:#fdba74">${PESOS(DPI[i]*1e6)}</b></div><div class="r">Diferencia <b style="color:${DPI[i]-v>=0?'#86efac':'#fca5a5'}">${DPI[i]-v>=0?'+':''}${PESOS((DPI[i]-v)*1e6)}</b></div>`:''}`;
+  tip.innerHTML=`<div class="d">${DOW[toD(d).getDay()]} ${dl(d)} · ${i<=lastR&&real[i]!=null?'real':'proyectado'}${DATA.vtos&&DATA.vtos[d]?` · <span style="color:#fbbf24">${esc(DATA.vtos[d])}</span>`:''}</div><div class="r">Saldo <b style="color:${v<0?'#ff8a95':'#8af0b8'}">${PESOS(v*1e6)}</b></div><div class="r">Ingresos <b style="color:#8ce8bd">${PESOS(inc[i]*1e6)}</b></div><div class="r">Egresos <b style="color:#f0a0aa">${PESOS(-egr[i]*1e6)}</b></div>${NPV[i]!=null?`<div class="r" style="font-size:11px;opacity:.8">Nueva proy. <b style="color:#67e8f9">${PESOS(NPV[i]*1e6)}</b></div>`:''}${DPI[i]!=null?`<div class="r" style="margin-top:4px;border-top:1px solid #1d3d66;padding-top:4px">Disp. real <b style="color:#fdba74">${PESOS(DPI[i]*1e6)}</b></div><div class="r">Diferencia <b style="color:${DPI[i]-v>=0?'#86efac':'#fca5a5'}">${DPI[i]-v>=0?'+':''}${PESOS((DPI[i]-v)*1e6)}</b></div>`:''}`;
   cur.setAttribute('x1',cx(i));cur.setAttribute('x2',cx(i));cur.setAttribute('opacity',.45);
   tip.style.opacity=1;const px=cx(i)*r.width/W+14,tw=tip.offsetWidth;tip.style.left=(px+tw+20>r.width?px-tw-28:px+14)+'px';tip.style.top='60px'};
  svg.onmouseleave=()=>{tip.style.opacity=0;cur.setAttribute('opacity',0)}}
