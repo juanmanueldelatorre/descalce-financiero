@@ -354,8 +354,8 @@ section[hidden]{display:none}
  <div id="ffK" hidden></div>
  <div class="lf"><div class="lf-h"><b>SEGRUP</b><span id="ffInfo"></span><span class="lf-lg"><i></i>real <i class="d"></i><span id="ffFotoLg">proyectado</span> <i class="o"></i>disponibilidad real<span id="ffNPL" style="display:none;align-items:center;gap:6px"><i class="c"></i>nueva proyección</span></span><label class="lf-ck" id="ffNPck" hidden><input type="checkbox" id="ffNP">Añadir nueva proyección</label><button type="button" class="lf-btn" id="dpOpen">Cargar disponibilidad</button><label class="lf-sw"><span class="a">FF</span><input type="checkbox" id="ffSw" role="switch" aria-label="Cambiar entre flujo de fondos e ingresos y egresos"><i></i><span class="b">I/E</span></label></div><div class="lf-c" id="ffMain"></div><div class="lf-tip" id="ffTip"></div></div>
  <div class="dp" id="dpPanel" hidden>
-  <div class="dp-h"><div><h3>Disponibilidad real</h3><p>Saldo de bancos de cada día. Cargalo, descargá el HTML y subilo a GitHub: así todos ven la línea naranja.</p></div><button type="button" class="lf-btn" id="dpClose">Cerrar</button></div>
-  <form class="dp-f" id="dpForm"><label>Fecha<input type="date" id="dpDate" required></label><label>Saldo ($)<input type="text" id="dpAmt" inputmode="decimal" placeholder="-464.968.571" required></label><button type="submit" class="lf-btn on">Guardar</button><span class="dp-msg" id="dpMsg"></span><button type="button" class="lf-btn dl" id="dpDl">Descargar HTML para GitHub</button></form>
+  <div class="dp-h"><div><h3>Disponibilidad real</h3><p id="dpDesc">Saldo de bancos de cada día. Cargalo, descargá el HTML y subilo a GitHub: así todos ven la línea naranja.</p></div><button type="button" class="lf-btn" id="dpClose">Cerrar</button></div>
+  <form class="dp-f" id="dpForm"><label>Fecha<input type="date" id="dpDate" required></label><label>Saldo ($)<input type="text" id="dpAmt" inputmode="decimal" placeholder="-464.968.571" required></label><span id="dpLog" style="display:none"><label>Tu nombre<input id="dpNom" autocomplete="name"></label><label>Clave<input type="password" id="dpCla" autocomplete="current-password"></label></span><button type="submit" class="lf-btn on">Guardar</button><span class="dp-msg" id="dpMsg"></span><button type="button" class="lf-btn dl" id="dpDl">Descargar HTML para GitHub</button></form>
   <p class="dp-pend" id="dpPend" hidden></p>
   <div class="dp-t" id="dpTable"></div>
  </div>
@@ -1558,7 +1558,7 @@ async function post(body){body.clave=AUTH&&AUTH.clave;body.quien=AUTH&&AUTH.nomb
 async function flush(){
   if(sending||!Q.length)return;sending=true;const ops=Q.splice(0);live();
   try{const r=await post({a:'save',ops});
-    if(r.ok){const otro=REV==null||r.rev!==REV+1;REV=otro?null:r.rev;lastOk=new Date();netErr='';if(otro)setTimeout(()=>pull(true),300)}
+    if(r.ok){const otro=REV==null||r.rev!==REV+1;REV=otro?null:r.rev;lastOk=new Date();netErr='';if(otro)setTimeout(()=>pull(true),300);try{dpTable()}catch(_){}}
     else if(r.error==='clave'){AUTH=null;try{localStorage.removeItem(AUK)}catch(_){}netErr='La clave no es válida: volvé a ingresar. Lo último no se guardó.';REV=null;sending=false;live();pull();return}
     else throw new Error(r.error)}
   catch(e){Q.unshift(...ops);netErr='Sin conexión: reintentando guardar…';setTimeout(flush,5000)}
@@ -1573,7 +1573,7 @@ async function pull(full){
     const j=await (await fetch(u+'&a=get')).json();if(!j.ok)throw 0;
     if(Q.length||sending||EDIT)return;
     LIVE=true;if(netErr.startsWith('No se pudo'))netErr='';
-    if(j.rev!==REV){REV=j.rev;ST={ed:j.ed||{},add:j.add||[]};fotoSet(j.fotos||[]);applyAll()}
+    if(j.rev!==REV){REV=j.rev;ST={ed:j.ed||{},add:j.add||[]};DREM=j.disp||{};dispRebuild();fotoSet(j.fotos||[]);applyAll();dispMigrar();try{dpTable()}catch(_){}}
   }catch(e){netErr='No se pudo leer la base: se muestran los últimos datos.'}
   live();
 }
@@ -1607,12 +1607,12 @@ function live(){
   if(liveMode!==mode){liveMode=mode;n.className='cg-note cg-live';
     n.innerHTML=mode==='e'?`<span class="lv">● En vivo</span><span id="cgLiveTxt"></span><button type="button" class="lf-btn" id="cgSalir">Salir</button>`
       :`<span class="lv">● En vivo</span><span>Todos ven estos datos. Para modificar, ingresá:</span><form id="cgLog"><input id="cgNom" placeholder="Tu nombre" autocomplete="name"><input id="cgCla" type="password" placeholder="Clave" autocomplete="current-password"><button class="lf-btn on">Entrar</button></form><span id="cgLiveTxt"></span>`;
-    if(mode==='e')$('cgSalir').onclick=()=>{AUTH=null;try{localStorage.removeItem(AUK)}catch(_){}live()};
+    if(mode==='e')$('cgSalir').onclick=()=>{AUTH=null;try{localStorage.removeItem(AUK)}catch(_){}live();dpUI()};
     else $('cgLog').onsubmit=async e=>{e.preventDefault();const nombre=$('cgNom').value.trim(),clave=$('cgCla').value;const t=$('cgLiveTxt');
       if(!nombre||!clave){t.className='err';t.textContent='Completá nombre y clave.';return}
       t.className='';t.textContent='Verificando…';
       try{const r=await (await fetch(CG_API,{method:'POST',body:JSON.stringify({a:'login',clave,quien:nombre})})).json();
-        if(r.ok){AUTH={nombre,clave};try{localStorage.setItem(AUK,JSON.stringify(AUTH))}catch(_){}netErr='';live();W.focus({preventScroll:true})}
+        if(r.ok){AUTH={nombre,clave};try{localStorage.setItem(AUK,JSON.stringify(AUTH))}catch(_){}netErr='';live();dpUI();dispMigrar();W.focus({preventScroll:true})}
         else{t.className='err';t.textContent='Clave incorrecta.'}}catch(_){t.className='err';t.textContent='No se pudo conectar con la base.'}};
   }
   const t=$('cgLiveTxt');if(!t||(mode==='r'&&t.textContent==='Verificando…'))return;
@@ -1623,6 +1623,44 @@ if(REMOTE){$('cgReset').style.display='none';live();pull(true);setInterval(()=>{
   addEventListener('beforeunload',e=>{if(Q.length||sending){e.preventDefault();e.returnValue=''}})}
 
 window.cgRecalc=()=>{if(!built)return;calc();paintTotals(0);drawSel()};
+
+/* ---------- Disponibilidad real en la base compartida ---------- */
+let DREM={};
+function dispRebuild(){const D=Object.assign({},DISP_BASE);for(const d in DREM){if(DREM[d]==null)delete D[d];else D[d]=DREM[d]}
+  for(const d in DP_LOC.set)D[d]=DP_LOC.set[d];DP_LOC.del.forEach(d=>{if(!(d in DP_LOC.set))delete D[d]});DISP=D}
+const dpLocPend=()=>Object.keys(DP_LOC.set).length+DP_LOC.del.length;
+function dispMigrar(){/* saldos cargados antes solo en este navegador: se suben a la base */
+  if(!REMOTE||!AUTH||!dpLocPend())return;const ops=[];
+  for(const d in DP_LOC.set){ops.push({op:'disp',d,v:DP_LOC.set[d]});DREM[d]=DP_LOC.set[d]}
+  for(const d of DP_LOC.del)if(!(d in DP_LOC.set)){ops.push({op:'dispDel',d});DREM[d]=null}
+  DP_LOC={set:{},del:[]};dpSave();dispRebuild();enqueue(ops)}
+function dpDespues(){syncLive();if(window.cgRecalc)cgRecalc();dpTable();if(!$('ff').hidden)ffChart()}
+async function dpLogin(){if(AUTH)return true;const nombre=$('dpNom').value.trim(),clave=$('dpCla').value,m=$('dpMsg');
+  if(!nombre||!clave){m.className='dp-msg err';m.textContent='Para guardar, poné tu nombre y la clave de Carga FF.';return false}
+  try{const r=await (await fetch(CG_API,{method:'POST',body:JSON.stringify({a:'login',clave,quien:nombre})})).json();
+    if(!r.ok){m.className='dp-msg err';m.textContent='Clave incorrecta.';return false}
+    AUTH={nombre,clave};try{localStorage.setItem(AUK,JSON.stringify(AUTH))}catch(_){}liveMode='';live();dpUI();return true}
+  catch(_){m.className='dp-msg err';m.textContent='No se pudo conectar con la base.';return false}}
+function dpUI(){$('dpLog').style.display=AUTH?'none':'contents'}
+if(REMOTE){
+  $('dpDl').style.display='none';
+  $('dpDesc').textContent='Saldo de bancos de cada día. Al guardar queda en la base y todos lo ven en el gráfico (línea naranja) al instante.';
+  dpUI();
+  $('dpForm').onsubmit=async e=>{e.preventDefault();const d=$('dpDate').value.replace(/-/g,''),v=dpNum($('dpAmt').value),m=$('dpMsg');
+    if(!d||!isFinite(v)){m.className='dp-msg err';m.textContent='Revisá la fecha y el saldo.';return}
+    if(!await dpLogin())return;dispMigrar();
+    DREM[d]=Math.round(v*100)/100;dispRebuild();enqueue([{op:'disp',d,v:DREM[d]}]);
+    $('dpAmt').value='';m.className='dp-msg';m.textContent='✓ Guardado '+dlY(d)+' para todos';dpDespues()};
+  $('dpTable').onclick=async e=>{const b=e.target.closest('[data-del]');if(!b)return;const d=b.dataset.del;
+    if(d in DP_LOC.set||DP_LOC.del.includes(d)){delete DP_LOC.set[d];DP_LOC.del=DP_LOC.del.filter(x=>x!==d);dpSave()}
+    if(!AUTH){if(!await dpLogin())return}
+    DREM[d]=null;dispRebuild();enqueue([{op:'dispDel',d}]);dpDespues()};
+  const _dt=dpTable;dpTable=function(){_dt();const pn=dpLocPend(),P=$('dpPend');
+    P.hidden=!pn;P.textContent=pn?`${pn} saldo(s) cargados antes solo en este navegador: se suben a la base apenas guardes con tu clave.`:'';
+    $('dpTable').querySelectorAll('[data-del]').forEach(b=>{const d=b.dataset.del,st=b.closest('tr').querySelector('td.st');if(!st)return;
+      st.innerHTML=(d in DP_LOC.set)?'<span class="pd">sin guardar</span>':Q.some(o=>o.d===d)||sending?'<span class="pd">guardando…</span>':'<span class="ok">guardado</span>'})};
+}
+
 
 /* ---------- Sacar foto proyección (clave propia, la valida Apps Script) ---------- */
 if(REMOTE){
