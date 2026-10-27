@@ -473,7 +473,7 @@ section[hidden]{display:none}
  <div class="head"><div><h1>Supuestos</h1><p>Simulá ingresos y egresos sobre el flujo de fondos para ver cómo se mueve la proyección</p></div>
   <div class="ctl"><select class="psel" id="spR" aria-label="Período"><option value="1" selected>1 mes</option><option value="3">3 meses</option><option value="6">6 meses</option><option value="y" id="spYr">Año</option><option value="all">Histórico</option><option value="c">Personalizado…</option></select><span class="rng" id="spC2" hidden><label>Desde<input type="date" id="spFrom"></label><label>Hasta<input type="date" id="spTo"></label></span></div></div>
  <div id="spK" hidden></div>
- <div class="lf"><div class="lf-h"><b>SEGRUP</b><span id="spInfo"></span><span class="lf-lg"><i></i>con supuestos <i class="g"></i>sin supuestos</span><label class="lf-sw"><span class="a">FF</span><input type="checkbox" id="spSw" role="switch" aria-label="Cambiar entre flujo de fondos e ingresos y egresos"><i></i><span class="b">I/E</span></label></div><div class="lf-c" id="spMain"></div><div class="lf-tip" id="spTip"></div></div>
+ <div class="lf"><div class="lf-h"><b>SEGRUP</b><span id="spInfo"></span><span class="lf-lg"><i></i>real <i class="d"></i>con supuestos <i class="o"></i>disponibilidad real<span id="spNPL" style="display:none;align-items:center;gap:6px"><i class="c"></i>nueva proyección</span></span><label class="lf-ck" id="spNPck" hidden><input type="checkbox" id="spNP">Añadir nueva proyección</label><label class="lf-sw"><span class="a">FF</span><input type="checkbox" id="spSw" role="switch" aria-label="Cambiar entre flujo de fondos e ingresos y egresos"><i></i><span class="b">I/E</span></label></div><div class="lf-c" id="spMain"></div><div class="lf-tip" id="spTip"></div></div>
  <div class="dp" style="border-left-color:#3b8ff0">
   <div class="dp-h"><div><h3 style="color:#8fc0ff">Cargar supuesto</h3><p>Un ingreso o egreso que no está en el flujo (o un cambio de fecha/monto). Se suma solo en esta hoja.</p></div><button type="button" class="lf-btn" id="spClear">Borrar todos</button></div>
   <form class="sp-f" id="spForm"><label>Desde<input type="date" id="spDate" required></label><label>Hasta (opcional)<input type="date" id="spHasta"></label><label id="spModoL" hidden>Cómo se aplica<select id="spModo"><option value="tot">Repartir el total en el rango</option><option value="dia">Monto por cada día hábil</option><option value="sem">Monto por semana</option><option value="mes">Monto por mes</option></select></label><label>Tipo<select id="spTipo"><option value="i">Ingreso</option><option value="e">Egreso</option></select></label><label>Concepto<input type="text" id="spConc" placeholder="Ej: cobro Cencosud adelantado"></label><label>Monto ($)<input type="text" id="spAmt" inputmode="decimal" placeholder="150.000.000" required></label><button type="submit" class="lf-btn on" style="background:#3b8ff0;border-color:#3b8ff0;color:#fff">Agregar</button><span class="dp-msg" id="spMsg"></span></form>
@@ -1208,81 +1208,29 @@ function ffChart(){const box=$('ffMain'),W=Math.max(320,box.clientWidth),H=box.c
  svg.onmouseleave=()=>{tip.style.opacity=0;cur.setAttribute('opacity',0)};
 }
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function spChart(){const box=$('spMain'),W=Math.max(320,box.clientWidth),H=box.clientHeight,tip=$('spTip');
- const Y_=TODAY.slice(0,4),cf=$('spFrom').value.replace(/-/g,''),ct=$('spTo').value.replace(/-/g,''),from=SP_M==='c'?([cf,ct].sort()[0]||SPS.days[0]):SP_M==='all'?SPS.days[0]:SP_M==='y'?Y_+'0101':add(TODAY,-7),to=SP_M==='c'?([cf,ct].sort()[1]||SPS.days.at(-1)):SP_M==='all'?SPS.days.at(-1):SP_M==='y'?[SPS.days.at(-1),Y_+'1231'].sort()[0]:toS(new Date(+TODAY.slice(0,4),+TODAY.slice(4,6)-1+SP_M,+TODAY.slice(6)));
- const ix=SPS.days.map((d,i)=>[d,i]).filter(x=>x[0]>=from&&x[0]<=to).map(x=>x[1]);if(!ix.length)return;const a=ix[0],z=ix.at(-1)+1;
- const days=SPS.days.slice(a,z),n=days.length,M=v=>v/1e8; // centavos -> millones
- const real=days.map((d,i)=>SPS.realI[a+i]!=null?M(SPS.realI[a+i]):null),lastR=real.reduce((p,v,i)=>v!=null?i:p,-1);
- const proj=days.map((d,i)=>i>=lastR?M(SPS.disp[a+i]):null),inc=days.map((d,i)=>M(SPS.inc[a+i])),egr=days.map((d,i)=>M(SPS.egr[a+i]));
- const val=i=>real[i]!=null&&i<=lastR?real[i]:proj[i];
- const VW=SP_V,L=50,R=60,T=26,B=40,gap=0,avail=H-T-B,HD=VW==='ff'?avail:0,HF=avail-HD,step=(W-L-R)/n,cx=i=>L+(i+.5)*step;
- const DPI=days.map((d,i)=>{const nx=days[i+1];const ks=Object.keys(DISP).filter(k=>k>=d&&(!nx||k<nx)).sort();return ks.length?DISP[ks.at(-1)]/1e6:null});
- const BASE=days.map((d,i)=>i>=lastR?S12.disp[a+i]/1e8:null);const vs=days.map((d,i)=>val(i)).concat(VW==='ff'&&SP_HAS()?BASE:[]).concat(VW==='ff'?DPI:[]).filter(v=>v!=null);let hi=Math.max(0,...vs),lo=Math.min(0,...vs);if(hi-lo<1){hi=1000;lo=-1000}const pd=(hi-lo)*.14;hi+=pd;lo-=pd;
- const dy=v=>T+(hi-v)/(hi-lo)*HD,zy=dy(0);
- const fTop=T+HD+gap,fUp=Math.max(1,...inc)*1.15,fDn=Math.max(1,...egr)*1.15,fz=fTop+HF*fUp/(fUp+fDn),fy=v=>fz-v/(fUp+fDn)*HF;
- const ti=days.findIndex(d=>d>=TODAY),newM=i=>i===0||days[i-1].slice(4,6)!==days[i].slice(4,6);
- let s='';
- // pasado sombreado
- if(ti>0)s+=`<rect x="${L}" y="${T-14}" width="${ti*step}" height="${H-T-B+14}" fill="#0c1d36" opacity=".55"/>`;
- // bandas de mes
- for(let i=0;i<n;i++)if(newM(i)){const x=L+i*step;{let k2=i+1;while(k2<n&&!newM(k2))k2++;const odd=+days[i].slice(4,6)%2;s+=`<rect x="${x}" y="${T-14}" width="${(k2-i)*step}" height="${H-B-T+14}" fill="${odd?'#6fa8ff':'#000814'}" opacity="${odd?.045:.16}" pointer-events="none"/>`}if(i)s+=`<line x1="${x}" x2="${x}" y1="${T-14}" y2="${H-B}" stroke="#2a4a72" stroke-width="1"/>`;let k=i+1;while(k<n&&!newM(k))k++;{const bw_=(k-i)*step,nmM=MUP[+days[i].slice(4,6)-1],lab=nmM.length*8.2+10<bw_?nmM:bw_>34?nmM.slice(0,3):'';if(lab)s+=`<text x="${x+6}" y="${T-3}" fill="#6f8fbf" font-size="10" font-weight="700" letter-spacing=".14em">${lab}</text>`}}
- // ejes
- if(VW==='ff'){
- ticks(lo,hi,4).forEach(v=>{s+=`<line x1="${L}" x2="${W-R}" y1="${dy(v)}" y2="${dy(v)}" stroke="${v===0?'#36557e':'#1c3659'}" stroke-width="1"/><text x="${L-8}" y="${dy(v)+3.5}" fill="#7d93b2" font-size="10.5" text-anchor="end">${N0(v)}</text>`});
- }
- // hoy
- if(ti>=0){const x=cx(ti);s+=`<line x1="${x}" x2="${x}" y1="${T-14}" y2="${H-B}" stroke="#6aa8ff" stroke-width="1" opacity=".55"/><text x="${x}" y="${T-16}" fill="#8fc0ff" font-size="9.5" font-weight="700" text-anchor="middle" letter-spacing=".08em">HOY</text>`}
- if(VW==='ff'){
- // área + línea proyectada
- const P=days.map((d,i)=>proj[i]!=null?[cx(i),dy(proj[i]),proj[i],i]:null).filter(Boolean);
- if(P.length>1){const ar=`M${P[0][0]} ${zy}`+P.map(p=>`L${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join('')+`L${P.at(-1)[0]} ${zy}Z`;
-  s+=`<defs><clipPath id="spU"><rect x="0" y="0" width="${W}" height="${zy}"/></clipPath><clipPath id="spD"><rect x="0" y="${zy}" width="${W}" height="${H}"/></clipPath></defs><path d="${ar}" fill="#22c55e" opacity=".24" clip-path="url(#spU)"/><path d="${ar}" fill="#ef4444" opacity=".22" clip-path="url(#spD)"/>`;
-  {const pts=P.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');s+=`<polyline points="${pts}" fill="none" stroke="#4ade80" stroke-width="2" stroke-dasharray="5 3" stroke-linejoin="round" clip-path="url(#spU)"/><polyline points="${pts}" fill="none" stroke="#f87171" stroke-width="2" stroke-dasharray="5 3" stroke-linejoin="round" clip-path="url(#spD)"/>`}}
- if(SP_HAS()){const BP=BASE.map((v,i)=>v==null?null:[cx(i),dy(v)]).filter(Boolean);if(BP.length>1)s+=`<polyline points="${BP.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')}" fill="none" stroke="#c7d3e3" stroke-width="1.5" stroke-dasharray="2 3" opacity=".75"/>`;
-}
- // línea real
- const RP=days.map((d,i)=>real[i]!=null&&i<=lastR?[cx(i),dy(real[i]),real[i],i]:null).filter(Boolean);
- if(RP.length>1){const pts=RP.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');s+=`<defs><clipPath id="spU2"><rect x="0" y="0" width="${W}" height="${zy}"/></clipPath><clipPath id="spD2"><rect x="0" y="${zy}" width="${W}" height="${H}"/></clipPath></defs><path d="M${RP[0][0]} ${zy}${RP.map(p=>'L'+p[0].toFixed(1)+' '+p[1].toFixed(1)).join('')}L${RP.at(-1)[0]} ${zy}Z" fill="#22c55e" opacity=".24" clip-path="url(#spU2)"/><path d="M${RP[0][0]} ${zy}${RP.map(p=>'L'+p[0].toFixed(1)+' '+p[1].toFixed(1)).join('')}L${RP.at(-1)[0]} ${zy}Z" fill="#ef4444" opacity=".22" clip-path="url(#spD2)"/><polyline points="${pts}" fill="none" stroke="#4ade80" stroke-width="2.6" stroke-linejoin="round" clip-path="url(#spU2)"/><polyline points="${pts}" fill="none" stroke="#f87171" stroke-width="2.6" stroke-linejoin="round" clip-path="url(#spD2)"/>`}
- // puntos y etiquetas
- const all=days.map((d,i)=>val(i)!=null?[cx(i),dy(val(i)),val(i),i]:null).filter(Boolean),pj=P.length?P:all;
- const iMax=pj.reduce((b,p)=>p[2]>b[2]?p:b,pj[0]),iMin=pj.reduce((b,p)=>p[2]<b[2]?p:b,pj[0]),iLast=all.at(-1),lr=RP.at(-1);
- const every=Math.max(1,Math.ceil(30/step));
- const SPI=[iMax,iMin,iLast,lr].filter(Boolean).map(q=>q[3]);all.forEach((p,k)=>{const sp=SPI.includes(p[3]),near=SPI.some(q=>Math.abs(q-p[3])*step<34);if(!sp)s+=`<circle cx="${p[0]}" cy="${p[1]}" r="2.2" fill="${p[2]>=0?'#4ade80':'#f87171'}"/>`;
-  if(sp||near||k%every||!p[2])return;const up=p[2]>=0;s+=`<text x="${p[0]}" y="${up?p[1]-8:p[1]+15}" fill="${up?'#86efac':'#fca5a5'}" font-size="9.5" text-anchor="middle">${N0(p[2])}</text>`});
- const big=(p,col,dyy,anchor='middle',dx=0)=>p&&p[2]?`<circle cx="${p[0]}" cy="${p[1]}" r="3.2" fill="${col}"/><text x="${p[0]+dx}" y="${p[1]+dyy}" fill="${col}" font-size="12.5" font-weight="800" text-anchor="${anchor}">${N0(p[2])}</text>`:'';
- s+=big(iMax,iMax[2]>=0?'#8af0b8':'#ff8a95',-10)+big(iMin,'#ff8a95',20)+(iLast!==iMax&&iLast!==iMin?big(iLast,iLast[2]>=0?'#8af0b8':'#ff8a95',4,'start',8):'')+(lr&&lr!==iMax&&lr!==iMin?big(lr,'#ff8a95',lr[2]<0?20:-10):'');
- if(lr)s=s.replace(new RegExp(`<circle cx="${lr[0]}" cy="${lr[1]}" r="3.2" fill="#ff8a95"/>`),`<circle cx="${lr[0]}" cy="${lr[1]}" r="3.4" fill="#ff8a95"/>`);
- {const O=DPI.map((v,i)=>v==null?null:[cx(i),dy(v),v,i]).filter(Boolean);
-  if(O.length>1)s+=`<polyline points="${O.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')}" fill="none" stroke="#fb923c" stroke-width="2.4" stroke-linejoin="round"/>`;
-  O.forEach((p,k)=>{s+=`<circle cx="${p[0]}" cy="${p[1]}" r="3.2" fill="#fb923c" stroke="#132a4b" stroke-width="1.2"/>`;if(k===O.length-1||O.length<=12)s+=`<text x="${p[0]}" y="${p[1]-9}" fill="#fdba74" font-size="10.5" font-weight="700" text-anchor="middle">${N0(p[2])}</text>`})}
- }
- // panel de ingresos / egresos
- if(VW==='ie'){ticks(-fDn,fUp,4).forEach(v=>{const yy=fy(v);if(yy<fTop||yy>fTop+HF)return;s+=`<line x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}" stroke="#1c3659" stroke-width="1"/><text x="${L-8}" y="${yy+3.5}" fill="#7d93b2" font-size="10.5" text-anchor="end">${N0(v)}</text>`});
- s+=`<line x1="${L}" x2="${W-R}" y1="${fz}" y2="${fz}" stroke="#36557e" stroke-width="1"/>`;
- const bw=Math.max(3,Math.min(13,step*.42)),thr=Math.max(fUp,fDn)*.035;
- days.forEach((d,i)=>{const x=cx(i)-bw/2,vi=inc[i],ve=egr[i],fut=i>lastR;
-  if(vi>0){const y=fy(vi),h=Math.max(2,fz-y);s+=`<rect x="${x}" y="${fz-h}" width="${bw}" height="${h}" rx="${Math.min(bw/2,h/2,4)}" fill="#5fd3a0" opacity="${fut?.85:1}"/>`;if(vi>=thr&&step>=16)s+=`<text x="${cx(i)}" y="${fz-h-5}" fill="#8ce8bd" font-size="9.5" font-weight="700" text-anchor="middle">${N0(vi)}</text>`}
-  if(ve>0){const h=Math.max(2,fy(-ve)-fz);s+=`<rect x="${x}" y="${fz}" width="${bw}" height="${h}" rx="${Math.min(bw/2,h/2,4)}" fill="#d9606e" opacity="${fut?.85:1}"/>`;if(ve>=thr&&step>=16)s+=`<text x="${cx(i)}" y="${fz+h+12}" fill="#f0a0aa" font-size="9.5" font-weight="700" text-anchor="middle">${N0(ve)}</text>`}});
- }
- {const MK=SP_DAYS();days.forEach((d,i)=>{const L=MK[a+i];if(!L)return;const net=L.reduce((x,y)=>x+y.v,0);s+=`<path d="M${cx(i)-5} ${T-12}L${cx(i)+5} ${T-12}L${cx(i)} ${T-5}Z" fill="${net>=0?'#4ade80':'#f87171'}"/>`})}
- // eje x
- const lstep=Math.max(1,Math.ceil(26/step)),PRI=days.map((d,i)=>i).filter(i=>newM(i)||days[i]===TODAY);let lx=-1e9;
- days.forEach((d,i)=>{const nm=newM(i),mon=toD(d).getDay()===1,td=d===TODAY,pri=nm||td;if(!pri&&(i%lstep||PRI.some(j=>Math.abs(j-i)*step<24)))return;if(pri&&cx(i)-lx<20&&!nm)return;lx=cx(i);const x=cx(i),col=td?'#7db6ff':(mon||nm)?'#ffffff':'#9fb2cc';
-  s+=`<text x="${x}" y="${H-B+18}" fill="${col}" font-size="11.5" font-weight="${mon||nm||td?700:400}" text-anchor="middle">${+d.slice(6)}</text>`;
-  if(step>=22||nm)s+=`<text x="${x}" y="${H-B+31}" fill="${nm?'#6aa8ff':'#6f86a4'}" font-size="9" font-weight="${nm?700:400}" text-anchor="middle">${nm?MAB[+d.slice(4,6)-1]:DOW[toD(d).getDay()]}</text>`});
- s+=`<line id="spCur" x1="0" x2="0" y1="${T-14}" y2="${H-B}" stroke="#9fb8dc" stroke-width="1" opacity="0"/>`;
- box.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Flujo de fondos diario">${s}</svg>`;
- const v0=val(ti<0?0:ti);$('spInfo').innerHTML=`Saldo hoy ${dl(TODAY)} <strong class="${v0<0?'n':'p'}">${PESOS(v0*1e6)}</strong>${SP_HAS()?' <span style="font-size:11.5px;color:#7d93b2">con supuestos</span>':''}`;
- const svg=box.querySelector('svg'),cur=svg.querySelector('#spCur');
- svg.onmousemove=e=>{const r=svg.getBoundingClientRect(),x=(e.clientX-r.left)*W/r.width,i=Math.floor((x-L)/step);if(i<0||i>=n){tip.style.opacity=0;cur.setAttribute('opacity',0);return}
-  const d=days[i],v=val(i),I=SPS.allI.filter(m=>m.date===d).sort((p,q)=>q.amount-p.amount),E=SPS.allE.filter(m=>m.date===d).sort((p,q)=>q.amount-p.amount);
-  const mv=[...I.slice(0,4).map(m=>[m.client,m.amount,1]),...E.slice(0,4).map(m=>[m.concept,-m.amount,0])];
-  tip.innerHTML=`<div class="d">${DOW[toD(d).getDay()]} ${dl(d)} · ${i<=lastR&&real[i]!=null?'real':'proyectado'}${DATA.vtos&&DATA.vtos[d]?` · <span style="color:#fbbf24">${esc(DATA.vtos[d])}</span>`:''}</div><div class="r">Saldo <b style="color:${v<0?'#ff8a95':'#8af0b8'}">${PESOS(v*1e6)}</b></div><div class="r">Ingresos <b style="color:#8ce8bd">${PESOS(inc[i]*1e6)}</b></div><div class="r">Egresos <b style="color:#f0a0aa">${PESOS(-egr[i]*1e6)}</b></div>${spTipExtra(a+i,v)}${DPI[i]!=null?`<div class="r" style="margin-top:4px;border-top:1px solid #1d3d66;padding-top:4px">Disp. real <b style="color:#fdba74">${PESOS(DPI[i]*1e6)}</b></div><div class="r">Diferencia <b style="color:${DPI[i]-v>=0?'#86efac':'#fca5a5'}">${DPI[i]-v>=0?'+':''}${PESOS((DPI[i]-v)*1e6)}</b></div>`:''}`;
-  cur.setAttribute('x1',cx(i));cur.setAttribute('x2',cx(i));cur.setAttribute('opacity',.45);
-  tip.style.opacity=1;const px=cx(i)*r.width/W+14,tw=tip.offsetWidth;tip.style.left=(px+tw+20>r.width?px-tw-28:px+14)+'px';tip.style.top='60px'};
- svg.onmouseleave=()=>{tip.style.opacity=0;cur.setAttribute('opacity',0)}}
-
-/* ---------- SUPUESTOS (copia del flujo: no toca los datos originales) ---------- */
+/* Supuestos = copia EXACTA y en tiempo real del gráfico de Flujo de fondos (se genera desde ffChart),
+   con los supuestos sumados a la nueva proyección (línea celeste). */
+let SP_NP=(()=>{try{return localStorage.getItem('segrup.npsp')!=='0'}catch(_){return true}})();
+function liveNPsp(){const an=liveAnchor();if(!an)return null;const L=new Array(S12.days.length).fill(null);let s=an.A;L[an.ck]=s;
+ for(let c=an.ck+1;c<S12.days.length;c++){s+=(SPS.inc[c]-SPS.egr[c])/100;L[c]=s}an.L=L;return an}
+function spTipX(k){if(!SP_HAS())return '';const L0=liveNP(),L1=liveNPsp();if(!L0||!L1||k<L0.ck)return '';const e=L1.L[k]-L0.L[k],X=SP_DAYS()[k];
+ return `<div class="r" style="margin-top:4px;border-top:1px solid #1d3d66;padding-top:4px">Efecto supuestos <b style="color:${e>=0?'#86efac':'#fca5a5'}">${e>=0?'+':''}${PESOS(e)}</b></div>`+(X?`<div class="m">${X.map(x=>`<div><span>${esc(x.c||'Supuesto')}</span><span style="color:${x.v>=0?'#8ce8bd':'#f0a0aa'}">${(x.v>=0?'+':'')+N0(x.v/1e6)} M</span></div>`).join('')}</div>`:'')}
+/* serie con supuestos = nueva proyección (celeste) + supuestos, desde el último saldo real */
+function spMap(){const L=liveNPsp(),M=new Map();if(L)for(let c=L.ck;c<S12.days.length;c++)M.set(S12.days[c],L.L[c]);return M}
+function spMake(){let s=ffChart.toString();const rep=(a,b,all)=>{if(!s.includes(a))throw new Error('spMake: falta '+a);s=all?s.split(a).join(b):s.replace(a,b)};
+ /* base = línea celeste (lo real); la punteada pasa a ser "con supuestos" en vez de la foto */
+ rep('function ffChart(){','function (){const SPVM=spMap();');rep('FOTO_V','SPVM',1);
+ rep("$('ffMain')","$('spMain')");rep("$('ffTip')","$('spTip')");rep("$('ffFrom')","$('spFrom')",1);rep("$('ffTo')","$('spTo')",1);
+ rep('FF_M','SP_M',1);rep('FF_V','SP_V',1);rep('FF_NP','SP_NP',1);rep("$('ffInfo')","$('spInfo')",1);rep("$('ffNPL')","$('spNPL')",1);rep("$('ffNPck')","$('spNPck')",1);
+ rep('lfU','spxU',1);rep('lfD','spxD',1);rep('lfCur','spCur',1);rep('S12.inc','SPS.inc',1);rep('S12.egr','SPS.egr',1);
+ rep("'Foto'","'Con supuestos'");
+ rep("if(NP.g0>=a&&NP.D!=null&&Math.abs(NP.D)>=.05)","if(false)");
+ /* marcas en los días con supuestos */
+ rep(" {const C=NPV.map("," {const SD=SP_DAYS();proj.forEach((v,i)=>{if(v!=null&&SD[a+i]){const x=cx(i),y=dy(v);s+=`<path d=\"M${x} ${y-11}l-5 -8h10z\" fill=\"#fbbf24\"/>`}})}\n {const C=NPV.map(");
+ rep("  cur.setAttribute('x1',cx(i));","  tip.innerHTML+=spTipX(a+i);\n  cur.setAttribute('x1',cx(i));");
+ return eval('('+s+')')}
+function spChart(){if(!spChart.f)spChart.f=spMake();return spChart.f()}
+$('spNP').checked=SP_NP;$('spNP').onchange=e=>{SP_NP=e.target.checked;try{localStorage.setItem('segrup.npsp',SP_NP?'1':'0')}catch(_){}spChart()};
 let SP_M=1,SP_V='ff',SPS=S12;
 let SUP=(()=>{try{return JSON.parse(localStorage.getItem('segrup.sup.v1')||'[]')}catch(e){return []}})();
 const spSave=()=>{try{localStorage.setItem('segrup.sup.v1',JSON.stringify(SUP))}catch(e){}};
