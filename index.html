@@ -424,6 +424,12 @@ section[hidden]{display:none}
 .dp-t td.ccs{text-align:right}
 @media(max-width:900px){.cc-k{grid-template-columns:1fr}.cc-k>div{border-left:0;border-top:1px solid var(--line)}.cc-k>div:first-child{border-top:0}.cc-r{grid-template-columns:1fr auto}.cc-r .ty{grid-column:1/-1}.cc-r .ac{grid-column:1/-1;justify-content:flex-start}.cc-e{grid-template-columns:1fr auto 24px}.cc-e .cc-tag{grid-column:1/-1}.cc-form input[data-k="nm"]{min-width:0;width:100%}}
 .dp-t{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+.mvc{border-bottom:1px solid var(--line)}.mvc .cc{margin:0;border:0;border-radius:0;background:#04192c}
+.cc-tx{margin:6px 0;font-size:12.5px;color:var(--muted)}.cc-log{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0;font-size:12px;color:#fdba74}
+.cc-log input{background:#041f36;color:var(--text);border:1px solid #0b2c4a;border-radius:7px;padding:5px 8px;font:inherit;font-size:12.5px;width:140px}
+.mvc>.cc>.cc-form{display:flex}.cc-b.real{color:#fdba74;border-color:#7a4a22}.cc-tag.real{background:#2a1a0a;color:#fdba74}.cc-r.nuevo{grid-template-columns:1fr}.cc-r.nuevo .ac{justify-content:flex-start}
+.ccc{font-size:11px;font-weight:700;padding:2px 8px;border-radius:9px}.ccc.ok{background:#052e16;color:#4ade80}.ccc.pd{background:#3a2a06;color:#fbbf24}.ccc.nb{background:#0b2a4a;color:#8fc0ff}
 /*CG:CSS-FIN*/</style></head><body>
 <div class="app">
 <nav aria-label="Hojas">
@@ -1343,7 +1349,7 @@ $('ieFrom').onchange=$('ieTo').onchange=()=>{IE_SEL=null;ieRender()};
 /* ---------- MOVIMIENTOS POR DÍA ---------- */
 let MV_R='15',MV_T='a';const MV_OPEN=new Set();const MV_SAL=Object.fromEntries(S12.days.map((d,i)=>[d,S12.disp[i]/100]));
 $('mvFrom').min=$('mvTo').min=iso(first);$('mvFrom').max=$('mvTo').max=iso(lastD);
-function mvRange(){const a=TODAY<first?first:TODAY;let f=a,t=lastD;if(MV_R==='7')t=add(a,7);else if(MV_R==='15')t=add(a,15);else if(MV_R==='m'){f=a.slice(0,6)+'01';t=toS(new Date(+a.slice(0,4),+a.slice(4,6),0))}else if(MV_R==='sw'||MV_R==='sa'){const dd=toD(a);dd.setDate(dd.getDate()-(dd.getDay()+6)%7-(MV_R==='sa'?7:0));f=toS(dd);const e=new Date(dd);e.setDate(e.getDate()+4);t=toS(e)}else if(MV_R==='all'){f=first;t=lastD}$('mvFrom').value=iso(f<first?first:f);$('mvTo').value=iso(t>lastD?lastD:t)}
+function mvRange(){const a=TODAY<first?first:TODAY;let f=(MV_R==='7'||MV_R==='15')&&T0<a?T0:a,t=lastD; /* arranca en el último día real, para conciliar */if(MV_R==='7')t=add(a,7);else if(MV_R==='15')t=add(a,15);else if(MV_R==='m'){f=a.slice(0,6)+'01';t=toS(new Date(+a.slice(0,4),+a.slice(4,6),0))}else if(MV_R==='sw'||MV_R==='sa'){const dd=toD(a);dd.setDate(dd.getDate()-(dd.getDay()+6)%7-(MV_R==='sa'?7:0));f=toS(dd);const e=new Date(dd);e.setDate(e.getDate()+4);t=toS(e)}else if(MV_R==='all'){f=first;t=lastD}$('mvFrom').value=iso(f<first?first:f);$('mvTo').value=iso(t>lastD?lastD:t)}
 /* control de lo real: ✓ pasó / ✗ no pasó (se guarda en la base) y lo previsto en la foto que no pasó */
 window.CHK=JSON.parse(JSON.stringify(CHK_BASE));window.CLS=window.CLS||{};
 const mvKey=x=>x.t+':'+(x.dif?'__dif':x.nm);
@@ -1419,8 +1425,8 @@ function mvRender(){const f=$('mvFrom').value.replace(/-/g,''),to=$('mvTo').valu
  push('i',DATA.NI,DATA.NI.length-1);push('e',DATA.NE,DATA.NE.length-1);
  const days=[...by.keys()].sort();let TI=0,TE=0,N=0;
  const html=days.map(d=>{const L=by.get(d).sort((a,b)=>a.t===b.t?Math.abs(b.v)-Math.abs(a.v):a.t==='i'?-1:1),ti=L.filter(x=>x.t==='i').reduce((a,x)=>a+x.v,0),te=L.filter(x=>x.t==='e').reduce((a,x)=>a+x.v,0);TI+=ti;TE+=te;N+=L.length;const s=MV_SAL[d],pr=d>T0,vt=DATA.vtos&&DATA.vtos[d],ck=CK[d]||{},nOk=pr?0:L.filter(x=>ck[mvKey(x)]==='ok').length,nNo=pr?0:L.filter(x=>ck[mvKey(x)]==='no').length,np=null;
-  return `<details class="mvd" data-d="${d}"${MV_OPEN.has(d)||(q&&L.length<=6)?' open':''}><summary class="mvd-h${d===TODAY?' today':''}"><i class="car" aria-hidden="true">›</i><b class="dt">${(s=>s[0].toUpperCase()+s.slice(1))(toD(d).toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'}))}</b><span class="tag${pr?' pr':''}">${pr?'proyectado':'real'}</span>${vt?`<span class="vt">${esc(vt)}</span>`:''}<span class="sp">${ti?`<span>Ingresos <b class="p">${PESOS(ti)}</b></span>`:''}${te?`<span>Egresos <b class="n">${PESOS(-te)}</b></span>`:''}${s!=null?`<span>Saldo del día <b class="${s<0?'n':'p'}">${PESOS(s)}</b></span>`:''}</span></summary>${mvTblPlain(L,{},true)}</details>`}).join('');
- $('mvL').innerHTML=html||'<p class="mv-empty">No hay movimientos con esos filtros.</p>';$('mvSem').innerHTML='';
+  return `<details class="mvd" data-d="${d}"${MV_OPEN.has(d)||(q&&L.length<=6)?' open':''}><summary class="mvd-h${d===TODAY?' today':''}"><i class="car" aria-hidden="true">›</i><b class="dt">${(s=>s[0].toUpperCase()+s.slice(1))(toD(d).toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'}))}</b><span class="tag${pr?' pr':''}">${pr?'proyectado':'real'}</span>${window.concChip?concChip(d):''}${vt?`<span class="vt">${esc(vt)}</span>`:''}<span class="sp">${ti?`<span>Ingresos <b class="p">${PESOS(ti)}</b></span>`:''}${te?`<span>Egresos <b class="n">${PESOS(-te)}</b></span>`:''}${s!=null?`<span>Saldo del día <b class="${s<0?'n':'p'}">${PESOS(s)}</b></span>`:''}</span></summary>${window.concHas&&concHas(d)?`<div class="mvc" data-cc-d="${d}"></div><details class="dc-all"><summary>Ver todos los movimientos del día</summary>${mvTblPlain(L,{},true)}</details>`:mvTblPlain(L,{},true)}</details>`}).join('');
+ $('mvL').innerHTML=html||'<p class="mv-empty">No hay movimientos con esos filtros.</p>';if(window.concFill)concFill();$('mvSem').innerHTML='';
  $('mvK').innerHTML=`<div><span>Ingresos</span><b class="p">${fM(TI)}</b><small>${dlY(f)} al ${dlY(to)}</small></div><div><span>Egresos</span><b class="n">${fM(-TE)}</b><small>${MV_T==='a'?'':'filtro aplicado'}</small></div><div><span>Neto</span><b class="${TI-TE>=0?'p':'n'}">${fM(TI-TE)}</b><small>ingresos − egresos</small></div><div><span>Movimientos</span><b>${N}</b><small>${days.length} día(s)</small></div>`;
  $('mvSub').textContent='Detalle de ingresos y pagos de cada día · real hasta el '+dlY(T0)+', después proyectado';mvAllLbl()}
 $('mvR').onchange=e=>{MV_R=e.target.value;$('mvC2').hidden=MV_R!=='c';if(MV_R!=='c')mvRange();mvRender()};
@@ -1709,7 +1715,7 @@ async function pull(full){
     const j=await (await fetch(u+'&a=get')).json();if(!j.ok)throw 0;
     if(Q.length||sending||EDIT)return;
     LIVE=true;if(netErr.startsWith('No se pudo'))netErr='';
-    if(j.rev!==REV){REV=j.rev;ST={ed:j.ed||{},add:j.add||[]};DREM=j.disp||{};window.CHK=chkMerge(j.chk||{});window.CLS=j.cls||{};dispRebuild();fotoSet(j.fotos||[]);applyAll();dispMigrar();try{dpTable()}catch(_){}try{concRender()}catch(_){}}
+    if(j.rev!==REV){REV=j.rev;ST={ed:j.ed||{},add:j.add||[]};DREM=j.disp||{};window.CHK=chkMerge(j.chk||{});window.CLS=j.cls||{};dispRebuild();fotoSet(j.fotos||[]);applyAll();dispMigrar();try{dpTable()}catch(_){}}
   }catch(e){netErr='No se pudo leer la base: se muestran los últimos datos.'}
   live();
 }
@@ -1811,7 +1817,7 @@ if(REMOTE){
     if(!d||!isFinite(v)){m.className='dp-msg err';m.textContent='Revisá la fecha y el saldo.';return}
     if(!await dpLogin())return;dispMigrar();
     DREM[d]=Math.round(v*100)/100;dispRebuild();enqueue([{op:'disp',d,v:DREM[d]}]);
-    $('dpAmt').value='';m.className='dp-msg';m.textContent='✓ Guardado '+dlY(d)+' para todos';dpDespues();concOpen(d)};
+    $('dpAmt').value='';m.className='dp-msg';m.textContent='✓ Guardado '+dlY(d)+' para todos';dpDespues();m.textContent+=' · conciliá el día en Movimientos por día'};
   $('dpTable').onclick=async e=>{const b=e.target.closest('[data-del]');if(!b)return;const d=b.dataset.del;
     if(d in DP_LOC.set||DP_LOC.del.includes(d)){delete DP_LOC.set[d];DP_LOC.del=DP_LOC.del.filter(x=>x!==d);dpSave()}
     if(!AUTH){if(!await dpLogin())return}
@@ -1823,70 +1829,72 @@ if(REMOTE){
 }
 
 
-/* ---------- CONCILIACIÓN del día: banco vs esperado (saldo anterior + movimientos de Carga FF) ---------- */
-let CC=null; /* día abierto */
+/* ---------- CONCILIACIÓN día por día (en Movimientos por día): banco vs esperado ----------
+   esperado = saldo del día anterior (banco si está cargado, si no el flujo) + movimientos del día en Carga FF.
+   Cada diferencia se explica como REPROGRAMACIÓN (pasa a otra fecha) o DIFERENCIA REAL (monto distinto, no pasó, o algo no proyectado).
+   Cada explicación ajusta Carga FF, así el día queda igual al banco. */
 const ccM=v=>(v<0?'−':'')+'$ '+Math.round(Math.abs(v)).toLocaleString('es-AR');
 const ccMM=v=>(v>=0?'+':'−')+(Math.abs(v)/1e6).toLocaleString('es-AR',{minimumFractionDigits:1,maximumFractionDigits:1})+' M';
 function concInfo(d){if(!VAL){model();calc()}const c=DIX.get(d),B=DISP[d];if(c==null||B==null||d<DATA.T0)return null;
   const pc=c-1;if(pc<0)return null;const prevD=DD[pc],Bp=DISP[prevD]!=null?DISP[prevD]:CF[pc],net=TI[c]-TE[c],E=Bp+net;
   return{d,c,B,Bp,prevD,banco:DISP[prevD]!=null,net,E,falta:B-E}}
 const concRecs=d=>Object.entries(((window.CLS||{})[d])||{}).filter(([k,r])=>r&&r.v===2);
-function concEstado(d){const i=concInfo(d);return i?(Math.abs(i.falta)<1?'ok':'pend'):null}
-function concSet(d,id,rec){if(REMOTE&&!AUTH){concMsg('Para conciliar, ingresá tu nombre y la clave arriba (como para guardar el saldo).',1);return false}
+window.concHas=d=>DIX.has(d)&&d>=DATA.T0&&d<=TODAY;
+window.concChip=d=>{if(!concHas(d))return '';const i=concInfo(d);if(!i)return '<span class="ccc nb">sin saldo de banco</span>';
+  return Math.abs(i.falta)<1?'<span class="ccc ok">✓ conciliado</span>':`<span class="ccc pd">falta conciliar ${ccMM(i.falta)}</span>`};
+function concSet(d,id,rec){
   const C=window.CLS||(window.CLS={}),o=C[d]||(C[d]={}),old=o[id];
   if(old&&old.dl)for(const[t,nm,dd,dx]of old.dl)cgAdd(t,nm,dd,-dx);
   if(rec&&rec.dl)for(const[t,nm,dd,dx]of rec.dl)cgAdd(t,nm,dd,dx);
   if(rec)o[id]=rec;else delete o[id];
   if(REMOTE)enqueue([{op:'cls',d,k:id,t:rec?rec.t:(old&&old.t)||'i',n:rec?rec.nm:(old&&old.nm)||'',rec}]);else try{localStorage.setItem('segrup.cls',JSON.stringify(C))}catch(_){}
-  if(window.cgRecalc)cgRecalc();syncLive();try{dpTable()}catch(_){}if(!$('ff').hidden)ffChart();return true}
-function concMsg(s,err){const m=$('ccMsg');if(!m)return;m.className='cc-msg'+(err?' err':'');m.textContent=s||''}
-function concOpen(d){CC=d;concRender();const b=$('dpConc');if(b)b.scrollIntoView({behavior:'smooth',block:'nearest'})}
-function concRender(){const box=$('dpConc');if(!box)return;if(!CC){box.innerHTML='';return}
-  const i=concInfo(CC);if(!i){box.innerHTML=`<div class="cc"><p class="cc-msg">No se puede conciliar el ${dlY(CC)}: tiene que ser un día hábil del flujo con saldo de banco cargado y un día anterior.</p></div>`;return}
-  const c=i.c,ok=Math.abs(i.falta)<1,ROWSD=[...RI,...RE].filter(r=>Math.abs(VAL.get(r.key)[c])>=1).sort((a,b)=>a.t===b.t?VAL.get(b.key)[c]-VAL.get(a.key)[c]:a.t==='i'?-1:1);
-  const nx=DD[c+1]||null,recs=concRecs(CC),opts=t=>[...(t==='i'?RI:RE)].filter(r=>!r.dif).map(r=>`<option>${esc(r.name)}</option>`).join('');
-  const lbl={rep:'Reprogramación',monto:'Diferencia de monto',omi:'Omisión'};
-  box.innerHTML=`<div class="cc${ok?' ok':''}">
-   <div class="cc-h"><h4>Conciliación del ${dTxt(CC)}</h4><button type="button" class="cc-x" data-cc="cerrar" title="Cerrar">✕</button></div>
-   <div class="cc-k"><div><span>Banco</span><b>${ccM(i.B)}</b></div><div><span>Esperado</span><b>${ccM(i.E)}</b><small>${i.banco?'banco':'flujo'} del ${dl(i.prevD)} ${ccM(i.Bp)} ${i.net>=0?'+':'−'} movimientos del día ${ccM(Math.abs(i.net)).replace('−','')}</small></div>
-    <div class="cc-f ${ok?'ok':i.falta>0?'p':'n'}"><span>${ok?'Conciliado':'Falta conciliar'}</span><b>${ok?'✓':ccMM(i.falta)}</b><small>${ok?(nx?'podés pasar al '+dl(nx):''):i.falta>0?'el banco tiene más de lo esperado':'el banco tiene menos de lo esperado'}</small></div></div>
-   ${ok&&nx?`<button type="button" class="lf-btn on cc-next" data-cc="next">Cargar saldo del ${dTxt(nx)} →</button>`:''}
-   ${recs.length?`<div class="cc-l"><h5>Cómo se llegó al saldo</h5>${recs.map(([id,r])=>`<div class="cc-e"><span class="cc-tag ${r.c}">${lbl[r.c]}</span><span class="nm">${esc(r.nm)}<small>${r.c==='rep'?`${ccM(r.m)} pasa al ${dl(r.f)}`:r.c==='monto'?`proyectado ${ccM(r.p)} → real ${ccM(r.real)}`:`${r.t==='i'?'ingreso':'egreso'} no proyectado ${ccM(r.m)}`}</small></span><b class="${r.ef>=0?'p':'n'}">${ccMM(r.ef)}</b><button type="button" class="cc-x" data-cc="undo" data-id="${id}" title="Deshacer">✕</button></div>`).join('')}</div>`:''}
-   ${ok?'':`<div class="cc-l"><h5>Movimientos proyectados del día (Carga FF) · tocá el que no coincide</h5>
-    ${ROWSD.map(r=>{const v=VAL.get(r.key)[c];return `<div class="cc-r" data-t="${r.t}" data-nm="${esc(r.name)}" data-v="${v}"><span class="ty ${r.t}">${r.t==='i'?'Ingreso':'Egreso'}</span><span class="nm">${esc(r.name)}</span><b>${ccM(r.t==='i'?v:-v)}</b>${r.dif?'<span></span>':`<span class="ac"><button type="button" class="cc-b rep" data-cc="rep">↪ Reprogramar</button><button type="button" class="cc-b mon" data-cc="monto">≠ Otro monto</button></span>`}<div class="cc-form" hidden></div></div>`}).join('')||'<p class="cc-msg">No hay movimientos proyectados ese día.</p>'}
-    <div class="cc-r omi"><span class="ac"><button type="button" class="cc-b omi" data-cc="omi">+ Omisión (pasó algo que no estaba proyectado)</button></span><div class="cc-form" hidden></div></div></div>`}
-   <p class="cc-msg" id="ccMsg"></p></div>`;
-  box._opts=opts}
-function concForm(row,kind){const f=row.querySelector('.cc-form');box_close();f.hidden=false;const t=row.dataset.t,v=+row.dataset.v||0,c=DIX.get(CC),i=concInfo(CC);
-  if(kind==='rep')f.innerHTML=`<label>Monto<input class="cc-in" data-k="m" value="${Math.round(v).toLocaleString('es-AR')}"></label><label>Pasa al<input type="date" class="cc-in" data-k="f" min="${iso(DD[c+1]||CC)}" max="${iso(DD.at(-1))}"></label><button type="button" class="lf-btn on" data-cc="okrep">Aplicar</button><button type="button" class="lf-btn" data-cc="cancel">Cancelar</button>`;
-  else if(kind==='monto')f.innerHTML=`<label>Monto real${(()=>{const sug=v+(t==='i'?1:-1)*i.falta;return sug>=0?` <a href="#" class="cc-sug" data-sug="${Math.round(sug)}">usar ${Math.round(sug).toLocaleString('es-AR')} (cierra el día)</a>`:''})()}<input class="cc-in" data-k="real" placeholder="${Math.round(v).toLocaleString('es-AR')}"></label><button type="button" class="lf-btn on" data-cc="okmonto">Aplicar</button><button type="button" class="lf-btn" data-cc="cancel">Cancelar</button>`;
-  else f.innerHTML=`<label>Tipo<select class="cc-in" data-k="t"><option value="i"${i.falta>=0?' selected':''}>Ingreso</option><option value="e"${i.falta<0?' selected':''}>Egreso</option></select></label><label>Cliente / concepto<input class="cc-in" data-k="nm" list="ccLst" placeholder="escribí para buscar"><datalist id="ccLst"></datalist></label><label>Monto<input class="cc-in" data-k="m" value="${Math.round(Math.abs(i.falta)).toLocaleString('es-AR')}"></label><button type="button" class="lf-btn on" data-cc="okomi">Aplicar</button><button type="button" class="lf-btn" data-cc="cancel">Cancelar</button>`;
-  if(kind==='omi'){const fill=()=>{const tt=f.querySelector('[data-k="t"]').value;f.querySelector('#ccLst').innerHTML=$('dpConc')._opts(tt)};fill();f.querySelector('[data-k="t"]').onchange=fill}
-  const first=f.querySelector(kind==='rep'?'[data-k="f"]':kind==='omi'?'[data-k="nm"]':'[data-k="real"]');if(first)first.focus()}
-function box_close(){document.querySelectorAll('#dpConc .cc-form').forEach(x=>{x.hidden=true;x.innerHTML=''})}
-$('dpPanel').insertAdjacentHTML('beforeend','<div id="dpConc"></div>');
-$('dpConc').addEventListener('click',e=>{const b=e.target.closest('[data-cc],.cc-sug');if(!b)return;e.preventDefault();
+  if(window.cgRecalc)cgRecalc();syncLive();try{dpTable()}catch(_){}return true}
+async function ccLogin(box){if(!REMOTE||AUTH)return true;const nombre=(box.querySelector('[data-k="nom"]')||{}).value||'',clave=(box.querySelector('[data-k="cla"]')||{}).value||'';
+  if(!nombre.trim()||!clave){ccMsg(box,'Para conciliar, poné tu nombre y la clave de Carga FF.',1);return false}
+  try{const r=await (await fetch(CG_API,{method:'POST',body:JSON.stringify({a:'login',clave,quien:nombre.trim()})})).json();
+    if(!r.ok){ccMsg(box,'Clave incorrecta.',1);return false}AUTH={nombre:nombre.trim(),clave};try{localStorage.setItem(AUK,JSON.stringify(AUTH))}catch(_){}liveMode='';live();dpUI();return true}
+  catch(_){ccMsg(box,'No se pudo conectar con la base.',1);return false}}
+function ccMsg(box,s,err){const m=box.querySelector('.cc-msg');if(m){m.className='cc-msg'+(err?' err':'');m.textContent=s||''}}
+const ccLog=()=>REMOTE&&!AUTH?`<div class="cc-log"><span>Para conciliar ingresá:</span><input data-k="nom" placeholder="Tu nombre"><input data-k="cla" type="password" placeholder="Clave"></div>`:'';
+function concHTML(d){const i=concInfo(d);
+  if(!i)return `<div class="cc"><div class="cc-h"><h4>Conciliación con el banco</h4></div><p class="cc-tx">Cargá el saldo del banco de este día para conciliarlo con lo proyectado.</p>${ccLog()}
+    <div class="cc-form"><label>Saldo del banco ($)<input data-k="banco" inputmode="decimal" placeholder="-109.904.602"></label><button type="button" class="lf-btn on" data-cc="banco">Guardar y conciliar</button></div><p class="cc-msg"></p></div>`;
+  const c=i.c,ok=Math.abs(i.falta)<1,nx=DD[c+1]||null,recs=concRecs(d);
+  const R=[...RI,...RE].filter(r=>Math.abs(VAL.get(r.key)[c])>=1).sort((a,b)=>a.t===b.t?VAL.get(b.key)[c]-VAL.get(a.key)[c]:a.t==='i'?-1:1);
+  return `<div class="cc${ok?' ok':''}">
+   <div class="cc-k"><div><span>Banco</span><b>${ccM(i.B)}</b></div><div><span>Esperado (proyectado)</span><b>${ccM(i.E)}</b><small>${i.banco?'banco':'flujo'} del ${dl(i.prevD)} ${ccM(i.Bp)} ${i.net>=0?'+':'−'} movimientos ${ccM(Math.abs(i.net)).replace('−','')}</small></div>
+    <div class="cc-f ${ok?'ok':i.falta>0?'p':'n'}"><span>${ok?'Conciliado':'Falta conciliar'}</span><b>${ok?'✓':ccMM(i.falta)}</b><small>${ok?'el día cierra con el banco':i.falta>0?'el banco tiene más de lo proyectado':'el banco tiene menos de lo proyectado'}</small></div></div>
+   ${recs.length?`<div class="cc-l"><h5>Cómo se llegó al saldo del banco</h5>${recs.map(([id,r])=>`<div class="cc-e"><span class="cc-tag ${r.c==='rep'?'rep':'real'}">${r.c==='rep'?'Reprogramación':'Diferencia real'}</span><span class="nm">${esc(r.nm)}<small>${r.c==='rep'?`${ccM(r.m)} pasa al ${dl(r.f)}`:r.sub==='nuevo'?`no estaba proyectado · ${r.t==='i'?'ingreso':'egreso'} ${ccM(r.m)}`:`proyectado ${ccM(r.p)} → real ${ccM(r.real)}`}</small></span><b class="${r.ef>=0?'p':'n'}">${ccMM(r.ef)}</b><button type="button" class="cc-x" data-cc="undo" data-id="${id}" title="Deshacer">✕</button></div>`).join('')}</div>`:''}
+   ${ok?'':`${ccLog()}<div class="cc-l"><h5>Movimientos proyectados del día · tocá el que no coincide con el banco</h5>
+    ${R.map(r=>{const v=VAL.get(r.key)[c];return `<div class="cc-r" data-t="${r.t}" data-nm="${esc(r.name)}" data-v="${v}"><span class="ty ${r.t}">${r.t==='i'?'Ingreso':'Egreso'}</span><span class="nm">${esc(r.name)}</span><b>${ccM(r.t==='i'?v:-v)}</b>${r.dif?'<span></span>':`<span class="ac"><button type="button" class="cc-b rep" data-cc="rep">↪ Reprogramación</button><button type="button" class="cc-b real" data-cc="real">≠ Diferencia real</button></span>`}<div class="cc-form" hidden></div></div>`}).join('')||'<p class="cc-tx">No hay movimientos proyectados ese día.</p>'}
+    <div class="cc-r nuevo"><span class="ac"><button type="button" class="cc-b real" data-cc="nuevo">+ Diferencia real: pasó algo que no estaba proyectado</button></span><div class="cc-form" hidden></div></div></div>`}
+   <p class="cc-msg"></p></div>`}
+window.concFill=()=>{document.querySelectorAll('#mvL [data-cc-d]').forEach(x=>{x.innerHTML=concHTML(x.dataset.ccD)})};
+function ccForm(row,kind,d){row.closest('.cc').querySelectorAll('.cc-form').forEach(x=>{if(x.closest('.cc-r')){x.hidden=true;x.innerHTML=''}});
+  const f=row.querySelector('.cc-form');f.hidden=false;const t=row.dataset.t,v=+row.dataset.v||0,c=DIX.get(d),i=concInfo(d),sg=t==='i'?1:-1;
+  if(kind==='rep')f.innerHTML=`<label>Monto que se corre<input data-k="m" value="${Math.round(v).toLocaleString('es-AR')}"></label><label>Pasa al<input type="date" data-k="f" min="${iso(DD[c+1]||d)}" max="${iso(DD.at(-1))}"></label><button type="button" class="lf-btn on" data-cc="okrep">Aplicar</button><button type="button" class="lf-btn" data-cc="cancel">Cancelar</button>`;
+  else if(kind==='real'){const sug=v+sg*i.falta;f.innerHTML=`<label>Monto real (0 si no pasó)${sug>=0?` <a href="#" class="cc-sug" data-sug="${Math.round(sug)}">usar ${Math.round(sug).toLocaleString('es-AR')} (cierra el día)</a>`:''}<input data-k="real" placeholder="${Math.round(v).toLocaleString('es-AR')}"></label><button type="button" class="lf-btn on" data-cc="okreal">Aplicar</button><button type="button" class="lf-btn" data-cc="cancel">Cancelar</button>`}
+  else{f.innerHTML=`<label>Tipo<select data-k="t"><option value="i"${i.falta>=0?' selected':''}>Ingreso</option><option value="e"${i.falta<0?' selected':''}>Egreso</option></select></label><label>Cliente / concepto<input data-k="nm" list="ccLst${d}" placeholder="escribí para buscar"><datalist id="ccLst${d}"></datalist></label><label>Monto<input data-k="m" value="${Math.round(Math.abs(i.falta)).toLocaleString('es-AR')}"></label><button type="button" class="lf-btn on" data-cc="oknuevo">Aplicar</button><button type="button" class="lf-btn" data-cc="cancel">Cancelar</button>`;
+    const fill=()=>{const tt=f.querySelector('[data-k="t"]').value;f.querySelector('datalist').innerHTML=[...(tt==='i'?RI:RE)].filter(r=>!r.dif).map(r=>`<option>${esc(r.name)}</option>`).join('')};fill();f.querySelector('[data-k="t"]').onchange=fill}
+  const first=f.querySelector(kind==='rep'?'[data-k="f"]':kind==='nuevo'?'[data-k="nm"]':'[data-k="real"]');if(first)first.focus()}
+$('mvL').addEventListener('click',async e=>{const b=e.target.closest('[data-cc],.cc-sug');if(!b||!b.closest('[data-cc-d]'))return;e.preventDefault();e.stopPropagation();
+  const box=b.closest('[data-cc-d]'),d=box.dataset.ccD;
   if(b.classList.contains('cc-sug')){b.closest('label').querySelector('input').value=(+b.dataset.sug).toLocaleString('es-AR');return}
   const a=b.dataset.cc,row=b.closest('.cc-r');
-  if(a==='cerrar'){CC=null;concRender();return}
-  if(a==='next'){const c=DIX.get(CC),nx=DD[c+1];$('dpDate').value=iso(nx);$('dpAmt').value='';$('dpAmt').focus();CC=null;concRender();return}
-  if(a==='undo'){concSet(CC,b.dataset.id,null);concRender();return}
-  if(a==='cancel'){box_close();return}
-  if(a==='rep'||a==='monto'||a==='omi'){concForm(row,a);return}
+  if(a==='cancel'){const f=b.closest('.cc-form');f.hidden=true;f.innerHTML='';return}
+  if(a==='rep'||a==='real'||a==='nuevo'){ccForm(row,a,d);return}
+  if(!await ccLogin(box))return;
+  if(a==='banco'){const v=dpNum(box.querySelector('[data-k="banco"]').value);if(!isFinite(v)){ccMsg(box,'Poné el saldo del banco.',1);return}
+    if(REMOTE){dispMigrar();DREM[d]=Math.round(v*100)/100;dispRebuild();enqueue([{op:'disp',d,v:DREM[d]}])}else{dpPut(d,v);dpSave()}
+    dpDespues();mvRender();return}
+  if(a==='undo'){concSet(d,b.dataset.id,null);mvRender();return}
   const f=row.querySelector('.cc-form'),val=k=>{const x=f.querySelector(`[data-k="${k}"]`);return x?x.value:''},t=row.dataset.t,nm=row.dataset.nm,v=+row.dataset.v||0,sg=t==='i'?1:-1,id='x'+Date.now();
-  if(a==='okrep'){const m=parse(val('m')),fd=val('f').replace(/-/g,'');if(!(m>0)||!fd){concMsg('Poné el monto y la fecha.',1);return}const ff=DIX.has(fd)?fd:DD.find(x=>x>=fd);
-    if(!ff){concMsg('Esa fecha está fuera del flujo.',1);return}concSet(CC,id,{v:2,c:'rep',t,nm,m,f:ff,ef:-sg*m,dl:[[t,nm,CC,-m],[t,nm,ff,m]]})}
-  else if(a==='okmonto'){const r=parse(val('real'));if(!isFinite(r)||val('real').trim()===''){concMsg('Poné el monto real.',1);return}concSet(CC,id,{v:2,c:'monto',t,nm,p:v,real:r,ef:sg*(r-v),dl:[[t,nm,CC,r-v]]})}
-  else if(a==='okomi'){const tt=val('t'),n=val('nm').trim(),m=parse(val('m'));const ok=[...(tt==='i'?RI:RE)].some(r=>r.name===n&&!r.dif);
-    if(!ok){concMsg('Elegí un cliente o concepto de la lista (si es nuevo, agregalo primero en Carga FF).',1);return}if(!(m>0)){concMsg('Poné el monto.',1);return}
-    concSet(CC,id,{v:2,c:'omi',t:tt,nm:n,m,ef:(tt==='i'?1:-1)*m,dl:[[tt,n,CC,m]]})}
-  concRender()});
-/* estado de conciliación en la tabla de disponibilidad */
-{const _dt2=dpTable;dpTable=function(){_dt2();const T=$('dpTable').querySelector('table');if(!T)return;const h=T.querySelector('thead tr');if(h&&!h.querySelector('.cch'))h.lastElementChild.insertAdjacentHTML('beforebegin','<th class="cch">Conciliación</th>');
-  T.querySelectorAll('tbody tr').forEach(tr=>{const b=tr.querySelector('[data-del]');if(!b||tr.querySelector('.ccs'))return;const d=b.dataset.del,i=concInfo(d);
-    b.closest('td').insertAdjacentHTML('beforebegin',`<td class="ccs">${!i?'<span class="q">—</span>':Math.abs(i.falta)<1?`<button type="button" class="cc-st ok" data-conc="${d}">✓ conciliado</button>`:`<button type="button" class="cc-st pd" data-conc="${d}">falta ${ccMM(i.falta)}</button>`}</td>`)})};}
-$('dpTable').addEventListener('click',e=>{const b=e.target.closest('[data-conc]');if(b)concOpen(b.dataset.conc)});
-if(!REMOTE)$('dpForm').addEventListener('submit',()=>setTimeout(()=>{const d=$('dpDate').value.replace(/-/g,'');if(DISP[d]!=null)concOpen(d)},30));
+  if(a==='okrep'){const m=parse(val('m')),fd=val('f').replace(/-/g,'');if(!(m>0)||!fd){ccMsg(box,'Poné el monto y la fecha.',1);return}const ff=DIX.has(fd)?fd:DD.find(x=>x>=fd);
+    if(!ff){ccMsg(box,'Esa fecha está fuera del flujo.',1);return}concSet(d,id,{v:2,c:'rep',t,nm,m,f:ff,ef:-sg*m,dl:[[t,nm,d,-m],[t,nm,ff,m]]})}
+  else if(a==='okreal'){const r=parse(val('real'));if(!isFinite(r)||val('real').trim()===''){ccMsg(box,'Poné el monto real (0 si no pasó).',1);return}concSet(d,id,{v:2,c:'real',sub:'monto',t,nm,p:v,real:r,ef:sg*(r-v),dl:[[t,nm,d,r-v]]})}
+  else if(a==='oknuevo'){const tt=val('t'),n=val('nm').trim(),m=parse(val('m'));if(![...(tt==='i'?RI:RE)].some(r=>r.name===n&&!r.dif)){ccMsg(box,'Elegí un cliente o concepto de la lista (si es nuevo, agregalo primero en Carga FF).',1);return}
+    if(!(m>0)){ccMsg(box,'Poné el monto.',1);return}concSet(d,id,{v:2,c:'real',sub:'nuevo',t:tt,nm:n,m,ef:(tt==='i'?1:-1)*m,dl:[[tt,n,d,m]]})}
+  mvRender()});
 
 /* ---------- Sacar foto proyección (clave propia, la valida Apps Script) ---------- */
 if(REMOTE){
