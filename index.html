@@ -430,6 +430,10 @@ section[hidden]{display:none}
 .cc-log input{background:#041f36;color:var(--text);border:1px solid #0b2c4a;border-radius:7px;padding:5px 8px;font:inherit;font-size:12.5px;width:140px}
 .mvc>.cc>.cc-form{display:flex}.cc-b.real{color:#fdba74;border-color:#7a4a22}.cc-tag.real{background:#2a1a0a;color:#fdba74}.cc-r.nuevo{grid-template-columns:1fr}.cc-r.nuevo .ac{justify-content:flex-start}
 .ccc{font-size:11px;font-weight:700;padding:2px 8px;border-radius:9px}.ccc.ok{background:#052e16;color:#4ade80}.ccc.pd{background:#3a2a06;color:#fbbf24}.ccc.nb{background:#0b2a4a;color:#8fc0ff}
+
+.cc-b.ok{color:#4ade80;border-color:#166534}.cc-b.mon{color:#fbbf24;border-color:#7a5a12}.cc-tag.mon{background:#2a1e05;color:#fbbf24}
+.cc-pill{font-size:11.5px;font-weight:700;padding:4px 9px;border-radius:7px}.cc-pill.ok{background:#052e16;color:#4ade80}.cc-pill.mon{background:#2a1e05;color:#fbbf24}
+.cc-r.ok .nm,.cc-r.ok b{opacity:.7}.cc-r .ac{flex-wrap:wrap}
 /*CG:CSS-FIN*/</style></head><body>
 <div class="app">
 <nav aria-label="Hojas">
@@ -1864,16 +1868,19 @@ function concHTML(d){const i=concInfo(d);
   return `<div class="cc${ok?' ok':''}">
    <div class="cc-k"><div><span>Banco</span><b>${ccM(i.B)}</b></div><div><span>Esperado (proyectado)</span><b>${ccM(i.E)}</b><small>${i.banco?'banco':'flujo'} del ${dl(i.prevD)} ${ccM(i.Bp)} ${i.net>=0?'+':'−'} movimientos ${ccM(Math.abs(i.net)).replace('−','')}</small></div>
     <div class="cc-f ${ok?'ok':i.falta>0?'p':'n'}"><span>${ok?'Conciliado':'Falta conciliar'}</span><b>${ok?'✓':ccMM(i.falta)}</b><small>${ok?'el día cierra con el banco':i.falta>0?'el banco tiene más de lo proyectado':'el banco tiene menos de lo proyectado'}</small></div></div>
-   ${recs.length?`<div class="cc-l"><h5>Cómo se llegó al saldo del banco</h5>${recs.map(([id,r])=>`<div class="cc-e"><span class="cc-tag ${r.c==='rep'?'rep':'real'}">${r.c==='rep'?'Reprogramación':'Diferencia real'}</span><span class="nm">${esc(r.nm)}<small>${r.c==='rep'?`${ccM(r.m)} pasa al ${dl(r.f)}`:r.sub==='nuevo'?`no estaba proyectado · ${r.t==='i'?'ingreso':'egreso'} ${ccM(r.m)}`:`proyectado ${ccM(r.p)} → real ${ccM(r.real)}`}</small></span><b class="${r.ef>=0?'p':'n'}">${ccMM(r.ef)}</b><button type="button" class="cc-x" data-cc="undo" data-id="${id}" title="Deshacer">✕</button></div>`).join('')}</div>`:''}
-   ${ok?'':`${ccLog()}<div class="cc-l"><h5>Movimientos proyectados del día · tocá el que no coincide con el banco</h5>
-    ${R.map(r=>{const v=VAL.get(r.key)[c];return `<div class="cc-r" data-t="${r.t}" data-nm="${esc(r.name)}" data-v="${v}"><span class="ty ${r.t}">${r.t==='i'?'Ingreso':'Egreso'}</span><span class="nm">${esc(r.name)}</span><b>${ccM(r.t==='i'?v:-v)}</b>${r.dif?'<span></span>':`<span class="ac"><button type="button" class="cc-b rep" data-cc="rep">↪ Reprogramación</button><button type="button" class="cc-b real" data-cc="real">≠ Diferencia real</button></span>`}<div class="cc-form" hidden></div></div>`}).join('')||'<p class="cc-tx">No hay movimientos proyectados ese día.</p>'}
-    <div class="cc-r nuevo"><span class="ac"><button type="button" class="cc-b real" data-cc="nuevo">+ Diferencia real: pasó algo que no estaba proyectado</button></span><div class="cc-form" hidden></div></div></div>`}
+   ${recs.length?`<div class="cc-l"><h5>Cómo se llegó al saldo del banco</h5>${recs.map(([id,r])=>`<div class="cc-e"><span class="cc-tag ${r.c==='rep'?'rep':r.c==='monto'?'mon':'real'}">${r.c==='rep'?'Reprogramación':r.c==='monto'?'Diferencia de monto':'Diferencia real'}</span><span class="nm">${esc(r.nm)}<small>${r.c==='rep'?`${ccM(r.m)} pasa al ${dl(r.f)}`:r.sub==='nuevo'?`no estaba proyectado · ${r.t==='i'?'ingreso':'egreso'} ${ccM(r.m)}`:r.sub==='nopaso'?`no pasó · proyectado ${ccM(r.p)}`:`proyectado ${ccM(r.p)} → real ${ccM(r.real)}`}</small></span><b class="${r.ef>=0?'p':'n'}">${ccMM(r.ef)}</b><button type="button" class="cc-x" data-cc="undo" data-id="${id}" title="Deshacer">✕</button></div>`).join('')}</div>`:''}
+   ${ccLog()}<div class="cc-l"><h5>Movimientos proyectados del día · marcá cada uno</h5>
+    ${R.map(r=>{const v=VAL.get(r.key)[c],ck=((window.CHK||{})[d]||{})['cc:'+r.t+':'+r.name],mr=recs.find(([id,x])=>x.c==='monto'&&x.t===r.t&&x.nm===r.name),sal=r.t==='i'?'Entró':'Salió';
+      const ac=r.dif?'<span></span>':ck==='ok'?`<span class="ac"><span class="cc-pill ok">✓ ${sal}</span><button type="button" class="cc-x" data-cc="unok" title="Quitar">✕</button></span>`:mr?`<span class="ac"><span class="cc-pill mon">≠ Monto ajustado</span></span>`
+        :`<span class="ac"><button type="button" class="cc-b ok" data-cc="okk" title="${sal} el monto proyectado">✓ ${sal}</button><button type="button" class="cc-b rep" data-cc="rep">↪ Reprogramación</button><button type="button" class="cc-b mon" data-cc="monto">≠ Dif. de monto</button><button type="button" class="cc-b real" data-cc="real" title="No pasó y no se reprograma">✗ Dif. real</button></span>`;
+      return `<div class="cc-r${ck==='ok'?' ok':''}" data-t="${r.t}" data-nm="${esc(r.name)}" data-v="${v}"><span class="ty ${r.t}">${r.t==='i'?'Ingreso':'Egreso'}</span><span class="nm">${esc(r.name)}</span><b>${ccM(r.t==='i'?v:-v)}</b>${ac}<div class="cc-form" hidden></div></div>`}).join('')||'<p class="cc-tx">No hay movimientos proyectados ese día.</p>'}
+    <div class="cc-r nuevo"><span class="ac"><button type="button" class="cc-b real" data-cc="nuevo">+ Diferencia real: pasó algo que no estaba proyectado</button></span><div class="cc-form" hidden></div></div></div>
    <p class="cc-msg"></p></div>`}
 window.concFill=()=>{document.querySelectorAll('#mvL [data-cc-d]').forEach(x=>{x.innerHTML=concHTML(x.dataset.ccD)})};
 function ccForm(row,kind,d){row.closest('.cc').querySelectorAll('.cc-form').forEach(x=>{if(x.closest('.cc-r')){x.hidden=true;x.innerHTML=''}});
   const f=row.querySelector('.cc-form');f.hidden=false;const t=row.dataset.t,v=+row.dataset.v||0,c=DIX.get(d),i=concInfo(d),sg=t==='i'?1:-1;
   if(kind==='rep')f.innerHTML=`<label>Monto que se corre<input data-k="m" value="${Math.round(v).toLocaleString('es-AR')}"></label><label>Pasa al<input type="date" data-k="f" min="${iso(DD[c+1]||d)}" max="${iso(DD.at(-1))}"></label><button type="button" class="lf-btn on" data-cc="okrep">Aplicar</button><button type="button" class="lf-btn" data-cc="cancel">Cancelar</button>`;
-  else if(kind==='real'){const sug=v+sg*i.falta;f.innerHTML=`<label>Monto real (0 si no pasó)${sug>=0?` <a href="#" class="cc-sug" data-sug="${Math.round(sug)}">usar ${Math.round(sug).toLocaleString('es-AR')} (cierra el día)</a>`:''}<input data-k="real" placeholder="${Math.round(v).toLocaleString('es-AR')}"></label><button type="button" class="lf-btn on" data-cc="okreal">Aplicar</button><button type="button" class="lf-btn" data-cc="cancel">Cancelar</button>`}
+  else if(kind==='monto'){const sug=v+sg*i.falta;f.innerHTML=`<label>Monto real${sug>=0?` <a href="#" class="cc-sug" data-sug="${Math.round(sug)}">usar ${Math.round(sug).toLocaleString('es-AR')} (cierra el día)</a>`:''}<input data-k="real" placeholder="${Math.round(v).toLocaleString('es-AR')}"></label><button type="button" class="lf-btn on" data-cc="okreal">Aplicar</button><button type="button" class="lf-btn" data-cc="cancel">Cancelar</button>`}
   else{f.innerHTML=`<label>Tipo<select data-k="t"><option value="i"${i.falta>=0?' selected':''}>Ingreso</option><option value="e"${i.falta<0?' selected':''}>Egreso</option></select></label><label>Cliente / concepto<input data-k="nm" list="ccLst${d}" placeholder="escribí para buscar"><datalist id="ccLst${d}"></datalist></label><label>Monto<input data-k="m" value="${Math.round(Math.abs(i.falta)).toLocaleString('es-AR')}"></label><button type="button" class="lf-btn on" data-cc="oknuevo">Aplicar</button><button type="button" class="lf-btn" data-cc="cancel">Cancelar</button>`;
     const fill=()=>{const tt=f.querySelector('[data-k="t"]').value;f.querySelector('datalist').innerHTML=[...(tt==='i'?RI:RE)].filter(r=>!r.dif).map(r=>`<option>${esc(r.name)}</option>`).join('')};fill();f.querySelector('[data-k="t"]').onchange=fill}
   const first=f.querySelector(kind==='rep'?'[data-k="f"]':kind==='nuevo'?'[data-k="nm"]':'[data-k="real"]');if(first)first.focus()}
@@ -1882,8 +1889,10 @@ $('mvL').addEventListener('click',async e=>{const b=e.target.closest('[data-cc],
   if(b.classList.contains('cc-sug')){b.closest('label').querySelector('input').value=(+b.dataset.sug).toLocaleString('es-AR');return}
   const a=b.dataset.cc,row=b.closest('.cc-r');
   if(a==='cancel'){const f=b.closest('.cc-form');f.hidden=true;f.innerHTML='';return}
-  if(a==='rep'||a==='real'||a==='nuevo'){ccForm(row,a,d);return}
+  if(a==='rep'||a==='monto'||a==='nuevo'){ccForm(row,a,d);return}
   if(!await ccLogin(box))return;
+  if(a==='okk'||a==='unok'){if(window.chkSet&&chkSet(d,'cc:'+row.dataset.t+':'+row.dataset.nm,row.dataset.t,row.dataset.nm,a==='okk'?'ok':'')!==false)mvRender();return}
+  if(a==='real'){const t=row.dataset.t,nm=row.dataset.nm,v=+row.dataset.v||0,sg=t==='i'?1:-1;concSet(d,'x'+Date.now(),{v:2,c:'real',sub:'nopaso',t,nm,p:v,real:0,ef:-sg*v,dl:[[t,nm,d,-v]]});mvRender();return}
   if(a==='banco'){const v=dpNum(box.querySelector('[data-k="banco"]').value);if(!isFinite(v)){ccMsg(box,'Poné el saldo del banco.',1);return}
     if(REMOTE){dispMigrar();DREM[d]=Math.round(v*100)/100;dispRebuild();enqueue([{op:'disp',d,v:DREM[d]}])}else{dpPut(d,v);dpSave()}
     dpDespues();mvRender();return}
@@ -1891,7 +1900,7 @@ $('mvL').addEventListener('click',async e=>{const b=e.target.closest('[data-cc],
   const f=row.querySelector('.cc-form'),val=k=>{const x=f.querySelector(`[data-k="${k}"]`);return x?x.value:''},t=row.dataset.t,nm=row.dataset.nm,v=+row.dataset.v||0,sg=t==='i'?1:-1,id='x'+Date.now();
   if(a==='okrep'){const m=parse(val('m')),fd=val('f').replace(/-/g,'');if(!(m>0)||!fd){ccMsg(box,'Poné el monto y la fecha.',1);return}const ff=DIX.has(fd)?fd:DD.find(x=>x>=fd);
     if(!ff){ccMsg(box,'Esa fecha está fuera del flujo.',1);return}concSet(d,id,{v:2,c:'rep',t,nm,m,f:ff,ef:-sg*m,dl:[[t,nm,d,-m],[t,nm,ff,m]]})}
-  else if(a==='okreal'){const r=parse(val('real'));if(!isFinite(r)||val('real').trim()===''){ccMsg(box,'Poné el monto real (0 si no pasó).',1);return}concSet(d,id,{v:2,c:'real',sub:'monto',t,nm,p:v,real:r,ef:sg*(r-v),dl:[[t,nm,d,r-v]]})}
+  else if(a==='okreal'){const r=parse(val('real'));if(!isFinite(r)||val('real').trim()===''){ccMsg(box,'Poné el monto real.',1);return}concSet(d,id,{v:2,c:'monto',t,nm,p:v,real:r,ef:sg*(r-v),dl:[[t,nm,d,r-v]]})}
   else if(a==='oknuevo'){const tt=val('t'),n=val('nm').trim(),m=parse(val('m'));if(![...(tt==='i'?RI:RE)].some(r=>r.name===n&&!r.dif)){ccMsg(box,'Elegí un cliente o concepto de la lista (si es nuevo, agregalo primero en Carga FF).',1);return}
     if(!(m>0)){ccMsg(box,'Poné el monto.',1);return}concSet(d,id,{v:2,c:'real',sub:'nuevo',t:tt,nm:n,m,ef:(tt==='i'?1:-1)*m,dl:[[tt,n,d,m]]})}
   mvRender()});
