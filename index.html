@@ -958,12 +958,12 @@ main :is(.head,.cb-head) h1::before{content:"";display:inline-block;width:3px;he
    <div class="avx-main">
     <div class="avx-pair">
     <section class="avx-balances" aria-labelledby="avBalancesTitle">
-     <div class="av-upcoming-head avx-bal-head"><div class="avx-title-tag"><h2 id="avBalancesTitle">Bancos y caja</h2><span id="avCloseLabel" class="avx-when avx-when-close">Cierre de ayer · —</span></div><div class="avx-bal-right"><label class="av-detail-toggle"><input type="checkbox" id="avShowDetails"> Ver detalles</label></div></div>
+     <div class="av-upcoming-head avx-bal-head"><div class="avx-title-tag"><h2 id="avBalancesTitle">Bancos</h2><span id="avCloseLabel" class="avx-when avx-when-close">Cierre de ayer · —</span></div><div class="avx-bal-right"><label class="av-detail-toggle"><input type="checkbox" id="avShowDetails"> Ver detalles</label></div></div>
     <div id="avBanks" class="avx-rows" aria-label="Bancos"></div>
-    <div class="avx-sec"><span>Efectivo</span></div>
-    <div class="avx-row avx-static" style="--av-color:#666666"><span class="avx-name"><i class="avx-sq">C</i><b>Caja</b></span><span class="avx-cols"><span><em>Saldo</em><strong id="avCashValue">—</strong></span></span><span class="avx-link"></span></div>
+    <div class="avx-row avx-static avx-total-row" style="--av-color:#1692f6"><span class="avx-name"><b>Total bancos</b></span><span class="avx-cols"><span><em>Saldo total</em><strong id="avBankTotal">—</strong></span></span><span class="avx-link"></span></div>
+    <span class="avx-hidden"><strong id="avCashValue">—</strong></span>
     </section>
-    <span class="avx-hidden"><strong id="avBankCutoff"></strong><strong id="avBankTotal"></strong><strong id="avLimitTotal"></strong></span>
+    <span class="avx-hidden"><strong id="avBankCutoff"></strong><strong id="avLimitTotal"></strong></span>
     <section class="av-upcoming avx-moves" aria-labelledby="avUpcomingTitle">
      <div class="av-upcoming-head"><div class="avx-title-tag"><h2 id="avUpcomingTitle">Movimientos del día</h2><span id="avMovementWindow" class="avx-when avx-when-today">—</span></div></div>
      <div class="av-movement-grid">
@@ -977,7 +977,7 @@ main :is(.head,.cb-head) h1::before{content:"";display:inline-block;width:3px;he
     <section class="av-day-summary avx-card avx-day" tabindex="0" aria-labelledby="avAvailableTitle" aria-describedby="avAvailableDetail">
      <div class="av-available-head"><em id="avAvailableTitle">Disponibilidad del día</em><label for="avIncludeForecast"><input id="avIncludeForecast" type="checkbox"> Incluir proyecciones</label></div>
      <strong id="avAvailable">—</strong>
-     <small class="av-hover-hint">Saldo + FCI ± movimientos de hoy · pasá el mouse para ver el detalle</small>
+     <small class="av-hover-hint">Saldo + FCI + caja ± movimientos de hoy · pasá el mouse para ver el detalle</small>
      <div id="avAvailableDetail" class="av-breakdown" role="tooltip" aria-live="polite"></div>
     </section>
    </div>
@@ -3432,13 +3432,13 @@ window.cpRender=render;
   const company=row.company||'segrup';
   if(savedByCompany[company]&&row.date&&row.values)savedByCompany[company].push(row);
  }
- const AV_SEED=/*AV_SEED*/[{"company":"segrup","date":"2026-11-19","savedAt":"2026-11-20T11:17:00.000Z","values":{
-  "av-bbva-balance":"22.009.399","av-bbva-fci":"0","av-bbva-limit":"700.000.000","av-bbva-rate":"35,5",
-  "av-galicia-balance":"86.051.562","av-galicia-fci":"101.557","av-galicia-limit":"1.000.000.000","av-galicia-rate":"45",
-  "av-macro-balance":"16.823.738","av-macro-fci":"0","av-macro-limit":"400.000.000",
+ const AV_SEED=/*AV_SEED*/[{"company":"segrup","date":"2026-11-19","savedAt":"2026-11-20T13:24:00.000Z","values":{
+  "av-bbva-balance":"31.418.365","av-bbva-fci":"0","av-bbva-limit":"700.000.000","av-bbva-rate":"35,5",
+  "av-galicia-balance":"8.801.600","av-galicia-fci":"202.203.717","av-galicia-limit":"1.000.000.000","av-galicia-rate":"45",
+  "av-macro-balance":"26.088.825","av-macro-fci":"0","av-macro-limit":"400.000.000",
   "av-nacion-balance":"278.391","av-nacion-fci":"0","av-nacion-limit":"200.000.000",
   "av-santafe-balance":"78.036","av-santafe-fci":"0","av-santafe-limit":"0",
-  "av-santander-balance":"8.679.564","av-santander-fci":"0","av-santander-limit":"120.000.000"}},
+  "av-santander-balance":"8.678.631","av-santander-fci":"0","av-santander-limit":"120.000.000","avCash":"80.850"}},
  {"company":"origen","date":"2026-11-19","savedAt":"2026-11-20T11:23:00.000Z","values":{
   "av-bbva-balance":"5.522.915","av-bbva-fci":"0","av-bbva-limit":"300.000.000","av-bbva-rate":"35,5",
   "av-galicia-balance":"17.027.334","av-galicia-fci":"80.231.113","av-galicia-limit":"100.000.000",
@@ -3537,16 +3537,17 @@ window.cpRender=render;
  const sumFmt=n=>(n<0?'−':'')+'$ '+Math.round(Math.abs(n)).toLocaleString('es-AR');
  function drawSummary(){
   const day=viewDay||add(today,-1),date=iso(day);
-  const label=day.slice(6)+'-'+['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][+day.slice(4,6)-1];
+  const ld=viewDay?day:today;
+  const label=ld.slice(6)+'-'+['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][+ld.slice(4,6)-1];
   const sumMoves=(type,c)=>movementRows({confirmed:true,type},c).reduce((t,r)=>t+r.amount,0);
   let grand=0,html='';
   for(const [c,name] of [['segrup','SEGRUP'],['origen','ORIGEN']]){
    const row=savedByCompany[c].find(r=>r.date===date),v=row?.values||{};
-   const bancos=banks.reduce((t,[id])=>t+readAmount(v['av-'+id+'-balance'])+readAmount(v['av-'+id+'-fci']),0);
+   const bancos=banks.reduce((t,[id])=>t+readAmount(v['av-'+id+'-balance'])+readAmount(v['av-'+id+'-fci']),0)+readAmount(v.avCash);
    const cheques=sumMoves('i',c),egresos=sumMoves('e',c),disp=bancos+cheques,saldo=disp-egresos;
    grand+=saldo;
    html+=`<table><thead><tr><th>${name}</th><th>${label}</th></tr></thead><tbody>
-    <tr><td>Saldo bancos <small>(saldo + FCI)</small></td><td>${row?sumFmt(bancos):'Sin carga'}</td></tr>
+    <tr><td>Saldo bancos <small>(saldo + FCI + caja)</small></td><td>${row?sumFmt(bancos):'Sin carga'}</td></tr>
     <tr><td>Cheques a hoy</td><td>${cheques?sumFmt(cheques):'—'}</td></tr>
     <tr class="avx-sum-disp"><td>Disponibilidad</td><td>${sumFmt(disp)}</td></tr>
     <tr class="avx-sum-neg"><td>Egresos</td><td>${egresos?sumFmt(-egresos):'$ 0'}</td></tr>
@@ -3569,6 +3570,16 @@ window.cpRender=render;
  };
  let scheduled=[],activeMovement;
  try{const items=JSON.parse(localStorage.getItem(movementStorage)||'[]');if(Array.isArray(items))scheduled=items}catch(_){}
+ // Movimientos asegurados cargados desde la planilla (SEGRUP 20-nov). Se agregan una sola vez.
+ const MOV_SEED=/*MOV_SEED*/[
+  {seed:'sgp-20261120-i',company:'segrup',date:'20261120',amount:3849755.44,type:'i',method:'eCheq',concept:'Cheques a hoy (planilla 20-nov)'},
+  {seed:'sgp-20261120-e',company:'segrup',date:'20261120',amount:75133460,type:'e',method:'eCheq',concept:'Egresos (planilla 20-nov)'},
+  {seed:'org-20261120-i',company:'origen',date:'20261120',amount:5343765,type:'i',method:'eCheq',concept:'Cheques a hoy (planilla 20-nov)'},
+  {seed:'org-20261120-e',company:'origen',date:'20261120',amount:24644921.87,type:'e',method:'eCheq',concept:'Egresos (planilla 20-nov)'}
+ ]/*MOV_SEED*/;
+ {const done=(()=>{try{return JSON.parse(localStorage.getItem('segrup.mov.seeds')||'[]')}catch(_){return []}})();
+  const add=MOV_SEED.filter(r=>!done.includes(r.seed)&&!scheduled.some(x=>x.seed===r.seed));
+  if(add.length){scheduled=[...scheduled,...add];try{localStorage.setItem(movementStorage,JSON.stringify(scheduled));localStorage.setItem('segrup.mov.seeds',JSON.stringify([...done,...add.map(r=>r.seed)]))}catch(_){}}}
  const inWindow=d=>d===today;
  function movementRows(view,scope=company){
   if(view.confirmed)return scheduled.filter(row=>(scope==='consolidado'||(row.company||'segrup')===scope)&&row.type===view.type&&inWindow(row.date)).sort((a,b)=>a.date.localeCompare(b.date));
@@ -3586,7 +3597,7 @@ window.cpRender=render;
   return [...daily].sort(([a],[b])=>a.localeCompare(b)).map(([date,amount])=>({date,amount}));
  }
  function availableCash(values,scope,includeForecast){
-  const balances=banks.flatMap(([id])=>[values?.['av-'+id+'-balance'],values?.['av-'+id+'-fci']]).filter(value=>value!=null&&value!=='');
+  const balances=[...banks.flatMap(([id])=>[values?.['av-'+id+'-balance'],values?.['av-'+id+'-fci']]),values?.avCash].filter(value=>value!=null&&value!=='');
   if(!balances.length)return null;
   const base=balances.reduce((total,value)=>total+readAmount(value),0);
   const totalOf=(confirmed,type,id)=>movementRows({confirmed,type},id).reduce((total,row)=>total+row.amount,0);
@@ -3615,17 +3626,17 @@ window.cpRender=render;
    if((b==null||b==='')&&(f==null||f===''))return '';
    const fci=readAmount(f);
    return row(name+(fci?' <small>(incl. FCI '+asMoney(fci)+')</small>':''),asMoney(readAmount(b)+fci),'av-bd-bank');
-  }).join('');
+  }).join('')+(vals.avCash!=null&&vals.avCash!==''?row('Caja',asMoney(readAmount(vals.avCash)),'av-bd-bank'):'');
   const companyName={segrup:'SEGRUP',origen:'ORIGEN',consolidado:'Consolidado SEGRUP + ORIGEN'}[company];
   detail.innerHTML=`<h3>Cómo se compone · ${companyName}</h3>`+
-   `<p class="av-bd-sub">Saldo + FCI al cierre del ${dlY(activeRecord.date.replace(/-/g,''))}</p>`+bankRows+
-   row('Total bancos (saldo + FCI)',asMoney(result.base),'av-bd-sub-total')+
+   `<p class="av-bd-sub">Saldo + FCI + caja al cierre del ${dlY(activeRecord.date.replace(/-/g,''))}</p>`+bankRows+
+   row('Bancos + caja',asMoney(result.base),'av-bd-sub-total')+
    row('Ingresos asegurados de hoy',signed('+',result.incoming),'av-bd-in')+
    row('Egresos asegurados de hoy',signed('−',result.outgoing),'av-bd-out')+
    (includeForecast.checked?row('Neto proyectado adicional',signed(result.forecast<0?'−':'+',result.forecast),result.forecast<0?'av-bd-out':'av-bd-in'):'')+
    row('Disponibilidad del día',asMoney(value),'av-bd-total')+
    (includeForecast.checked?'<p class="av-bd-note">Se presume que el flujo base incluye los asegurados.</p>':'')+
-   '<p class="av-bd-note">La caja no se suma a la disponibilidad.</p>';
+   '';
  }
  includeForecast.onchange=drawAvailable;
  function drawMovementTotals(){
@@ -4205,6 +4216,20 @@ nav button svg{width:20px!important;height:20px!important}
 .sg-tools .avx-date button svg{width:14px!important;height:14px!important}
 .sg-logout{font-size:11.5px!important;font-weight:600!important;color:#c9d6e2!important;margin-left:10px!important}
 .sg-logout svg{width:16px!important;height:16px!important}
+
+/* fila de total en lugar de la caja */
+#availability .avx-total-row{margin-top:4px;border-top:1px solid #1692f6!important;background:linear-gradient(90deg,#063157 0%,#04264a 50%,#021c35 100%)!important}
+#availability .avx-total-row .avx-name b{font-size:15px;letter-spacing:.06em;color:#fff}
+#availability .avx-total-row .avx-cols strong{font-size:19px!important;color:#fff}
+#availability .avx-total-row .avx-cols em{color:#7fc0ff}
+
+#availability .avx-total-row .avx-cols>span{grid-column:1 / -1}
+
+/* proyecciones: fondo distinto a los asegurados (rayado tenue + borde punteado) */
+#availability .avx-moves .av-movement:not(.av-confirmed){
+ background:repeating-linear-gradient(135deg,#ffffff06 0 6px,transparent 6px 14px),linear-gradient(90deg,#0c1626,#09121f 75%)!important;
+ border:1px dashed color-mix(in srgb,var(--movement-ink) 45%,#1b3550)!important;border-left:3px dashed var(--movement-ink)!important}
+#availability .avx-moves .av-movement:not(.av-confirmed) strong{opacity:.85}
 </style>
 <script id="segrup-tema-js">
 (()=>{for(const sec of document.querySelectorAll('main > section[id]')){
