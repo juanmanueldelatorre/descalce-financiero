@@ -868,16 +868,13 @@ main :is(.head,.cb-head) h1::before{content:"";display:inline-block;width:3px;he
  <div class="home-apps" id="homeApps" role="group" aria-label="Aplicaciones"></div>
  <div class="home-chat">
   <div class="home-chat-inner">
-   <h1 id="homeTitle" tabindex="-1">¿A dónde querés ir?</h1>
+   <h1 id="homeTitle" tabindex="-1">¿Qué querés saber hoy?</h1>
    <div id="homeReply" role="status"></div>
    <div class="home-suggestions" aria-label="Consultas rápidas">
-    <button type="button" data-home-go="availability">Ver disponibilidades</button>
-    <button type="button" data-home-go="mv">Buscar un pago</button>
-    <button type="button" data-home-go="sp">Simular un supuesto</button>
    </div>
    <form id="homeForm">
     <label class="home-sr" for="homeQuery">Escribí qué querés consultar</label>
-    <input id="homeQuery" type="text" autocomplete="off" maxlength="240" placeholder="Ej. Quiero simular una baja de gastos" required>
+    <input id="homeQuery" type="text" autocomplete="off" maxlength="240" placeholder="Ej. ¿Cuánto pagamos de sueldos en diciembre?" required>
     <button type="submit" title="Ir a la hoja" aria-label="Ir a la hoja"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6"/></svg></button>
    </form>
   </div>
@@ -3610,6 +3607,7 @@ window.cpRender=render;
   }
   return {base,incoming,outgoing,forecast,total:Math.round((base+incoming-outgoing+forecast)*100)/100};
  }
+ window.AVBOT={records:savedByCompany,banks,companyBanks,availableCash,movementRows,readAmount,today:()=>today,iso};
  const includeForecast=$('avIncludeForecast');
  function drawAvailable(){
   const result=availableCash(activeRecord?.values,company,includeForecast.checked),output=$('avAvailable');
@@ -4230,6 +4228,32 @@ nav button svg{width:20px!important;height:20px!important}
  background:repeating-linear-gradient(135deg,#ffffff06 0 6px,transparent 6px 14px),linear-gradient(90deg,#0c1626,#09121f 75%)!important;
  border:1px dashed color-mix(in srgb,var(--movement-ink) 45%,#1b3550)!important;border-left:3px dashed var(--movement-ink)!important}
 #availability .avx-moves .av-movement:not(.av-confirmed) strong{opacity:.85}
+
+/* bot de consultas */
+#homeReply{width:min(860px,100%);margin:0 auto;max-height:52vh;overflow:auto;text-align:left}
+.bot-q{margin:0 0 8px;font-size:12px;color:#8ea5bb}
+.bot-q::before{content:"Consulta: ";font-weight:800;color:#1692f6;text-transform:uppercase;font-size:10.5px;letter-spacing:.08em}
+.bot-card{border:1px solid #0e3253;border-left:3px solid #1692f6;border-radius:8px;background:linear-gradient(180deg,#02213a,#011829);padding:12px 14px;color:#e3ebf3}
+.bot-title{font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.02em;color:#fff;margin-bottom:6px}
+.bot-lead{font-size:13px;margin:2px 0 8px;color:#dfe8f1}
+.bot-table{width:100%;border-collapse:collapse;font-size:13px}
+.bot-table th{text-align:left;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#b9c9d8;padding:5px 8px;border-bottom:1px solid #14395a;background:transparent}
+.bot-table td{padding:6px 8px;border-bottom:1px solid #0e3253;font-variant-numeric:tabular-nums}
+.bot-table td:not(:first-child),.bot-table th:not(:first-child){text-align:right}
+.bot-table tr.bot-total td{background:#062a47;border-bottom:0}
+.bot-pos{color:#75e0ab}.bot-neg{color:#ff8993}
+.bot-note{margin-top:8px;font-size:11.5px;color:#8ea5bb}
+.bot-go{margin-top:10px;justify-content:flex-start}
+.bot-ex-btn{border-color:#1692f6!important;color:#fff!important}
+.bot-ex-group{margin:8px 0}
+.bot-ex-group>span{display:block;font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#1692f6;margin-bottom:5px}
+.bot-ex-group>div{display:flex;flex-wrap:wrap;gap:6px}
+.bot-ex{border:1px solid #1b4466;border-radius:14px;background:#011a2d;color:#dfe8f1;font:500 12px var(--ui-font);padding:5px 10px;cursor:pointer}
+.bot-ex:hover{border-color:#1692f6;color:#fff}
+
+#home .home-suggestions:empty{display:none}
+
+#home #homeTitle{font-size:34px!important;font-weight:300!important;letter-spacing:-.01em;line-height:1.15;margin-bottom:22px}
 </style>
 <script id="segrup-tema-js">
 (()=>{for(const sec of document.querySelectorAll('main > section[id]')){
@@ -4292,5 +4316,421 @@ nav button svg{width:20px!important;height:20px!important}
 (()=>{const tools=document.getElementById('sgTopTools'),sec=document.getElementById('availability');
  const sync=()=>{tools.hidden=sec.hidden};sync();
  new MutationObserver(sync).observe(sec,{attributes:true,attributeFilter:['hidden']});})();
+</script>
+<script id="segrup-bot">
+/* ===== Bot de consultas: responde con los datos del HTML (sin IA) ===== */
+(()=>{
+const home=document.getElementById('home'),form=document.getElementById('homeForm'),query=document.getElementById('homeQuery'),reply=document.getElementById('homeReply');
+if(!home||!form)return;
+const N=v=>String(v).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9/$.,+ ]+/g,' ').replace(/\s+/g,' ').trim();
+const esc=v=>String(v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const money=n=>!Number.isFinite(n)?'—':(n<0?'−':'')+'$ '+Math.round(Math.abs(n)).toLocaleString('es-AR');
+const mill=n=>(n<0?'−':'')+'$ '+Math.abs(n).toLocaleString('es-AR',{minimumFractionDigits:1,maximumFractionDigits:1})+' M';
+const pct=n=>Number.isFinite(n)?n.toLocaleString('es-AR',{minimumFractionDigits:1,maximumFractionDigits:1})+'%':'—';
+const MES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const MESC=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const DOW=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const toD=s=>new Date(+s.slice(0,4),+s.slice(4,6)-1,+s.slice(6,8));
+const toS=d=>d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');
+const addD=(s,n)=>{const d=toD(s);d.setDate(d.getDate()+n);return toS(d)};
+const fd=s=>s.slice(6,8)+'/'+s.slice(4,6)+'/'+s.slice(2,4);
+const fdl=s=>DOW[toD(s).getDay()]+' '+fd(s);
+const mlab=m=>MES[+m.slice(4,6)-1]+' '+m.slice(0,4);
+const isOff=d=>[0,6].includes(toD(d).getDay())||(()=>{try{return DATA.vtos[d]==='FERIADO'}catch(_){return false}})();
+const businessNext=s=>{let d=addD(s,1);while(isOff(d))d=addD(d,1);return d};
+const businessPrev=s=>{let d=addD(s,-1);while(isOff(d))d=addD(d,-1);return d};
+const TODAY=()=>window.AVBOT?.today?.()||toS(new Date());
+const has=(q,re)=>re.test(q);
+const CO={segrup:'SEGRUP',origen:'ORIGEN'};
+
+/* ---------- empresa, banco, período ---------- */
+function companies(q){
+ const o=/\borigen\b|\borg\b/.test(q),s=/\bsegrup\b|\bsgp\b/.test(q);
+ if(o&&!s)return ['origen'];if(s&&!o)return ['segrup'];return ['segrup','origen'];
+}
+const BANKS=[['bbva',/\bbbva\b|\bfrances\b/],['galicia',/\bgalicia\b/],['macro',/\bmacro\b/],['nacion',/\bnacion\b/],['santafe',/santa ?fe|\bbsf\b/],['santander',/santander|\brio\b/]];
+const bankOf=q=>BANKS.filter(([,re])=>re.test(q)).map(([k])=>k);
+function period(q){
+ const t=TODAY(),y=+t.slice(0,4),m=+t.slice(4,6);
+ let mm=q.match(/\b(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\b/);
+ if(mm){const yy=mm[3]?(mm[3].length===2?'20'+mm[3]:mm[3]):String(y);const d=yy+mm[2].padStart(2,'0')+mm[1].padStart(2,'0');return {from:d,to:d,label:'el '+fd(d),day:true}}
+ if(/pasado manana/.test(q)){const d=businessNext(businessNext(t));return {from:d,to:d,label:fdl(d),day:true}}
+ if(/\bmanana\b/.test(q)){const d=businessNext(t);return {from:d,to:d,label:'mañana ('+fd(d)+')',day:true}}
+ if(/\bayer\b/.test(q)){const d=businessPrev(t);return {from:d,to:d,label:'ayer ('+fd(d)+')',day:true}}
+ if(/\bhoy\b/.test(q)){return {from:t,to:t,label:'hoy ('+fd(t)+')',day:true}}
+ const dow=['domingo','lunes','martes','miercoles','jueves','viernes','sabado'].findIndex(d=>new RegExp('\\b'+d+'\\b').test(q));
+ if(dow>0&&dow<6){let d=t;do{d=addD(d,1)}while(toD(d).getDay()!==dow);return {from:d,to:d,label:'el '+fdl(d),day:true}}
+ const monday=s=>{let d=s;while(toD(d).getDay()!==1)d=addD(d,-1);return d};
+ if(/(proxima|siguiente|otra) semana|semana que viene/.test(q)){const a=addD(monday(t),7);return {from:a,to:addD(a,4),label:'la semana próxima ('+fd(a)+' al '+fd(addD(a,4))+')'}}
+ if(/esta semana|en la semana/.test(q)){const a=monday(t);return {from:t,to:addD(a,4),label:'esta semana (hasta el '+fd(addD(a,4))+')'}}
+ if(/semana pasada/.test(q)){const a=addD(monday(t),-7);return {from:a,to:addD(a,4),label:'la semana pasada'}}
+ let mi=MES.findIndex(x=>new RegExp('\\b'+x+'\\b').test(q.replace(/setiembre/,'septiembre')));
+ let yy=q.match(/\b(202\d)\b/)?.[1];
+ if(mi<0){
+  if(/mes (que viene|proximo|siguiente)|proximo mes/.test(q)){mi=m%12;yy=yy||String(m===12?y+1:y)}
+  else if(/mes pasado|mes anterior/.test(q)){mi=(m+10)%12;yy=yy||String(m===1?y-1:y)}
+  else if(/este mes|del mes|en el mes|fin de mes|a fin de mes/.test(q)){mi=m-1}
+  else if(yy&&/\b(ano|anual)\b/.test(q)||/este ano|en el ano|del ano|en lo que va del ano/.test(q)){const Y=yy||String(y);return {from:Y+'0101',to:Y+'1231',label:'el año '+Y,year:Y}}
+ }
+ if(mi>=0){
+  if(!yy)yy=String(/(que viene|proximo|siguiente)/.test(q)&&mi+1<m?y+1:y);
+  const M=yy+String(mi+1).padStart(2,'0');
+  const last=toS(new Date(+yy,mi+1,0));
+  if(/fin de|final de|cierre de|a fin/.test(q))return {from:last,to:last,label:'fin de '+mlab(M),day:true,month:M,end:true};
+  return {from:M+'01',to:last,label:mlab(M),month:M};
+ }
+ return null;
+}
+
+/* ---------- datos ---------- */
+const S={segrup:window.S12,origen:window.S12O};
+try{S.segrup=S12;S.origen=S12O}catch(_){}
+const realTo=c=>c==='segrup'?(DATA.T0||S12.today):(S12O.T0||S12O.today);
+function saldoFlujo(c,d){
+ const X=S[c];if(!X)return null;
+ let i=-1;for(let k=0;k<X.days.length;k++){if(X.days[k]<=d)i=k;else break}
+ if(i<0)return null;
+ return {date:X.days[i],v:X.disp[i]/100};
+}
+function flowItems(c,kind,from,to){
+ const X=S[c];if(!X)return [];
+ return (kind==='i'?X.allI:X.allE).filter(x=>x.date>=from&&x.date<=to);
+}
+const sumA=a=>a.reduce((t,x)=>t+x.amount,0)/100;
+
+/* listas para reconocer clientes y conceptos */
+const CLIENTS=new Map();
+for(const c of ['segrup','origen'])for(const x of (S[c]?.allI||[]))if(x.client){const k=x.client;if(!CLIENTS.has(k))CLIENTS.set(k,new Set());CLIENTS.get(k).add(c)}
+const CB_CLI=[];try{for(const [cod,v] of Object.entries(CB_DATA.clientes))CB_CLI.push({cod,name:v[0],unidad:v[2],cond:v[4],medio:v[6]})}catch(_){}
+const CONCEPTS=new Set();for(const c of ['segrup','origen'])for(const x of (S[c]?.allE||[]))if(x.concept)CONCEPTS.add(x.concept);
+const CONCEPT_ALIAS=[[/\bsueldo|\bsueldos|haberes/,/^SUELDOS$/i],[/\biva\b/,/\bIVA\b/i],[/\biibb\b|ingresos brutos/,/IIBB/i],[/\b931\b|cargas sociales|f931/,/931/],[/alquiler/,/alquiler/i],[/proveedor/,/PROVEEDORES|proveedores/i],[/sindicato/,/sindicato/i],[/prestamo/,/prestamo/i],[/interes/,/intereses/i],[/honorario/,/honorarios/i],[/embargo/,/embargo/i],[/mutual/,/mutual/i],[/aguinaldo|\bsac\b/,/aguinaldo|SAC/i],[/caja regional/,/Cajas Regionales/i],[/retiro de socio|socios/,/socios/i],[/dolar/,/dolar/i],[/acuerdo/,/^ACUERDOS$/i],[/debito/,/^Débitos$/i],[/km\b|ajuste/,/Ajustes de sueldos/i]];
+const STOP=new Set(('cuanto cuanta cuantos cuantas que cual cuales cuando donde como quien quienes el la los las de del al a en y o u un una unos unas por para con sin se nos me le les lo mi tu su sus es son fue va van hay tiene tenemos tengo hace hacer dar dame decime mostrame ver muestra mostrar paga pago pagos pagamos pagar pagaron pago cobro cobra cobramos cobrar cobros cobranza cobranzas debe deben deuda adeuda saldo saldos total totales ingreso ingresos egreso egresos gasto gastos gastamos gasta entra entran entro salida salidas proximo proxima siguiente ultimo ultima hoy manana ayer semana mes ano este esta esa ese fin final cierre cliente clientes proveedor proveedores empresa banco bancos plata dinero vence vencimiento vencimientos fecha dia dias monto montos importe importes segrup origen sgp org ambas grupo consolidado real proyectado proyeccion previsto estimado mucho mas menos mayor mayores menor principal principales top lista listar todo todos todas este baja bajas alta altas simular simula simulacion quiero queria necesito supuesto supuestos sobre ventas venta indicador hola buenas gracias favor podes puedo como andan estamos vamos tendremos cerramos cierra '+MES.join(' ')).split(' '));
+const CLIENT_ALIAS=[[/\bepe\b/,'energia santa fe'],[/\b7 soles|siete soles/,'siete soles'],[/\bdgc\b/,'gas cuyana']];
+function matchClient(q){
+ for(const [re,t] of CLIENT_ALIAS)if(re.test(q))q=q+' '+t;
+ const toks=q.split(' ').filter(w=>w.length>=3&&!STOP.has(w)&&!/^\d+$/.test(w));
+ if(!toks.length)return null;
+ let best=null,bs=0;
+ const score=name=>{const n=N(name).split(' ');let sc=0;for(const t of toks){if(n.some(w=>w===t))sc+=2;else if(t.length>=4&&n.some(w=>w.startsWith(t)))sc+=1}return sc};
+ for(const name of CLIENTS.keys()){const sc=score(name);if(sc>bs){bs=sc;best={name,src:'flujo'}}}
+ for(const c of CB_CLI){const sc=score(c.name);if(sc>bs){bs=sc;best={name:c.name,src:'cb',cod:c.cod}}}
+ return bs>=2?best:null;
+}
+function matchConcept(q){
+ for(const [re,target] of CONCEPT_ALIAS)if(re.test(q)){const list=[...CONCEPTS].filter(c=>target.test(c));if(list.length){const ex=list.find(c=>N(c)===N(q.match(re)[0].trim()))||list.find(c=>c.length<6)||list[0];return {label:ex,list:/\biva\b/.test(q)?list.filter(c=>/^IVA$/i.test(c)).concat(list.filter(c=>!/^IVA$/i.test(c))):list}}}
+ const toks=q.split(' ').filter(w=>w.length>=4&&!STOP.has(w));
+ for(const c of CONCEPTS){const n=N(c);if(toks.some(t=>n.split(' ').includes(t)))return {label:c,list:[c]}}
+ return null;
+}
+
+/* ---------- salida ---------- */
+function card(title,rows,opts={}){
+ let h='<div class="bot-card"><div class="bot-title">'+title+'</div>';
+ if(opts.lead)h+='<div class="bot-lead">'+opts.lead+'</div>';
+ if(rows&&rows.length){
+  h+='<table class="bot-table">'+(opts.head?'<thead><tr>'+opts.head.map(x=>'<th>'+x+'</th>').join('')+'</tr></thead>':'')+'<tbody>'+rows.map(r=>'<tr'+(r.cls?' class="'+r.cls+'"':'')+'>'+r.c.map(x=>'<td>'+x+'</td>').join('')+'</tr>').join('')+'</tbody></table>';
+ }
+ if(opts.note)h+='<div class="bot-note">'+opts.note+'</div>';
+ if(opts.go)h+='<div class="home-suggestions bot-go"><button type="button" data-home-go="'+opts.go[0]+'">'+opts.go[1]+' →</button></div>';
+ return h+'</div>';
+}
+const R=(c,cls)=>({c,cls});
+
+/* ---------- respuestas: Tesorería · Disponibilidad ---------- */
+function avRecord(c){
+ const A=window.AVBOT;if(!A)return null;
+ const target=A.iso(addD(A.today(),-1));
+ const list=A.records[c]||[];
+ return list.find(r=>r.date===target)||list.filter(r=>r.date<=target).sort((a,b)=>b.date.localeCompare(a.date))[0]||null;
+}
+const recDate=r=>r?r.date.replace(/-/g,''):null;
+function bankVals(c){
+ const A=window.AVBOT,r=avRecord(c);if(!r)return null;
+ const ids=(A.companyBanks[c]||A.banks.map(b=>b[0]));
+ return {rec:r,list:A.banks.filter(([id])=>ids.includes(id)).map(([id,name])=>{const v=r.values;const has=k=>v[k]!=null&&v[k]!=='';
+  return {id,name,bal:A.readAmount(v['av-'+id+'-balance']),fci:A.readAmount(v['av-'+id+'-fci']),lim:has('av-'+id+'-limit')?A.readAmount(v['av-'+id+'-limit']):null,rate:has('av-'+id+'-rate')?A.readAmount(v['av-'+id+'-rate']):null,loaded:has('av-'+id+'-balance')||has('av-'+id+'-fci')}}),
+  cash:r.values.avCash?A.readAmount(r.values.avCash):0};
+}
+function disponibilidad(q){
+ const A=window.AVBOT;if(!A)return null;
+ const cs=companies(q),fc=/proyecc|proyectad/.test(q);
+ const rows=[];let tot=0,ok=0;
+ for(const c of cs){
+  const r=avRecord(c);if(!r){rows.push(R([CO[c],'Sin saldos cargados','','','']));continue}
+  const x=A.availableCash(r.values,c,fc);if(!x){rows.push(R([CO[c],'Sin saldos','','','']));continue}
+  rows.push(R(['<b>'+CO[c]+'</b>',money(x.base),'+ '+money(x.incoming),'− '+money(x.outgoing),'<b>'+money(x.total)+'</b>']));tot+=x.total;ok++;
+ }
+ if(cs.length>1&&ok)rows.push(R(['<b>Total SGP + ORG</b>','','','','<b>'+money(tot)+'</b>'],'bot-total'));
+ const r0=avRecord(cs[0]);
+ return card('Disponibilidad del día · hoy '+fd(TODAY()),rows,{head:['Empresa','Bancos + caja (cierre '+(r0?fd(recDate(r0)):'—')+')','Ingresos asegurados','Egresos asegurados','Disponibilidad'],note:fc?'Incluye el neto de las proyecciones del día.':'Saldo bancario + FCI + caja del cierre de ayer, más ingresos y menos egresos asegurados de hoy.',go:['availability','Ver Disponibilidad']});
+}
+function bancos(q){
+ const A=window.AVBOT;if(!A)return null;
+ const want=bankOf(q),cs=companies(q),rows=[];
+ for(const c of cs){
+  const b=bankVals(c);if(!b)continue;
+  const list=b.list.filter(x=>!want.length||want.includes(x.id));
+  for(const x of list)if(x.loaded||want.length)rows.push(R([CO[c],x.name,money(x.bal),money(x.fci),'<b>'+money(x.bal+x.fci)+'</b>']));
+  if(!want.length)rows.push(R([CO[c],'<b>Total bancos</b>','','','<b>'+money(b.list.reduce((t,x)=>t+x.bal+x.fci,0))+'</b>'],'bot-total'));
+ }
+ if(!rows.length)return card('Saldos bancarios',[],{note:want.length?'Ese banco no opera con la empresa consultada.':'No hay saldos cargados.'});
+ const r=avRecord(cs[0]);
+ return card((want.length?'Saldo en '+A.banks.find(b=>b[0]===want[0])[1]:'Saldos por banco')+' · cierre '+(r?fd(recDate(r)):''),rows,{head:['Empresa','Banco','Saldo','FCI','Saldo total'],go:['availability','Ver Disponibilidad']});
+}
+function fci(q){
+ const cs=companies(q),rows=[];let t=0;
+ for(const c of cs){const b=bankVals(c);if(!b)continue;for(const x of b.list)if(x.fci){rows.push(R([CO[c],x.name,money(x.fci)]));t+=x.fci}}
+ if(!rows.length)return card('FCI',[],{note:'No hay fondos comunes de inversión cargados.'});
+ if(rows.length>1)rows.push(R(['','<b>Total FCI</b>','<b>'+money(t)+'</b>'],'bot-total'));
+ return card('Fondos comunes de inversión (FCI)',rows,{head:['Empresa','Banco','FCI'],go:['availability','Ver Disponibilidad']});
+}
+function caja(q){
+ const cs=companies(q),rows=[];
+ for(const c of cs){const b=bankVals(c);rows.push(R([CO[c],b?money(b.cash):'Sin carga']))}
+ return card('Caja (efectivo) · cierre de ayer',rows,{head:['Empresa','Caja'],note:'La caja se suma en la Disponibilidad del día y en el resumen.',go:['availability','Ver Disponibilidad']});
+}
+function descubierto(q){
+ const want=bankOf(q),cs=companies(q),rows=[];let U=0,L=0;
+ for(const c of cs){const b=bankVals(c);if(!b)continue;let u=0,l=0;
+  for(const x of b.list){if(want.length&&!want.includes(x.id))continue;const used=Math.max(0,-x.bal);if(x.lim!=null){l+=x.lim}u+=used;
+   if(want.length||x.lim)rows.push(R([CO[c],x.name,money(used),x.lim==null?'Sin cargar':money(x.lim),x.lim>0?pct(used/x.lim*100):'—']))}
+  if(!want.length)rows.push(R([CO[c],'<b>Total</b>','<b>'+money(u)+'</b>','<b>'+money(l)+'</b>','<b>'+(l>0?pct(u/l*100):'—')+'</b>'],'bot-total'));U+=u;L+=l}
+ return card('Descubierto · utilizado / acuerdo',rows,{head:['Empresa','Banco','Utilizado','Acuerdo','% uso'],lead:cs.length>1&&!want.length?'Grupo: <b>'+money(U)+'</b> utilizado de <b>'+money(L)+'</b> ('+(L>0?pct(U/L*100):'—')+').':'',go:['availability','Ver Disponibilidad']});
+}
+function tasas(q){
+ const want=bankOf(q),cs=companies(q),rows=[];
+ for(const c of cs){const b=bankVals(c);if(!b)continue;for(const x of b.list){if(want.length&&!want.includes(x.id))continue;rows.push(R([CO[c],x.name,x.rate==null?'Sin cargar':pct(x.rate)+' TNA']))}}
+ return card('Tasas de descubierto',rows,{head:['Empresa','Banco','Tasa'],go:['availability','Ver Disponibilidad']});
+}
+function asegurados(q){
+ const A=window.AVBOT;if(!A)return null;
+ const cs=companies(q),t=A.today(),rows=[];
+ const wantI=/ingres|cobr|entr|cheques? a hoy/.test(q),wantE=/egres|sal|pag|debito/.test(q);
+ for(const c of cs){
+  const i=A.movementRows({confirmed:true,type:'i'},c),e=A.movementRows({confirmed:true,type:'e'},c);
+  const si=i.reduce((x,r)=>x+r.amount,0),se=e.reduce((x,r)=>x+r.amount,0);
+  const showI=!wantE||wantI,showE=!wantI||wantE;
+  rows.push(R(['<b>'+CO[c]+'</b>',...(showI?[money(si)]:[]),...(showE?[money(se)]:[])]));
+ }
+ const showI=!wantE||wantI,showE=!wantI||wantE;
+ return card('Movimientos asegurados · hoy '+fd(t),rows,{head:['Empresa',...(showI?['Ingresos asegurados (eCheq)']:[]),...(showE?['Salidas aseguradas']:[])],go:['availability','Ver Disponibilidad']});
+}
+function proyeccionDia(q){
+ const A=window.AVBOT;if(!A)return null;const cs=companies(q),rows=[];
+ for(const c of cs){const i=A.movementRows({confirmed:false,type:'i'},c).reduce((x,r)=>x+r.amount,0),e=A.movementRows({confirmed:false,type:'e'},c).reduce((x,r)=>x+r.amount,0);rows.push(R(['<b>'+CO[c]+'</b>',money(i),money(e),money(i-e)]))}
+ return card('Proyección del flujo para hoy '+fd(A.today()),rows,{head:['Empresa','Ingresos proyectados','Egresos proyectados','Neto'],go:['availability','Ver Disponibilidad']});
+}
+function resumen(){
+ const A=window.AVBOT;if(!A)return null;const rows=[];let g=0;
+ for(const c of ['segrup','origen']){const r=avRecord(c);if(!r)continue;const x=A.availableCash(r.values,c,false);if(!x)continue;g+=x.total;
+  rows.push(R(['<b>'+CO[c]+'</b>',money(x.base),money(x.incoming),money(x.base+x.incoming),'−'+money(x.outgoing).replace('−',''),'<b>'+money(x.total)+'</b>']))}
+ rows.push(R(['<b>Total SGP + ORG</b>','','','','','<b>'+money(g)+'</b>'],'bot-total'));
+ return card('Resumen de saldos · '+fd(TODAY()),rows,{head:['Empresa','Saldo bancos','Cheques a hoy','Disponibilidad','Egresos','Saldo'],go:['availability','Ver Disponibilidad']});
+}
+function inversiones(q){
+ const A=window.AVBOT;if(!A)return null;const cs=companies(q),rows=[];
+ const F=[['avStocks','Acciones'],['avBonds','Bonos'],['avCauciones','Cauciones'],['avCedears','CEDEARs'],['avOn','ON'],['avFixed','Plazos fijos'],['avOther','Otras']];
+ for(const c of cs){const r=avRecord(c);const v=r?.values||{};const t=F.reduce((s,[k])=>s+A.readAmount(v[k]),0)+A.readAmount(v.avUsd)*A.readAmount(v.avFx);rows.push(R([CO[c],money(t)]))}
+ return card('Inversiones (cartera)',rows,{head:['Empresa','Valuación'],note:'Acciones, bonos, cauciones, CEDEARs, ON, plazos fijos, otras y dólares valuados al tipo de cambio cargado.',go:['availability','Ver Disponibilidad']});
+}
+
+/* ---------- Flujo de fondos ---------- */
+function saldoProyectado(q,p){
+ const cs=companies(q),rows=[];const d=p?.to||TODAY();
+ for(const c of cs){const x=saldoFlujo(c,d);if(!x){rows.push(R([CO[c],'Sin datos','']));continue}
+  rows.push(R(['<b>'+CO[c]+'</b>',fdl(x.date)+(x.date<d&&x.date===S[c].days.at(-1)?' <small>(último dato)</small>':''),'<b class="'+(x.v<0?'bot-neg':'bot-pos')+'">'+money(x.v)+'</b>',x.date<=realTo(c)?'real':'proyectado']))}
+ return card('Saldo del flujo de fondos · '+(p?p.label:'hoy'),rows,{head:['Empresa','Fecha','Saldo','Tipo'],go:['ff','Ver Flujo de fondos']});
+}
+function primerNegativo(q){
+ const cs=companies(q),rows=[],t=TODAY();
+ for(const c of cs){const X=S[c];if(!X)continue;let first=null,min=null;
+  X.days.forEach((d,i)=>{if(d<t)return;const v=X.disp[i]/100;if(first===null&&v<0)first={d,v};if(min===null||v<min.v)min={d,v}});
+  rows.push(R(['<b>'+CO[c]+'</b>',first?fdl(first.d)+' · '+money(first.v):'No queda negativo',min?fdl(min.d)+' · <b class="'+(min.v<0?'bot-neg':'')+'">'+money(min.v)+'</b>':'—']))}
+ return card('¿Cuándo queda negativo el flujo?',rows,{head:['Empresa','Primer día en negativo','Saldo más bajo proyectado'],go:['ff','Ver Flujo de fondos']});
+}
+function minimoPeriodo(q,p){
+ const cs=companies(q),rows=[];
+ for(const c of cs){const X=S[c];let min=null,max=null;X.days.forEach((d,i)=>{if(d<p.from||d>p.to)return;const v=X.disp[i]/100;if(!min||v<min.v)min={d,v};if(!max||v>max.v)max={d,v}});
+  if(min)rows.push(R(['<b>'+CO[c]+'</b>',fdl(min.d)+' · <b class="'+(min.v<0?'bot-neg':'')+'">'+money(min.v)+'</b>',fdl(max.d)+' · '+money(max.v)]))}
+ return card('Saldos mínimo y máximo · '+p.label,rows,{head:['Empresa','Mínimo','Máximo'],go:['ff','Ver Flujo de fondos']});
+}
+function ingresosEgresos(q,p,kind){
+ const cs=companies(q),rows=[];let TI=0,TE=0;
+ const both=!kind;
+ for(const c of cs){const i=sumA(flowItems(c,'i',p.from,p.to)),e=sumA(flowItems(c,'e',p.from,p.to));TI+=i;TE+=e;
+  const tipo=p.to<=realTo(c)?'real':p.from>realTo(c)?'proyectado':'real + proyectado';
+  rows.push(R(['<b>'+CO[c]+'</b>',...(both||kind==='i'?['<span class="bot-pos">'+money(i)+'</span>']:[]),...(both||kind==='e'?['<span class="bot-neg">'+money(e)+'</span>']:[]),...(both?[money(i-e)]:[]),tipo]))}
+ if(cs.length>1)rows.push(R(['<b>Total</b>',...(both||kind==='i'?['<b>'+money(TI)+'</b>']:[]),...(both||kind==='e'?['<b>'+money(TE)+'</b>']:[]),...(both?['<b>'+money(TI-TE)+'</b>']:[]),''],'bot-total'));
+ const head=['Empresa',...(both||kind==='i'?['Ingresos']:[]),...(both||kind==='e'?['Egresos']:[]),...(both?['Neto']:[]),'Dato'];
+ return card((kind==='i'?'Ingresos':kind==='e'?'Egresos':'Ingresos y egresos')+' · '+p.label,rows,{head,note:'Real hasta el '+fd(realTo('segrup'))+'; después, proyección del flujo.',go:['ie','Ver Ingresos y egresos']});
+}
+function topItems(q,p,kind){
+ const cs=companies(q),field=kind==='i'?'client':'concept',acc=new Map();
+ for(const c of cs)for(const x of flowItems(c,kind,p.from,p.to)){const k=x[field]||'Sin detalle';if(cs.length>1&&/^SEGRUP$|^Transf\. ORIGEN$/i.test(k))continue;acc.set(k,(acc.get(k)||0)+x.amount/100)}
+ const list=[...acc].sort((a,b)=>b[1]-a[1]).slice(0,8);
+ return card((kind==='i'?'Principales ingresos por cliente':'Principales egresos por concepto')+' · '+p.label,list.map(([k,v],i)=>R([String(i+1),esc(k),'<b>'+money(v)+'</b>'])),{head:['#',kind==='i'?'Cliente':'Concepto','Monto'],note:cs.length>1?'SEGRUP + ORIGEN.':CO[cs[0]]+'.',go:['ie','Ver Ingresos y egresos']});
+}
+function delDia(q,p,kind){
+ const cs=companies(q),rows=[];let t=0;
+ for(const c of cs){const items=flowItems(c,kind,p.from,p.to).sort((a,b)=>b.amount-a.amount);for(const x of items.slice(0,10)){rows.push(R([CO[c],fd(x.date),esc(x.client||x.concept||''),money(x.amount/100)]));t+=x.amount/100}}
+ if(!rows.length)return card((kind==='i'?'Cobros':'Pagos')+' · '+p.label,[],{note:(isOff(p.from)?'Es feriado o fin de semana. ':'')+'No hay '+(kind==='i'?'cobros':'pagos')+' en el flujo para '+p.label+'.'});
+ rows.push(R(['','','<b>Total</b>','<b>'+money(t)+'</b>'],'bot-total'));
+ return card((kind==='i'?'Cobros previstos':'Pagos previstos')+' · '+p.label,rows,{head:['Empresa','Fecha',kind==='i'?'Cliente':'Concepto','Monto'],note:'Se muestran los 10 mayores por empresa.',go:['ie','Ver Ingresos y egresos']});
+}
+function clienteFlujo(q,cl,p){
+ const cs=companies(q),t=TODAY(),rows=[];
+ const from=p?.from||t.slice(0,6)+'01',to=p?.to||'20991231';
+ let tot=0,next=null,last=null;
+ for(const c of cs){const X=S[c];if(!X)continue;for(const x of X.allI){if(x.client!==cl.name)continue;
+  if(x.date>=from&&x.date<=to){tot+=x.amount/100;if(rows.length<12)rows.push(R([CO[c],fdl(x.date),money(x.amount/100),x.date<=realTo(c)?'cobrado':'previsto']))}
+  if(x.date>realTo(c)&&x.date>=t&&(!next||x.date<next.date))next={...x,c};if(x.date<=realTo(c)&&(!last||x.date>last.date))last={...x,c}}}
+ const lead=[last?'Último cobro: <b>'+fd(last.date)+'</b> por '+money(last.amount/100)+'.':'',next?'Próximo cobro previsto: <b>'+fdl(next.date)+'</b> por '+money(next.amount/100)+'.':''].filter(Boolean).join(' ');
+ if(rows.length)rows.push(R(['','<b>Total '+(p?p.label:'desde este mes')+'</b>','<b>'+money(tot)+'</b>',''],'bot-total'));
+ return card(esc(cl.name),rows,{head:['Empresa','Fecha','Monto','Estado'],lead,go:['ie','Ver Ingresos y egresos']});
+}
+function conceptoFlujo(q,co,p){
+ const cs=companies(q),t=TODAY(),rows=[];let tot=0,next=null;
+ const from=p?.from||t,to=p?.to||addD(t,60);
+ for(const c of cs)for(const x of (S[c]?.allE||[])){if(!co.list.includes(x.concept))continue;
+  if(x.date>=from&&x.date<=to){tot+=x.amount/100;rows.push(R([CO[c],fdl(x.date),esc(x.concept),money(x.amount/100)]))}
+  if(x.date>=t&&(!next||x.date<next.date))next={...x,c}}
+ rows.sort((a,b)=>0);
+ const lead=next?'Próximo pago: <b>'+fdl(next.date)+'</b> · '+money(next.amount/100)+' ('+CO[next.c]+').':'No hay pagos previstos.';
+ const shown=rows.slice(0,14);if(rows.length)shown.push(R(['','','<b>Total '+(p?p.label:'próximos 60 días')+'</b>','<b>'+money(tot)+'</b>'],'bot-total'));
+ return card(esc(co.label),shown,{head:['Empresa','Fecha','Concepto','Monto'],lead,go:['ie','Ver Ingresos y egresos']});
+}
+function vencimientos(q,p){
+ const V=DATA.vtos||{},t=TODAY();
+ const co=matchConcept(q);
+ let list=Object.entries(V).filter(([d,l])=>l!=='FERIADO'&&d>=(p?.from||t)&&d<=(p?.to||addD(t,30)));
+ if(co&&!p){const re=new RegExp(N(co.label).split(' ')[0],'i');const nx=Object.entries(V).filter(([d,l])=>d>=t&&re.test(N(l))).sort()[0];if(nx)return card('Próximo vencimiento · '+esc(nx[1]),[R([fdl(nx[0]),esc(nx[1])])],{head:['Fecha','Vencimiento'],go:['ff','Ver Flujo de fondos']})}
+ const fer=Object.entries(V).filter(([d,l])=>l==='FERIADO'&&d>=(p?.from||t)&&d<=(p?.to||addD(t,30)));
+ return card('Vencimientos · '+(p?p.label:'próximos 30 días'),list.sort().map(([d,l])=>R([fdl(d),esc(l)])),{head:['Fecha','Vencimiento'],note:fer.length?'Feriados: '+fer.map(([d])=>fd(d)).join(', ')+'.':'',go:['ff','Ver Flujo de fondos']});
+}
+
+/* ---------- Cobranzas ---------- */
+const CB=(()=>{try{return CB_DATA}catch(_){return null}})();
+function cbSaldo(cod){return CB.comprobantes.filter(r=>r[0]===cod).reduce((t,r)=>t+r[10],0)}
+function cbVencido(cod){const corte=CB.corte;return CB.comprobantes.filter(r=>(!cod||r[0]===cod)&&r[2]&&r[2]<corte&&r[10]>0).reduce((t,r)=>t+r[10],0)}
+function cobranzasTotal(){
+ if(!CB)return null;
+ const total=CB.control.saldo_total_clientes,venc=cbVencido();
+ const acc=new Map();for(const r of CB.comprobantes)acc.set(r[0],(acc.get(r[0])||0)+r[10]);
+ const top=[...acc].sort((a,b)=>b[1]-a[1]).slice(0,5);
+ return card('Cobranzas SEGRUP · corte '+fd(CB.corte.replace(/-/g,'')),[R(['Saldo a cobrar total','<b>'+money(total)+'</b>']),R(['Vencido al corte','<b class="bot-neg">'+money(venc)+'</b>']),R(['Clientes con saldo',String([...acc.values()].filter(v=>v>1).length)]),R(['Comprobantes',String(CB.control.comprobantes)]),...top.map(([k,v],i)=>R(['Deudor #'+(i+1)+': '+esc(CB.clientes[k]?.[0]||k),money(v)]))],{go:['cb','Ver Cobranzas']});
+}
+function cobranzasCliente(cl){
+ if(!CB)return null;
+ const nn=N(cl.name).split(' ').filter(w=>w.length>=4);const c=CB_CLI.find(x=>x.cod===cl.cod)||CB_CLI.find(x=>N(x.name)===N(cl.name))||CB_CLI.map(x=>[x,nn.filter(w=>N(x.name).split(' ').includes(w)).length]).filter(([,k])=>k>=Math.min(2,nn.length)).sort((a,b)=>b[1]-a[1])[0]?.[0];if(!c)return null;
+ const s=cbSaldo(c.cod),v=cbVencido(c.cod),n=CB.comprobantes.filter(r=>r[0]===c.cod&&Math.abs(r[10])>0.5).length;
+ return card(esc(c.name)+' · Cobranzas',[R(['Saldo adeudado','<b>'+money(s)+'</b>']),R(['Vencido al corte','<b class="bot-neg">'+money(v)+'</b>']),R(['Comprobantes con saldo',String(n)]),R(['Unidad de negocio',esc(c.unidad||'—')]),R(['Condición de pago',esc(c.cond||'—')]),R(['Medio de pago',esc(c.medio||'—')])],{note:'Corte '+fd(CB.corte.replace(/-/g,''))+'.',go:['cb','Ver Cobranzas']});
+}
+function deudores(){
+ if(!CB)return null;const acc=new Map();for(const r of CB.comprobantes)acc.set(r[0],(acc.get(r[0])||0)+r[10]);
+ return card('Clientes con mayor deuda · corte '+fd(CB.corte.replace(/-/g,'')),[...acc].sort((a,b)=>b[1]-a[1]).slice(0,10).map(([k,v],i)=>R([String(i+1),esc(CB.clientes[k]?.[0]||k),'<b>'+money(v)+'</b>',money(cbVencido(k))])),{head:['#','Cliente','Saldo','Vencido'],go:['cb','Ver Cobranzas']});
+}
+
+/* ---------- Económico y Compras ---------- */
+const RL=(()=>{try{return REL}catch(_){return null}})(),RC=(()=>{try{return RELC}catch(_){return null}})();
+const IND_ALIAS={mb:/margen bruto|margen/,mgl:/legales|mg legal/,mof:/mano de obra|\bmo fija|costo mo/,imp:/impuesto/,ropa:/ropa/,hon:/honorario/,otr:/otros costos/,mkt:/marketing/,int:/interes/,un:/\bun\b|utilidad neta|resultado/};
+const CP_ALIAS={ropa:/ropa/,mse:/materiales|seg(uridad)? electronica/,rr:/rodado|reparacion de (autos|vehiculos)|vehiculo/,hp:/honorarios profesionales/,gc:/computacion|informatica/,mkt:/marketing/,es:/elementos de seguridad/,ls:/licencia|software/,htt:/tercerizad|tecnicos/,tc:/tarjeta/};
+function lastMonth(obj,months){return months.filter(m=>obj&&obj[m]!=null).at(-1)}
+function economico(q,p){
+ if(!RL)return null;
+ if(/fuera de(l)? limite|fuera de objetivo|alarma|en rojo|mal/.test(q)&&!/compra/.test(q)){
+  const m=p?.month&&RL.meses.includes(p.month)?p.month:RL.meses.at(-1);
+  const bad=RL.r.filter(x=>x.lim!=null&&x.pct?.[m]!=null&&(x.sen==='min'?x.pct[m]<x.lim:x.pct[m]>x.lim));
+  return card('Indicadores fuera de límite · '+mlab(m),bad.map(x=>R([esc(x.t),'<b class="bot-neg">'+pct(x.pct[m])+'</b>',(x.sen==='min'?'mín. ':'máx. ')+pct(x.lim)])),{head:['Indicador','Valor','Límite'],note:bad.length?'':'Todos dentro de límite.',go:['ec','Ver Económico']});
+ }
+ if(/venta|factur|vendimos/.test(q)&&!Object.values(IND_ALIAS).some(re=>re.test(q))){
+  const yv=q.match(/\b(202\d)\b/)?.[1];if(yv&&!p?.month&&RL.ventas[yv]!=null)return card('Ventas '+yv,[R(['Ventas del año','<b>'+mill(RL.ventas[yv])+'</b>'])],{note:yv===RL.act?'Hasta '+mlab(RL.meses.at(-1))+'.':'',go:['ec','Ver Económico']});
+  if(p?.year)return card('Ventas '+p.year,[R(['Ventas acumuladas','<b>'+mill(RL.ventas[p.year]||0)+'</b>'])],{go:['ec','Ver Económico']});
+  const m=p?.month&&RL.ventas[p.month]!=null?p.month:RL.meses.at(-1);
+  return card('Ventas · '+mlab(m),[R(['Ventas del mes','<b>'+mill(RL.ventas[m])+'</b>']),R(['Acumulado '+RL.act,mill(RL.ventas[RL.act])])],{note:'Último mes del informe contable: '+mlab(RL.meses.at(-1))+'.',go:['ec','Ver Económico']});
+ }
+ const key=Object.keys(IND_ALIAS).find(k=>IND_ALIAS[k].test(q));if(!key)return null;
+ const x=RL.r.find(r=>r.k===key);if(!x)return null;
+ const m=p?.month&&x.pct[p.month]!=null?p.month:RL.meses.at(-1);
+ const okv=x.lim==null?null:(x.sen==='min'?x.pct[m]>=x.lim:x.pct[m]<=x.lim);
+ return card(esc(x.t)+' · '+mlab(m),[R(['% sobre ventas','<b class="'+(okv===false?'bot-neg':okv?'bot-pos':'')+'">'+pct(x.pct[m])+'</b>']),R(['Monto del mes',mill(x.m?.[m]||0)]),R(['Límite',x.lim==null?'Sin límite':(x.sen==='min'?'mín. ':'máx. ')+pct(x.lim)]),R(['Acumulado '+RL.act,pct(x.pct[RL.act])]),R(['Año anterior',pct(x.pct[String(+RL.act-1)])])],{go:['ec','Ver Económico']});
+}
+function compras(q,p){
+ if(!RC)return null;
+ const key=Object.keys(CP_ALIAS).find(k=>CP_ALIAS[k].test(q));
+ if(!key){
+  if(!/compra/.test(q))return null;
+  const m=p?.month&&RC.meses.includes(p.month)?p.month:RC.meses.filter(x=>x!==RC.parcial).at(-1);
+  return card('Compras por rubro · '+mlab(m),RC.r.filter(x=>x.m).sort((a,b)=>(b.m[m]||0)-(a.m[m]||0)).map(x=>R([esc(x.t),'<b>'+mill(x.m[m]||0)+'</b>',x.pct?.[m]!=null?pct(x.pct[m])+' s/ventas':'—'])),{head:['Rubro','Monto','% s/ventas'],go:['cp','Ver Compras']});
+ }
+ const x=RC.r.find(r=>r.k===key);
+ if(/proveedor/.test(q)){
+  const acc=x.prov.map(pv=>[pv.n,Object.values(pv.m).reduce((a,b)=>a+b,0)]).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  return card('Proveedores de '+esc(x.t)+' · '+RC.meses[0].slice(0,4),acc.map(([n,v],i)=>R([String(i+1),esc(n),mill(v)])),{head:['#','Proveedor','Comprado'],go:['cp','Ver Compras']});
+ }
+ if(p?.year){const tot=Object.entries(x.m).filter(([k])=>k.startsWith(p.year)).reduce((a,[,v])=>a+v,0);return card(esc(x.t)+' · '+p.year,[R(['Comprado en el año','<b>'+mill(tot)+'</b>'])],{go:['cp','Ver Compras']})}
+ const m=p?.month&&x.m[p.month]!=null?p.month:RC.meses.filter(k=>k!==RC.parcial).at(-1);
+ return card(esc(x.t)+' · '+mlab(m),[R(['Comprado','<b>'+mill(x.m[m]||0)+'</b>']),R(['% sobre ventas',x.pct?.[m]!=null?pct(x.pct[m]):'sin ventas de ese mes']),R(['Facturas del año',String(x.n)])],{note:m===RC.parcial?'Mes parcial, hasta el '+fd(RC.hasta)+'.':'',go:['cp','Ver Compras']});
+}
+
+/* ---------- enrutador ---------- */
+function answer(raw){
+ const q=N(raw).replace(/setiembre/g,'septiembre');if(!q)return null;
+ const p=period(q);
+ const I=/ingres|cobr|entr(a|o|an|aron)\b|entradas|percib/.test(q),E=/egres|gast|pag(o|os|amos|ar|aron|a)\b|salid|erogac/.test(q);
+ if(/resumen|sgp ?\+ ?org|total del grupo/.test(q))return resumen();
+ if(/\bcaja\b|efectivo/.test(q)&&!/flujo/.test(q))return caja(q);
+ if(/\bfci\b|fondos? comun/.test(q))return fci(q);
+ if(/(cuando|que dia|fecha).*(negativ|rojo|descubierto)|quedamos en rojo|vamos a estar en rojo|saldo negativo/.test(q))return primerNegativo(q);
+ if(/descubierto|acuerdo|giro en|\blimite\b/.test(q)&&!/indicador/.test(q))return descubierto(q);
+ if(/\btasa|\btna\b/.test(q))return tasas(q);
+ if(/asegurad|echeq|cheques? a hoy|debitos? automatico/.test(q))return asegurados(q);
+ if(/inversion|cartera|plazo fijo|cedear|bono/.test(q))return inversiones(q);
+ if(/feriado/.test(q)){const t=TODAY(),f=Object.keys(DATA.vtos||{}).filter(d=>DATA.vtos[d]==='FERIADO'&&d>=(p?.from||t)&&d<=(p?.to||addD(t,90))).sort();return card('Feriados · '+(p?p.label:'próximos 90 días'),f.map(d=>R([fdl(d)])),{head:['Fecha'],note:f.length?'':'No hay feriados en ese período.',go:['ff','Ver Flujo de fondos']})}
+ if(/vence|vencimiento|\bvtos?\b/.test(q))return vencimientos(q,p);
+ const ec=/venta|factur|vendimos|indicador|margen|fuera de limite|alarma|economico|% sobre ventas|utilidad/.test(q)?economico(q,p):null;if(ec)return ec;
+ if(/compra|proveedor|ropa|marketing|rodado|licencia|software|tarjeta|computacion|materiales|elementos de seguridad|tercerizad/.test(q)&&!/cliente/.test(q)){const r=compras(q,p);if(r)return r;const e2=economico(q,p);if(e2)return e2}
+ if(/deudor|mas deuda|deben mas|morosos?/.test(q))return deudores();
+ if(bankOf(q).length&&!/cobr|pag|cliente|debe|deuda|factur|ingres/.test(q))return bancos(q);
+ const cl=matchClient(q);
+ if(cl&&/deuda|debe|deben|adeuda|cobranza|vencid|facturas? (pendiente|impaga)/.test(q)){const r=cobranzasCliente(cl);if(r)return r}
+ if(cl){const fl=[...CLIENTS.keys()].find(n=>n===cl.name);if(fl)return clienteFlujo(q,{name:fl},p);const cb=cobranzasCliente(cl);if(cb)return cb}
+ if(/cobranza|deuda total|a cobrar|cuentas a cobrar|vencido/.test(q))return cobranzasTotal();
+ if(bankOf(q).length)return bancos(q);
+ if(/saldos? (en )?banc|saldo bancario|en los bancos|cuanto hay en (el|los) banco/.test(q))return bancos(q);
+ if(/disponib|cuanta plata|cuanto (dinero|tenemos|hay)|plata (hay|tenemos)|liquidez|disponemos/.test(q)&&!(p&&!p.day)&&!(p&&p.from>TODAY()))return disponibilidad(q);
+ if(/proyecc(ion)? (de )?(ingres|egres)|proyectado (de )?hoy|proyeccion del dia/.test(q))return proyeccionDia(q);
+ const co=E||/sueldo|iva|iibb|931|alquiler|sindicato|prestamo|aguinaldo|embargo|mutual|honorario/.test(q)?matchConcept(q):null;
+ if(co)return conceptoFlujo(q,co,p);
+ if(/mayor|principal|top|mas grande|ranking/.test(q)&&(I||E))return topItems(q,p||{from:TODAY().slice(0,6)+'01',to:toS(new Date(+TODAY().slice(0,4),+TODAY().slice(4,6),0)),label:mlab(TODAY().slice(0,6))},I&&!E?'i':'e');
+ if(p&&(/minimo|maximo|peor|mejor/.test(q)))return minimoPeriodo(q,p);
+ if(p&&(/saldo|flujo|como (cerramos|terminamos|quedamos)|cuanto (vamos a tener|tendremos)|cierra|fin de/.test(q)||/disponib|plata/.test(q)))return saldoProyectado(q,p.end||p.day?p:{...p,from:p.to,label:'fin de '+p.label});
+ if(p&&p.day&&(I||E)&&!(I&&E))return delDia(q,p,I?'i':'e');
+ if(p&&(I||E))return ingresosEgresos(q,p,I&&!E?'i':E&&!I?'e':null);
+ if(/flujo|saldo proyectado/.test(q))return saldoProyectado(q,null);
+ return null;
+}
+window.botAnswer=answer;
+
+/* ---------- integración con el buscador de Inicio ---------- */
+const EXAMPLES=[
+ ['Tesorería',['¿Cuánta plata tenemos hoy?','Disponibilidad de ORIGEN','Resumen SGP + ORG','Saldo en Galicia','¿Cuánto hay en los bancos de SEGRUP?','FCI','Caja','¿Cuánto descubierto usamos?','Tasa del BBVA','Ingresos asegurados de hoy','Salidas aseguradas de ORIGEN','Inversiones']],
+ ['Flujo de fondos',['Saldo a fin de diciembre','Saldo del flujo el 15/12','¿Cuándo quedamos en rojo?','Saldo mínimo de diciembre','¿Qué cobramos mañana?','¿Qué pagamos el viernes?','Ingresos de octubre','Egresos de noviembre de ORIGEN','Principales egresos de diciembre','Mayores ingresos de octubre']],
+ ['Clientes y pagos',['¿Cuándo paga Siete Soles?','Cobros de EPE en diciembre','¿Cuánto pagamos de sueldos en diciembre?','Próximo pago de IVA','¿Qué vence esta semana?','Vencimientos de diciembre']],
+ ['Cobranzas',['Deuda total de clientes','Clientes con más deuda','¿Cuánto debe Gani?']],
+ ['Económico y Compras',['Margen bruto de septiembre','Ventas de agosto','Indicadores fuera de límite','Impuestos sobre ventas','Compras de ropa de trabajo en octubre','Proveedores de ropa de trabajo','Compras de octubre']]
+];
+const exBtn=document.createElement('button');exBtn.type='button';exBtn.textContent='¿Qué puedo preguntar?';exBtn.className='bot-ex-btn';
+
+exBtn.onclick=()=>{reply.innerHTML='<div class="bot-card"><div class="bot-title">Preguntas de ejemplo</div>'+EXAMPLES.map(([g,l])=>'<div class="bot-ex-group"><span>'+g+'</span><div>'+l.map(x=>'<button type="button" class="bot-ex" data-q="'+esc(x)+'">'+esc(x)+'</button>').join('')+'</div></div>').join('')+'</div>'};
+home.addEventListener('click',e=>{const b=e.target.closest('[data-q]');if(!b)return;query.value=b.dataset.q;ask()});
+function ask(){
+ let html=null;try{html=answer(query.value)}catch(err){console.error(err);html=null}
+ if(!html)return false;
+ reply.innerHTML='<div class="bot-q">'+esc(query.value)+'</div>'+html;
+ return true;
+}
+document.addEventListener('submit',e=>{if(e.target!==form)return;if(ask()){e.preventDefault();e.stopImmediatePropagation()}},true);
+})();
+
 </script>
 </body></html>
