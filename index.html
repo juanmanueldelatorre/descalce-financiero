@@ -832,7 +832,63 @@ main :is(.sp-t,.dp-t,.rmt) th:last-child{border-start-end-radius:var(--ui-radius
 .segrup-page-mark{width:20px;height:18px;margin-inline-end:3px;opacity:.9}
 main :is(.head,.cb-head) h1::before{content:"";display:inline-block;width:3px;height:.68em;margin-right:8px;border-radius:2px;background:var(--segrup-red);vertical-align:baseline}
 @media(max-width:600px){.segrup-watermark{width:68vw}}
-</style></head><body>
+</style><style id="sg-login-css">
+html:not(.sg-auth) body>.sg-top,html:not(.sg-auth) body>.app{display:none!important}
+html.sg-auth .sg-login{display:none!important}
+.sg-login{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:20px;background:radial-gradient(120% 90% at 30% 0%,#032a49 0%,#01182c 50%,#00101e 100%);font-family:'Archivo',Inter,system-ui,sans-serif;color:#fff}
+.sg-login-card{width:min(380px,100%);display:grid;gap:6px;padding:30px 30px 26px;border:1px solid #0e3253;border-top:3px solid #1692f6;border-radius:10px;background:linear-gradient(180deg,#03243f 0%,#011a2e 100%);box-shadow:0 24px 60px #0008}
+.sg-login-logo svg{width:58px;height:51px;display:block;margin:0 auto 14px}
+.sg-login-eyebrow{text-align:center;font-size:10.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#1692f6}
+.sg-login h1{margin:2px 0 16px;text-align:center;font-size:26px;font-weight:300;color:#fff}
+.sg-login label{margin-top:6px;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#b9c9d8}
+.sg-login input{box-sizing:border-box;width:100%;height:42px;padding:0 12px;border:1px solid #1b4466;border-radius:6px;background:#011221;color:#fff;font:500 15px 'Archivo',Inter,system-ui,sans-serif;outline:none}
+.sg-login input:focus{border-color:#1692f6;box-shadow:0 0 0 3px #1692f633}
+.sg-pass{position:relative}.sg-pass input{padding-right:72px}
+.sg-pass button{position:absolute;right:6px;top:50%;transform:translateY(-50%);height:30px;padding:0 10px;border:0;border-radius:5px;background:#062a47;color:#c9d6e2;font:700 11px 'Archivo',system-ui,sans-serif;cursor:pointer}
+.sg-pass button:hover{color:#fff}
+.sg-login-error{min-height:18px;margin:6px 0 0;font-size:12.5px;color:#ff8993}
+.sg-login-btn{margin-top:6px;height:44px;border:0;border-radius:6px;background:#1692f6;color:#fff;font:800 13px 'Archivo',system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+.sg-login-btn:hover{background:#2aa0ff}
+.sg-shake{animation:sgShake .35s}
+@keyframes sgShake{0%,100%{transform:none}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+</style>
+</head><body>
+<div id="sgLogin" class="sg-login" role="dialog" aria-labelledby="sgLoginTitle">
+ <form id="sgLoginForm" class="sg-login-card" autocomplete="on" novalidate>
+  <div class="sg-login-logo"><svg viewBox="0 0 210 184" aria-hidden="true"><path fill="#e00a14" d="M105 0 210 184 105 152 0 184Z"/><path fill="#fff" d="M105 32 176 155 105 133 34 155Z"/><path fill="#1d5aa6" d="M105 64 142 126 105 116 68 126Z"/></svg></div>
+  <span class="sg-login-eyebrow">Tesorería</span>
+  <h1 id="sgLoginTitle">Iniciar sesión</h1>
+  <label for="sgUser">Usuario</label>
+  <input id="sgUser" name="username" type="text" autocomplete="username" autocapitalize="characters" spellcheck="false" required>
+  <label for="sgPass">Contraseña</label>
+  <div class="sg-pass"><input id="sgPass" name="password" type="password" autocomplete="current-password" required><button type="button" id="sgPassToggle" aria-label="Mostrar contraseña">Ver</button></div>
+  <p id="sgLoginError" class="sg-login-error" role="alert" aria-live="assertive"></p>
+  <button type="submit" class="sg-login-btn">Ingresar</button>
+ </form>
+</div>
+<script>
+(()=>{const H='bde6aa12e532a2e8f66d2571ee290b954fae5bce26689bd043c514153f7632d7',K='segrup.auth';
+function sha256(m){const K2=[],H0=[];let n=2,c=0;const isP=x=>{for(let i=2;i*i<=x;i++)if(x%i===0)return false;return true};const fr=x=>(x-Math.floor(x))*4294967296|0;
+ while(c<64){if(isP(n)){if(c<8)H0[c]=fr(Math.pow(n,1/2));K2[c]=fr(Math.pow(n,1/3));c++}n++}
+ const b=unescape(encodeURIComponent(m)),l=b.length,w=[];for(let i=0;i<l;i++)w[i>>2]|=b.charCodeAt(i)<<(24-(i%4)*8);w[l>>2]|=0x80<<(24-(l%4)*8);w[((l+8)>>6<<4)+15]=l*8;
+ const h=H0.slice();for(let j=0;j<w.length;j+=16){const W=[];let [a,bb,cc,d,e,f,g,hh]=h;
+  for(let i=0;i<64;i++){if(i<16)W[i]=w[j+i]|0;else{const x=W[i-15],y=W[i-2];W[i]=(((x>>>7|x<<25)^(x>>>18|x<<14)^(x>>>3))+W[i-7]+((y>>>17|y<<15)^(y>>>19|y<<13)^(y>>>10))+W[i-16])|0}
+   const t1=(hh+((e>>>6|e<<26)^(e>>>11|e<<21)^(e>>>25|e<<7))+((e&f)^(~e&g))+K2[i]+W[i])|0,t2=(((a>>>2|a<<30)^(a>>>13|a<<19)^(a>>>22|a<<10))+((a&bb)^(a&cc)^(bb&cc)))|0;
+   hh=g;g=f;f=e;e=(d+t1)|0;d=cc;cc=bb;bb=a;a=(t1+t2)|0}
+  h[0]=h[0]+a|0;h[1]=h[1]+bb|0;h[2]=h[2]+cc|0;h[3]=h[3]+d|0;h[4]=h[4]+e|0;h[5]=h[5]+f|0;h[6]=h[6]+g|0;h[7]=h[7]+hh|0}
+ return h.map(x=>(x>>>0).toString(16).padStart(8,'0')).join('')}
+window.sgSha256=sha256;
+const ok=()=>{try{return sessionStorage.getItem(K)===H}catch(_){return false}};
+const enter=()=>{document.documentElement.classList.add('sg-auth');const L=document.getElementById('sgLogin');if(L)L.hidden=true};
+if(ok())enter();
+const f=document.getElementById('sgLoginForm'),u=document.getElementById('sgUser'),p=document.getElementById('sgPass'),er=document.getElementById('sgLoginError');
+if(!ok())setTimeout(()=>u.focus(),50);
+document.getElementById('sgPassToggle').onclick=e=>{const v=p.type==='password';p.type=v?'text':'password';e.currentTarget.textContent=v?'Ocultar':'Ver';e.currentTarget.setAttribute('aria-label',v?'Ocultar contraseña':'Mostrar contraseña')};
+f.onsubmit=e=>{e.preventDefault();
+ if(sha256(u.value.trim().toUpperCase()+':'+p.value)===H){try{sessionStorage.setItem(K,H)}catch(_){}er.textContent='';enter();window.dispatchEvent(new Event('resize'))}
+ else{er.textContent='Usuario o contraseña incorrectos.';p.value='';p.focus();f.classList.remove('sg-shake');void f.offsetWidth;f.classList.add('sg-shake')}};
+})();
+</script>
 <header class="sg-top">
  <a class="sg-logo" href="#home" id="sgLogo" aria-label="SEGRUP Seguridad · Inicio"><svg viewBox="0 0 210 184" aria-hidden="true"><path fill="#e00a14" d="M105 0 210 184 105 152 0 184Z"/><path fill="#fff" d="M105 32 176 155 105 133 34 155Z"/><path fill="#1d5aa6" d="M105 64 142 126 105 116 68 126Z"/></svg></a>
  <div id="sgTopTools" class="sg-tools" hidden><div class="avx-head-btns"><button type="button" class="avx-summary-btn" onclick="document.getElementById('avChartDialog').showModal()" aria-haspopup="dialog" aria-controls="avChartDialog">Ver gráfico <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button><button type="button" id="avSummaryOpen" class="avx-summary-btn" aria-haspopup="dialog" aria-controls="avSummaryDialog">Ver resumen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div><div class="av-head-actions avx-actions"><label for="avCompany" class="avx-company" aria-label="Empresa"><select id="avCompany"><option value="segrup">SEGRUP</option><option value="origen">ORIGEN</option><option value="consolidado">CONSOLIDADO</option></select><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></label><div class="avx-date" role="group" aria-label="Fecha del saldo"><button type="button" id="avPrevDay" aria-label="Día anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button><strong id="avDateLabel">—</strong><button type="button" id="avNextDay" aria-label="Día siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div><span class="avx-hidden"><strong id="avLast">Sin cargas</strong><button type="button" id="avChartOpen">Ver gráfico</button></span></div></div>
@@ -4273,7 +4329,7 @@ nav button svg{width:20px!important;height:20px!important}
  try{localStorage.removeItem('segrup.home.tone')}catch(_){}
  document.documentElement.style.setProperty('--home-tone-level','0%');
  document.getElementById('sgLogo').onclick=e=>{e.preventDefault();show('home')};
- document.getElementById('sgLogout').onclick=()=>{try{localStorage.removeItem('segrup.carga.auth')}catch(_){}location.hash='#home';location.reload()};
+ document.getElementById('sgLogout').onclick=()=>{try{localStorage.removeItem('segrup.carga.auth');sessionStorage.removeItem('segrup.auth')}catch(_){}location.hash='#home';location.reload()};
 })();
 </script>
 <script id="segrup-ajuste-disponibilidad">
